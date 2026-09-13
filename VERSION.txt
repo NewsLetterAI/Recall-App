@@ -1,1 +1,1 @@
-Recall v1.9 — GitHub-only private archive + offline PWA
+Recall v1.9.1 — fix apertura PDF/documenti GitHub privati (MIME type)

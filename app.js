@@ -2045,7 +2045,31 @@ async function githubApi(path,{raw=false}={}){
   if(!r.ok){const t=await r.text().catch(()=>"");throw new Error(`GitHub ${r.status}${t?`: ${t.slice(0,120)}`:""}`);}
   return r;
 }
-async function githubBlob(repoPath){const r=await githubApi(`contents/${ghEncodePath(repoPath)}`,{raw:true});return await r.blob();}
+function mimeForPath(path){
+  const ext=String(path||'').toLowerCase().split('.').pop();
+  return ({
+    pdf:'application/pdf',
+    png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',
+    txt:'text/plain; charset=utf-8',md:'text/markdown; charset=utf-8',rtf:'application/rtf',
+    doc:'application/msword',
+    docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ppt:'application/vnd.ms-powerpoint',
+    pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    xls:'application/vnd.ms-excel',
+    xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  })[ext] || 'application/octet-stream';
+}
+function normalizeBlobMime(blob,path){
+  const type=mimeForPath(path);
+  if(!blob) return blob;
+  if((blob.type||'').toLowerCase()===type.toLowerCase()) return blob;
+  return new Blob([blob],{type});
+}
+async function githubBlob(repoPath){
+  const r=await githubApi(`contents/${ghEncodePath(repoPath)}`,{raw:true});
+  const bytes=await r.arrayBuffer();
+  return new Blob([bytes],{type:mimeForPath(repoPath)});
+}
 async function githubListDir(repoPath){const r=await githubApi(`contents/${ghEncodePath(repoPath)}`);return await r.json();}
 async function githubTest(){
   const cfg=getGithubConfig(), token=await getGithubToken(); if(!token) throw new Error('Inserisci il token');
@@ -2084,7 +2108,7 @@ async function syncGithubLibrary({silent=false}={}){
     save(); githubLibrarySynced=true; if(!silent) toast(`Archivio sincronizzato: ${archiveFiles.length+studyFiles.length} file`); return true;
   }catch(e){console.error(e);if(!silent)toast(`GitHub: ${e.message}`);return false;}
 }
-function openBlobTab(blob){const url=URL.createObjectURL(blob);const w=window.open(url,'_blank');if(!w)toast('Consenti l’apertura delle finestre');setTimeout(()=>URL.revokeObjectURL(url),120000);}
+function openBlobTab(blob,path=''){const safe=normalizeBlobMime(blob,path);const url=URL.createObjectURL(safe);const w=window.open(url,'_blank');if(!w)toast('Consenti l’apertura delle finestre');setTimeout(()=>URL.revokeObjectURL(url),120000);}
 function githubTokenUrl(){const cfg=getGithubConfig();return `https://github.com/settings/personal-access-tokens/new?name=Recall%20Read%20Only&description=Accesso%20sola%20lettura%20per%20Recall&target_name=${encodeURIComponent(cfg.owner)}&expires_in=366&contents=read`;}
 async function saveGithubSettings(){
   const owner=document.getElementById('ghOwner')?.value.trim(), repo=document.getElementById('ghRepo')?.value.trim(), branch=document.getElementById('ghBranch')?.value.trim()||'main', token=document.getElementById('ghToken')?.value.trim();
@@ -2143,9 +2167,9 @@ async function openPdfForMap(mapId){
     if((map.pdfMode==="github" || (map.pdfPath||'').startsWith('library/')) && map.pdfPath){
       let blob=await getPdf(mapId);
       if(!blob){if(!navigator.onLine){toast("Documento non scaricato offline");return;}blob=await githubBlob(map.pdfPath);await storePdf(mapId,blob);}
-      openBlobTab(blob); return;
+      openBlobTab(blob,map.pdfPath); return;
     }
-    const blob=await getPdf(mapId); if(!blob){toast("PDF non presente su questo dispositivo");return} openBlobTab(blob);
+    const blob=await getPdf(mapId); if(!blob){toast("PDF non presente su questo dispositivo");return} openBlobTab(blob,map.pdfPath);
   }catch(e){console.error(e);toast(`Impossibile aprire: ${e.message||'errore'}`);}
 }
 
@@ -2173,8 +2197,8 @@ async function deleteGeneralFile(id){
 async function openGeneralFile(id){
   const doc=state.documents.find(d=>d.id===id); if(!doc){toast("Documento non trovato");return;}
   try{
-    if(doc.storage==="github" && doc.path){let blob=await getGeneralFile(id);if(!blob){if(!navigator.onLine){toast('Documento non scaricato offline');return;}blob=await githubBlob(doc.path);await storeGeneralFile(id,blob);}openBlobTab(blob);return;}
-    const blob=await getGeneralFile(id); if(!blob){toast("File non disponibile in questo dispositivo");return;} openBlobTab(blob);
+    if(doc.storage==="github" && doc.path){let blob=await getGeneralFile(id);if(!blob){if(!navigator.onLine){toast('Documento non scaricato offline');return;}blob=await githubBlob(doc.path);await storeGeneralFile(id,blob);}openBlobTab(blob,doc.path);return;}
+    const blob=await getGeneralFile(id); if(!blob){toast("File non disponibile in questo dispositivo");return;} openBlobTab(blob,doc.filename||doc.path||'');
   }catch(e){console.error(e);toast(`Impossibile aprire: ${e.message||'errore'}`);}
 }
 
@@ -2182,9 +2206,9 @@ async function openGeneralFile(id){
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.9";
-const OFFLINE_DOC_CACHE="recall-docs-v19";
-const OFFLINE_CASE_CACHE="recall-cases-v19";
+const RECALL_VERSION="1.9.1";
+const OFFLINE_DOC_CACHE="recall-docs-v191";
+const OFFLINE_CASE_CACHE="recall-cases-v191";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
