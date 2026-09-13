@@ -1,1 +1,1 @@
-Recall v1.9.1 — fix apertura PDF/documenti GitHub privati (MIME type)
+Recall v1.10 — Archivio semplice + upload diretto GitHub

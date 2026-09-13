@@ -101,12 +101,17 @@
         <button class="ghost" id="libraryBackBtn">←</button>
         <div>
           <div class="eyebrow">BIBLIOTECA</div>
-          <h2 id="libraryTitle">Biblioteca personale</h2>
+          <h2 id="libraryTitle">Archivio</h2>
         </div>
         <button class="secondary" id="libraryAddBtn">+ Materiale</button>
       </div>
 
-      <div id="libraryLanding" class="library-home-grid">
+      <div id="libraryModeBar" class="library-modebar">
+        <button class="mode-tab active" id="libraryModeArchive">Archivio</button>
+        <button class="mode-tab" id="libraryModeStudies">Studi</button>
+      </div>
+
+      <div id="libraryLanding" class="library-home-grid" hidden>
         <button class="library-home-card card" id="openArchiveBtn">
           <span class="library-icon">▦</span>
           <span class="library-home-title">Archivio</span>
@@ -128,7 +133,7 @@
       </div>
 
       <div id="studiesExplorer" hidden>
-        <div class="archive-breadcrumb"><button class="crumb" id="studiesBackRoot">Biblioteca</button><span>›</span><span>Studi</span></div>
+        <div class="archive-breadcrumb"><span>Studi</span></div>
         <div id="studiesList" class="stack"></div>
       </div>
     </section>
@@ -149,9 +154,6 @@
           <option value="studi">Studi</option>
         </select>
 
-        <label class="label">Titolo</label>
-        <input id="newMapTitle" type="text" placeholder="Es. Pancreatite cronica"/>
-
         <div id="archiveMetadataFields">
           <div class="form-grid">
             <div>
@@ -167,9 +169,6 @@
               <datalist id="organSuggestions"></datalist>
             </div>
           </div>
-          <label class="label">Categoria / argomento</label>
-          <input id="newMapCategory" type="text" placeholder="Es. Pancreatiti" list="categorySuggestions"/>
-          <datalist id="categorySuggestions"></datalist>
         </div>
 
         <div id="studyMetadataFields" hidden>
@@ -177,12 +176,10 @@
           <input id="newStudyProject" type="text" placeholder="Es. Revisione sistematica UAE"/>
         </div>
 
-        <label class="label">Tag (opzionali)</label>
-        <input id="newMapTags" type="text" placeholder="Es. RM, TC, emergenza"/>
         <label class="label">File</label>
         <input id="newMapFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.rtf,.jpg,.jpeg,.png,.webp"/>
-        <p class="muted small">Il formato del file non determina dove viene salvato: nell'Archivio conta solo l'argomento. PDF, Word, mappe e appunti possono stare insieme nella stessa categoria.</p>
-        <button class="primary" id="saveMapBtn">Salva materiale</button>
+        <p class="muted small">Il file verrà caricato direttamente nel repository GitHub privato. Nell'Archivio comparirà con il suo nome, dentro il distretto e l'organo scelti.</p>
+        <button class="primary" id="saveMapBtn">Carica su GitHub</button>
       </div>
     </section>
 
@@ -315,10 +312,10 @@
           <label>Repository<input id="ghRepo" value="expert-potato9643019" autocomplete="off"></label>
         </div>
         <label>Branch<input id="ghBranch" value="main" autocomplete="off"></label>
-        <label>Token GitHub (sola lettura)<input id="ghToken" type="password" placeholder="github_pat_…" autocomplete="off"></label>
-        <div class="muted small">Serve una sola volta per dispositivo. Concedi solo <b>Contents: Read</b> e solo al repository Recall privato.</div>
+        <label>Token GitHub (lettura e scrittura)<input id="ghToken" type="password" placeholder="github_pat_…" autocomplete="off"></label>
+        <div class="muted small">Serve una sola volta per dispositivo. Concedi solo <b>Contents: Read and write</b> e soltanto al repository Recall privato.</div>
         <div class="actions wrap-actions">
-          <button class="secondary" id="createGithubTokenBtn">Crea token read-only</button>
+          <button class="secondary" id="createGithubTokenBtn">Crea token per Recall</button>
           <button class="primary" id="saveGithubBtn">Collega GitHub</button>
           <button class="secondary" id="syncGithubBtn">Sincronizza Archivio</button>
           <button class="ghost" id="forgetGithubBtn">Scollega dispositivo</button>
@@ -375,7 +372,7 @@
         <button class="danger" id="resetBtn">Ripristina demo</button>
       </div>
 
-      <div class="muted small version-label">Recall v1.9 · GitHub-only · PWA offline-ready</div>
+      <div class="muted small version-label">Recall v1.10 · GitHub-only · upload diretto · PWA offline-ready</div>
     </section>
   </main>
 

@@ -161,3 +161,47 @@ input[type=file]{width:100%;border:1px dashed var(--line);border-radius:14px;pad
 @media(max-width:620px){.connection-pill{display:none}.archive-material{align-items:flex-start}.offline-actions{width:100%;justify-content:flex-start}.archive-material{flex-wrap:wrap}}
 
 .github-private-card input{width:100%;margin-top:6px;padding:10px 11px;border:1px solid var(--line,#d1d5db);border-radius:10px;background:var(--surface,#fff);color:inherit}.github-private-card label{font-size:12px;color:var(--muted,#6b7280)}.compact-grid{gap:10px}.wrap-actions{flex-wrap:wrap}.image-unavailable{min-height:140px;background:#111827;border:1px dashed #475569}
+
+
+/* Biblioteca v1.9.2 — layout semplificato */
+.library-modebar{display:flex;gap:8px;margin:2px 0 12px}
+.mode-tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;font-weight:800;font-size:14px;cursor:pointer}
+.mode-tab.active{background:#111827;color:#fff;border-color:#111827}
+.archive-breadcrumb{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:4px 2px 12px;color:var(--muted);font-size:13px}
+.crumb{border:0;background:transparent;padding:0;color:inherit;font:inherit;font-weight:800;cursor:pointer}
+.library-tools{padding:12px 14px;border-radius:18px}
+.archive-section-title{margin:18px 2px 10px;font-size:14px;font-weight:900;letter-spacing:.02em;color:#111827}
+.archive-list{display:flex;flex-direction:column;gap:8px}
+.archive-list-row{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px;text-align:left;cursor:pointer}
+.archive-list-row:hover{box-shadow:0 10px 28px rgba(17,24,39,.06);transform:translateY(-1px)}
+.archive-list-main{min-width:0;flex:1}
+.archive-list-title{font-size:17px;font-weight:850;line-height:1.25}
+.archive-list-meta{font-size:13px;color:var(--muted);margin-top:4px}
+.archive-list-arrow{font-size:20px;color:#9ca3af;line-height:1}
+.archive-material{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;padding:14px 16px;border-radius:16px}
+.archive-material .map-title{font-size:16px}
+.archive-material .tags{margin-top:6px}
+.archive-material .offline-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.archive-empty{padding:18px}
+.device-badge{font-size:12px;font-weight:800;color:#166534;background:#dcfce7;padding:6px 10px;border-radius:999px}
+.offline-toggle{border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 11px;font-weight:800;font-size:13px;cursor:pointer}
+.offline-toggle[data-state="saved"]{background:#eefbf0;color:#166534;border-color:#bbf7d0}
+.offline-toggle[data-state="missing"]{background:#fff;color:#111827}
+#studiesList .archive-material{background:#fff;border:1px solid var(--line)}
+@media(max-width:620px){
+  .library-modebar{overflow:auto;padding-bottom:2px}
+  .archive-list-row{padding:13px 14px}
+  .archive-material{align-items:flex-start;flex-direction:column}
+  .archive-material .offline-actions{width:100%;justify-content:flex-start}
+}
+
+
+/* Recall v1.10 — file list compatta */
+.archive-material{padding:11px 14px;border-radius:14px}
+.archive-material .map-title,.archive-material .file-title{font-size:15px;font-weight:800;line-height:1.25}
+.archive-material .file-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.archive-list-row{padding:12px 14px;border-radius:14px}
+.archive-list-title{font-size:16px}
+.archive-list-meta{font-size:12px}
+.open-pdf,.offline-toggle{padding:8px 10px;font-size:12px}
+#saveMapBtn:disabled{opacity:.6;cursor:wait}

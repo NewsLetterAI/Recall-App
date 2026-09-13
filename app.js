@@ -2071,6 +2071,48 @@ async function githubBlob(repoPath){
   return new Blob([bytes],{type:mimeForPath(repoPath)});
 }
 async function githubListDir(repoPath){const r=await githubApi(`contents/${ghEncodePath(repoPath)}`);return await r.json();}
+async function githubExistingFile(repoPath){
+  try{
+    const r=await githubApi(`contents/${ghEncodePath(repoPath)}`);
+    return await r.json();
+  }catch(e){
+    if(String(e.message).includes('404')) return null;
+    throw e;
+  }
+}
+function ghSlug(value){
+  return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'altro';
+}
+function safeGithubFilename(name){
+  return String(name||'file').replace(/[\\/:*?"<>|]/g,'-').replace(/^\.+/,'').trim()||'file';
+}
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{const s=String(reader.result||'');resolve(s.includes(',')?s.split(',')[1]:s);};
+    reader.onerror=()=>reject(reader.error||new Error('Impossibile leggere il file'));
+    reader.readAsDataURL(file);
+  });
+}
+async function githubUploadFile(repoPath,file){
+  if(!navigator.onLine) throw new Error('Serve una connessione internet per caricare su GitHub');
+  if(!(await hasGithubConnection())) throw new Error('Collega prima GitHub dalle Impostazioni');
+  if(file.size>50*1024*1024) throw new Error('Per ora carica file inferiori a 50 MB');
+  const cfg=getGithubConfig(), token=await getGithubToken();
+  const existing=await githubExistingFile(repoPath);
+  if(existing && !confirm(`Esiste già “${file.name}” in questa cartella. Vuoi sostituirlo?`)) throw new Error('Caricamento annullato');
+  const content=await fileToBase64(file);
+  const body={message:`Recall: ${existing?'aggiorna':'aggiunge'} ${file.name}`,content,branch:cfg.branch||'main'};
+  if(existing?.sha) body.sha=existing.sha;
+  const url=`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ghEncodePath(repoPath)}`;
+  const r=await fetch(url,{method:'PUT',headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2026-03-10'},body:JSON.stringify(body)});
+  if(!r.ok){
+    const t=await r.text().catch(()=>'');
+    if(r.status===403) throw new Error('Il token non ha permesso di scrittura. Creane uno con Contents: Read and write.');
+    throw new Error(`GitHub ${r.status}${t?`: ${t.slice(0,140)}`:''}`);
+  }
+  return await r.json();
+}
 async function githubTest(){
   const cfg=getGithubConfig(), token=await getGithubToken(); if(!token) throw new Error('Inserisci il token');
   const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},cache:'no-store'});
@@ -2099,17 +2141,17 @@ async function syncGithubLibrary({silent=false}={}){
       if(mapPaths.has(f.path)) continue;
       const p=f.path.split('/'), area=humanSlug(p[2]||'Altro'), organ=humanSlug(p[3]||'Altro');
       const sub=p.slice(4,-1); const category=sub.length?sub.map(humanSlug).join(' › '):'Generale';
-      state.documents.push({id:`gh_${f.sha}`,title:titleFromFilename(f.name),filename:f.name,collection:'archive',area,organ,category,tags:[organ,category].filter(x=>x!=='Generale'),storage:'github',path:f.path,githubSha:f.sha});
+      state.documents.push({id:`gh_${f.sha}`,title:titleFromFilename(f.name),filename:f.name,collection:'archivio',area,organ,category:'Generale',tags:[organ],storage:'github',path:f.path,githubSha:f.sha});
     }
     for(const f of studyFiles){
       const p=f.path.split('/'), sub=p.slice(2,-1);
-      state.documents.push({id:`gh_${f.sha}`,title:titleFromFilename(f.name),filename:f.name,collection:'studies',project:sub.length?sub.map(humanSlug).join(' › '):'Studi',storage:'github',path:f.path,githubSha:f.sha});
+      state.documents.push({id:`gh_${f.sha}`,title:titleFromFilename(f.name),filename:f.name,collection:'studi',project:sub.length?sub.map(humanSlug).join(' › '):'Studi',storage:'github',path:f.path,githubSha:f.sha});
     }
     save(); githubLibrarySynced=true; if(!silent) toast(`Archivio sincronizzato: ${archiveFiles.length+studyFiles.length} file`); return true;
   }catch(e){console.error(e);if(!silent)toast(`GitHub: ${e.message}`);return false;}
 }
 function openBlobTab(blob,path=''){const safe=normalizeBlobMime(blob,path);const url=URL.createObjectURL(safe);const w=window.open(url,'_blank');if(!w)toast('Consenti l’apertura delle finestre');setTimeout(()=>URL.revokeObjectURL(url),120000);}
-function githubTokenUrl(){const cfg=getGithubConfig();return `https://github.com/settings/personal-access-tokens/new?name=Recall%20Read%20Only&description=Accesso%20sola%20lettura%20per%20Recall&target_name=${encodeURIComponent(cfg.owner)}&expires_in=366&contents=read`;}
+function githubTokenUrl(){const cfg=getGithubConfig();return `https://github.com/settings/personal-access-tokens/new?name=Recall%20Read%20Write&description=Recall%20puo%20leggere%20e%20caricare%20file%20nel%20solo%20repository%20selezionato&target_name=${encodeURIComponent(cfg.owner)}&expires_in=366&contents=write`; }
 async function saveGithubSettings(){
   const owner=document.getElementById('ghOwner')?.value.trim(), repo=document.getElementById('ghRepo')?.value.trim(), branch=document.getElementById('ghBranch')?.value.trim()||'main', token=document.getElementById('ghToken')?.value.trim();
   if(!owner||!repo){toast('Inserisci owner e repository');return;}
@@ -2206,9 +2248,9 @@ async function openGeneralFile(id){
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.9.1";
-const OFFLINE_DOC_CACHE="recall-docs-v191";
-const OFFLINE_CASE_CACHE="recall-cases-v191";
+const RECALL_VERSION="1.10";
+const OFFLINE_DOC_CACHE="recall-docs-v110";
+const OFFLINE_CASE_CACHE="recall-cases-v110";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -2356,29 +2398,29 @@ function renderHome(){
 
 
 
-let archiveNav={area:null,organ:null,category:null};
+let archiveNav={area:null,organ:null};
 
 function archiveMaterials(){
   const maps=state.maps.map(m=>{
-    const meta=bundledArchiveMeta[m.id]||{area:m.area||"Altro",organ:m.organ||m.title,category:"Generale"};
-    return {id:m.id,title:m.title,area:meta.area,organ:meta.organ,category:meta.category,tags:m.tags||[],filename:m.source||"PDF",kind:"map",map:m};
+    const meta=bundledArchiveMeta[m.id]||{area:m.area||"Altro",organ:m.organ||m.title};
+    return {id:m.id,title:m.title,area:meta.area,organ:meta.organ,filename:m.source||"PDF",kind:"map",map:m};
   });
   const docs=(state.documents||[]).filter(d=>d.collection==="archivio").map(d=>({...d,kind:"document"}));
   return [...maps,...docs];
 }
 function studyMaterials(){ return (state.documents||[]).filter(d=>d.collection==="studi"); }
-function libraryRoot(){
-  document.getElementById("libraryTitle").textContent="Biblioteca personale";
-  document.getElementById("libraryLanding").hidden=false;
-  document.getElementById("archiveExplorer").hidden=true;
-  document.getElementById("studiesExplorer").hidden=true;
+function setLibraryMode(mode){
+  document.getElementById("libraryModeArchive")?.classList.toggle("active",mode==="archivio");
+  document.getElementById("libraryModeStudies")?.classList.toggle("active",mode==="studi");
 }
+function libraryRoot(){ openArchiveRoot(); }
 function openArchiveRoot(){
-  archiveNav={area:null,organ:null,category:null};
+  archiveNav={area:null,organ:null};
   document.getElementById("libraryTitle").textContent="Archivio";
   document.getElementById("libraryLanding").hidden=true;
   document.getElementById("studiesExplorer").hidden=true;
   document.getElementById("archiveExplorer").hidden=false;
+  setLibraryMode("archivio");
   const s=document.getElementById("librarySearch"); s.value=""; s.oninput=()=>renderArchive();
   renderArchive();
 }
@@ -2387,6 +2429,7 @@ function openStudies(){
   document.getElementById("libraryLanding").hidden=true;
   document.getElementById("archiveExplorer").hidden=true;
   document.getElementById("studiesExplorer").hidden=false;
+  setLibraryMode("studi");
   renderStudies();
 }
 function archiveAreas(){
@@ -2395,33 +2438,32 @@ function archiveAreas(){
 function archiveOrgans(area){
   const all=new Set(Object.keys(archiveTaxonomy[area]||{})); archiveMaterials().filter(m=>m.area===area).forEach(m=>all.add(m.organ||"Altro")); return [...all];
 }
-function archiveCategories(area,organ){
-  const all=new Set((archiveTaxonomy[area]?.[organ])||[]); archiveMaterials().filter(m=>m.area===area&&m.organ===organ).forEach(m=>all.add(m.category||"Generale")); return [...all];
-}
 function materialCount(filter){
-  return archiveMaterials().filter(m=>(!filter.area||m.area===filter.area)&&(!filter.organ||m.organ===filter.organ)&&(!filter.category||m.category===filter.category)).length;
+  return archiveMaterials().filter(m=>(!filter.area||m.area===filter.area)&&(!filter.organ||m.organ===filter.organ)).length;
 }
 function escapeHTML(s){ return String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
 function renderBreadcrumb(){
   const b=document.getElementById("archiveBreadcrumb");
-  let html=`<button class="crumb" data-level="root">Biblioteca</button><span>›</span><button class="crumb" data-level="archive">Archivio</button>`;
+  let html=`<button class="crumb" data-level="archive">Archivio</button>`;
   if(archiveNav.area) html+=`<span>›</span><button class="crumb" data-level="area">${escapeHTML(archiveNav.area)}</button>`;
-  if(archiveNav.organ) html+=`<span>›</span><button class="crumb" data-level="organ">${escapeHTML(archiveNav.organ)}</button>`;
-  if(archiveNav.category) html+=`<span>›</span><span>${escapeHTML(archiveNav.category)}</span>`;
+  if(archiveNav.organ) html+=`<span>›</span><span>${escapeHTML(archiveNav.organ)}</span>`;
   b.innerHTML=html;
-  b.querySelectorAll('[data-level="root"]').forEach(x=>x.onclick=libraryRoot);
-  b.querySelectorAll('[data-level="archive"]').forEach(x=>x.onclick=()=>{archiveNav={area:null,organ:null,category:null};renderArchive();});
-  b.querySelectorAll('[data-level="area"]').forEach(x=>x.onclick=()=>{archiveNav.organ=null;archiveNav.category=null;renderArchive();});
-  b.querySelectorAll('[data-level="organ"]').forEach(x=>x.onclick=()=>{archiveNav.category=null;renderArchive();});
+  b.querySelectorAll('[data-level="archive"]').forEach(x=>x.onclick=()=>{archiveNav={area:null,organ:null};renderArchive();});
+  b.querySelectorAll('[data-level="area"]').forEach(x=>x.onclick=()=>{archiveNav.organ=null;renderArchive();});
+}
+function fileTypeLabel(filename){
+  const ext=String(filename||'').split('.').pop().toUpperCase();
+  return ext && ext!==String(filename||'').toUpperCase()?ext:'Documento';
 }
 function renderMaterialRows(materials){
-  if(!materials.length) return `<div class="card archive-empty"><b>Nessun materiale ancora</b><div class="muted small">Aggiungilo con “+ Materiale” e assegnalo a questo argomento.</div></div>`;
-  return `<div class="stack">${materials.map(m=>{
-    const tags=(m.tags||[]).map(t=>`<span class="tag">${escapeHTML(t)}</span>`).join("");
+  if(!materials.length) return `<div class="card archive-empty"><b>Nessun file ancora</b><div class="muted small">Aggiungilo con “+ Materiale”.</div></div>`;
+  const sorted=[...materials].sort((a,b)=>String(a.title||'').localeCompare(String(b.title||''),'it'));
+  return `<div class="stack">${sorted.map(m=>{
     const remote=(m.kind==="map" && m.map?.pdfPath) || (m.kind==="document" && m.storage==="github" && m.path);
     const local=(m.kind==="document" && m.storage==="indexeddb");
     const offlineControl=remote?`<button class="offline-toggle" data-offline-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Controllo…</button>`:(local?`<span class="device-badge">✓ Sul dispositivo</span>`:"");
-    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title">${escapeHTML(m.title)}</div><div class="muted small">${escapeHTML(m.filename||m.source||"Documento")}</div><div class="tags">${tags}</div></div><div class="offline-actions">${offlineControl}<button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri</button></div></div>`;
+    const filename=m.filename||m.source||"Documento";
+    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title file-title">${escapeHTML(m.title||titleFromFilename(filename))}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(filename))}</div></div><div class="offline-actions">${offlineControl}<button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri</button></div></div>`;
   }).join("")}</div>`;
 }
 function wireMaterialRows(body){
@@ -2430,29 +2472,31 @@ function wireMaterialRows(body){
   body.querySelectorAll('.archive-material[data-kind="map"]').forEach(el=>el.onclick=e=>{if(e.target.closest('button'))return;openMap(el.dataset.id);});
   refreshOfflineButtons(body);
 }
+function renderNodeList(items,kind){
+  return `<div class="archive-list">${items.map(item=>{
+    const count=kind==="area"?materialCount({area:item}):materialCount({area:archiveNav.area,organ:item});
+    const noun=count===1?'file':'file';
+    const attr=kind==="area"?`data-area="${escapeHTML(item)}"`:`data-organ="${escapeHTML(item)}"`;
+    return `<button class="archive-list-row" ${attr}><div class="archive-list-main"><div class="archive-list-title">${escapeHTML(item)}</div><div class="archive-list-meta">${count} ${noun}</div></div><span class="archive-list-arrow">›</span></button>`;
+  }).join("")}</div>`;
+}
 function renderArchive(){
   renderBreadcrumb(); const body=document.getElementById("archiveBody"); const q=norm(document.getElementById("librarySearch")?.value||"");
   if(q){
-    const found=archiveMaterials().filter(m=>norm([m.title,m.area,m.organ,m.category,...(m.tags||[])].join(" ")).includes(q));
+    const found=archiveMaterials().filter(m=>norm([m.title,m.filename,m.area,m.organ].join(" ")).includes(q));
     body.innerHTML=`<div class="archive-section-title">Risultati</div>${renderMaterialRows(found)}`; wireMaterialRows(body); return;
   }
   if(!archiveNav.area){
-    body.innerHTML=`<div class="archive-section-title">Scegli il distretto</div><div class="archive-grid">${archiveAreas().map(area=>`<button class="archive-node card" data-area="${escapeHTML(area)}"><span class="archive-node-title">${escapeHTML(area)}</span><span class="muted small">${archiveOrgans(area).length} sezioni · ${materialCount({area})} materiali</span></button>`).join("")}</div>`;
+    body.innerHTML=`<div class="archive-section-title">Scegli il distretto</div>${renderNodeList(archiveAreas(),"area")}`;
     body.querySelectorAll('[data-area]').forEach(x=>x.onclick=()=>{archiveNav.area=x.dataset.area;renderArchive();}); return;
   }
   if(!archiveNav.organ){
     const organs=archiveOrgans(archiveNav.area);
-    body.innerHTML=`<div class="archive-section-title">${escapeHTML(archiveNav.area)}</div><div class="archive-grid">${organs.map(organ=>`<button class="archive-node card" data-organ="${escapeHTML(organ)}"><span class="archive-node-title">${escapeHTML(organ)}</span><span class="muted small">${archiveCategories(archiveNav.area,organ).length} categorie · ${materialCount({area:archiveNav.area,organ})} materiali</span></button>`).join("")}</div>`;
+    body.innerHTML=`<div class="archive-section-title">${escapeHTML(archiveNav.area)}</div>${renderNodeList(organs,"organ")}`;
     body.querySelectorAll('[data-organ]').forEach(x=>x.onclick=()=>{archiveNav.organ=x.dataset.organ;renderArchive();}); return;
   }
-  if(!archiveNav.category){
-    const cats=archiveCategories(archiveNav.area,archiveNav.organ);
-    const generalMats=archiveMaterials().filter(m=>m.area===archiveNav.area&&m.organ===archiveNav.organ&&m.category==="Generale");
-    body.innerHTML=`<div class="archive-section-title">${escapeHTML(archiveNav.organ)}</div><div class="archive-grid compact">${cats.map(cat=>`<button class="archive-node card" data-category="${escapeHTML(cat)}"><span class="archive-node-title">${escapeHTML(cat)}</span><span class="muted small">${materialCount({area:archiveNav.area,organ:archiveNav.organ,category:cat})} materiali</span></button>`).join("")}</div>${generalMats.length?`<div class="archive-section-title">Materiale generale</div>${renderMaterialRows(generalMats)}`:""}`;
-    body.querySelectorAll('[data-category]').forEach(x=>x.onclick=()=>{archiveNav.category=x.dataset.category;renderArchive();}); wireMaterialRows(body); return;
-  }
-  const mats=archiveMaterials().filter(m=>m.area===archiveNav.area&&m.organ===archiveNav.organ&&m.category===archiveNav.category);
-  body.innerHTML=`<div class="archive-section-title">${escapeHTML(archiveNav.category)}</div>${renderMaterialRows(mats)}`; wireMaterialRows(body);
+  const mats=archiveMaterials().filter(m=>m.area===archiveNav.area&&m.organ===archiveNav.organ);
+  body.innerHTML=`<div class="archive-section-title">${escapeHTML(archiveNav.organ)}</div>${renderMaterialRows(mats)}`; wireMaterialRows(body);
 }
 function renderStudies(){
   const box=document.getElementById("studiesList"); const docs=studyMaterials();
@@ -2460,7 +2504,7 @@ function renderStudies(){
   box.innerHTML=docs.map(d=>`<div class="card archive-material"><div class="map-main"><div class="map-title">${escapeHTML(d.title)}</div><div class="muted small">${escapeHTML(d.project||d.filename||"")}</div></div><div class="offline-actions">${d.storage==="indexeddb"?'<span class="device-badge">✓ Sul dispositivo</span>':''}<button class="open-pdf" data-open-study="${d.id}">Apri</button></div></div>`).join("");
   box.querySelectorAll('[data-open-study]').forEach(b=>b.onclick=()=>openGeneralFile(b.dataset.openStudy));
 }
-function openLibrary(){ showView("libraryView"); libraryRoot(); if(!githubLibrarySynced && navigator.onLine) syncGithubLibrary({silent:true}).then(ok=>{if(ok && document.getElementById("libraryView").classList.contains("active")) renderArchive();}); }
+function openLibrary(){ showView("libraryView"); openArchiveRoot(); if(!githubLibrarySynced && navigator.onLine) syncGithubLibrary({silent:true}).then(ok=>{if(ok && document.getElementById("libraryView").classList.contains("active")) renderArchive();}); }
 
 
 function availableCases(filters={}){
@@ -2955,30 +2999,46 @@ window.rate=function(r){
 
 async function saveNewMap(){
   const collection=document.getElementById("newMapCollection").value;
-  const title=document.getElementById("newMapTitle").value.trim();
-  const tags=document.getElementById("newMapTags").value.split(",").map(x=>x.trim()).filter(Boolean);
   const f=document.getElementById("newMapFile").files[0];
-  if(!title){toast("Inserisci un titolo");return;} if(!f){toast("Seleziona un file");return;}
-  const id="doc_"+Date.now();
-  const doc={id,title,collection,tags,filename:f.name,mime:f.type,storage:"indexeddb",created:todayISO()};
+  if(!f){toast("Seleziona un file");return;}
+  if(!(await hasGithubConnection())){toast("Collega prima GitHub dalle Impostazioni");return;}
+  if(!navigator.onLine){toast("Serve internet per caricare il file su GitHub");return;}
+  let repoPath="";
   if(collection==="archivio"){
-    doc.area=document.getElementById("newMapArea").value;
-    doc.organ=document.getElementById("newMapOrgan").value.trim();
-    doc.category=document.getElementById("newMapCategory").value.trim()||"Generale";
-    if(!doc.organ){toast("Inserisci l'organo / sede");return;}
-  }else{ doc.project=document.getElementById("newStudyProject").value.trim(); }
+    const area=document.getElementById("newMapArea").value;
+    const organ=document.getElementById("newMapOrgan").value.trim();
+    if(!organ){toast("Inserisci l'organo / sede");return;}
+    repoPath=`library/archivio/${ghSlug(area)}/${ghSlug(organ)}/${safeGithubFilename(f.name)}`;
+  }else{
+    const project=document.getElementById("newStudyProject").value.trim();
+    repoPath=project?`library/studi/${ghSlug(project)}/${safeGithubFilename(f.name)}`:`library/studi/${safeGithubFilename(f.name)}`;
+  }
+  const btn=document.getElementById("saveMapBtn"), oldText=btn.textContent;
   try{
-    await storeGeneralFile(id,f); state.documents.push(doc); save();
-    ["newMapTitle","newMapOrgan","newMapCategory","newMapTags","newStudyProject"].forEach(x=>{const e=document.getElementById(x);if(e)e.value="";}); document.getElementById("newMapFile").value="";
-    toast("Materiale salvato"); openLibrary(); collection==="archivio"?openArchiveRoot():openStudies();
-  }catch(e){console.error(e);toast("Non sono riuscito a salvare il file");}
+    btn.disabled=true;btn.textContent="Caricamento…";
+    await githubUploadFile(repoPath,f);
+    document.getElementById("newMapFile").value="";
+    const organ=document.getElementById("newMapOrgan");if(organ)organ.value="";
+    const project=document.getElementById("newStudyProject");if(project)project.value="";
+    githubLibrarySynced=false;
+    await syncGithubLibrary({silent:true});
+    toast("File caricato su GitHub");
+    showView("libraryView");
+    collection==="archivio"?openArchiveRoot():openStudies();
+  }catch(e){
+    console.error(e);
+    if(String(e.message)!=="Caricamento annullato") toast(e.message||"Caricamento non riuscito");
+  }finally{
+    btn.disabled=false;btn.textContent=oldText;
+  }
 }
 function syncAddMaterialForm(){
   const isArchive=document.getElementById("newMapCollection")?.value!=="studi";
-  document.getElementById("archiveMetadataFields").hidden=!isArchive; document.getElementById("studyMetadataFields").hidden=isArchive;
+  document.getElementById("archiveMetadataFields").hidden=!isArchive;
+  document.getElementById("studyMetadataFields").hidden=isArchive;
   const area=document.getElementById("newMapArea")?.value||"Addome";
-  const organList=document.getElementById("organSuggestions"); if(organList) organList.innerHTML=Object.keys(archiveTaxonomy[area]||{}).map(x=>`<option value="${x}">`).join("");
-  const organ=document.getElementById("newMapOrgan")?.value||""; const catList=document.getElementById("categorySuggestions"); if(catList) catList.innerHTML=(archiveTaxonomy[area]?.[organ]||[]).map(x=>`<option value="${x}">`).join("");
+  const organList=document.getElementById("organSuggestions");
+  if(organList) organList.innerHTML=Object.keys(archiveTaxonomy[area]||{}).map(x=>`<option value="${x}">`).join("");
 }
 
 function exportData(){
@@ -2993,7 +3053,12 @@ document.getElementById("startReviewBtn").onclick=startReview;
 document.getElementById("backHomeBtn").onclick=()=>showView("homeView");
 document.getElementById("mapBackBtn").onclick=()=>showView("homeView");
 document.getElementById("addMapBtn").onclick=()=>{showView("addMapView");syncAddMaterialForm();};
-document.getElementById("libraryBackBtn").onclick=()=>{ if(!document.getElementById("libraryLanding").hidden) showView("homeView"); else libraryRoot(); };
+document.getElementById("libraryBackBtn").onclick=()=>{
+  if(!document.getElementById("studiesExplorer").hidden){showView("homeView");return;}
+  if(archiveNav.organ){archiveNav.organ=null;renderArchive();return;}
+  if(archiveNav.area){archiveNav.area=null;renderArchive();return;}
+  showView("homeView");
+};
 document.getElementById("libraryAddBtn").onclick=()=>{showView("addMapView");syncAddMaterialForm();};
 document.getElementById("addMapBackBtn").onclick=()=>showView("homeView");
 document.getElementById("saveMapBtn").onclick=saveNewMap;
@@ -3019,12 +3084,13 @@ document.getElementById("generateImageCaseBtn").onclick=()=>generateImageTrainin
 document.getElementById("imageGenModality").onchange=populateImageGeneratorTopics;
 document.getElementById("imageGenRegion").onchange=populateImageGeneratorTopics;
 
-document.getElementById("openArchiveBtn").onclick=openArchiveRoot;
-document.getElementById("openStudiesBtn").onclick=openStudies;
-document.getElementById("studiesBackRoot").onclick=libraryRoot;
+document.getElementById("openArchiveBtn")?.addEventListener("click",openArchiveRoot);
+document.getElementById("openStudiesBtn")?.addEventListener("click",openStudies);
+document.getElementById("libraryModeArchive")?.addEventListener("click",openArchiveRoot);
+document.getElementById("libraryModeStudies")?.addEventListener("click",openStudies);
+document.getElementById("studiesBackRoot")?.addEventListener("click",openArchiveRoot);
 document.getElementById("newMapCollection").onchange=syncAddMaterialForm;
 document.getElementById("newMapArea").onchange=syncAddMaterialForm;
-document.getElementById("newMapOrgan").oninput=syncAddMaterialForm;
 document.querySelector('[data-view="homeView"]').onclick=()=>showView("homeView");
 document.getElementById("saveGithubBtn")?.addEventListener("click",saveGithubSettings);
 document.getElementById("syncGithubBtn")?.addEventListener("click",()=>syncGithubLibrary());
