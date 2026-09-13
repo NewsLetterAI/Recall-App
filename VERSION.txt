@@ -1,1 +1,1 @@
-Recall v1.10.1 — rimossi definitivamente i riquadri Archivio/Studi; liste compatte
+Recall v1.11 — eliminazione file + lettore PDF con evidenziazioni, sottolineature e note sincronizzate

@@ -1,4 +1,4 @@
-const VERSION="v1101";
+const VERSION="v111";
 const CORE_CACHE=`recall-core-${VERSION}`;
 const RUNTIME_CACHE=`recall-runtime-${VERSION}`;
 const DOC_CACHE=`recall-docs-${VERSION}`;
@@ -53,6 +53,8 @@ self.addEventListener("fetch",event=>{
   const req=event.request;
   if(req.method!=="GET") return;
   const url=new URL(req.url);
+  const isPdfJsCdn=url.hostname==="cdnjs.cloudflare.com" && url.pathname.includes("/ajax/libs/pdf.js/4.10.38/");
+  if(isPdfJsCdn){event.respondWith(cacheFirst(req,RUNTIME_CACHE));return;}
   if(url.origin!==self.location.origin) return;
   if(req.mode==="navigate"){event.respondWith(navigationResponse(req));return;}
   if(["style","script","image","font"].includes(req.destination)){event.respondWith(cacheFirst(req,RUNTIME_CACHE));return;}

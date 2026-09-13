@@ -2113,6 +2113,36 @@ async function githubUploadFile(repoPath,file){
   }
   return await r.json();
 }
+
+async function githubDeleteFile(repoPath,sha=null,{silent404=false}={}){
+  if(!navigator.onLine) throw new Error('Serve una connessione internet per eliminare da GitHub');
+  if(!(await hasGithubConnection())) throw new Error('Collega prima GitHub dalle Impostazioni');
+  const cfg=getGithubConfig(), token=await getGithubToken();
+  let existing=sha?{sha}:await githubExistingFile(repoPath);
+  if(!existing?.sha){if(silent404)return false;throw new Error('File non trovato su GitHub');}
+  const url=`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ghEncodePath(repoPath)}`;
+  const r=await fetch(url,{method:'DELETE',headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2026-03-10'},body:JSON.stringify({message:`Recall: elimina ${repoPath.split('/').pop()}`,sha:existing.sha,branch:cfg.branch||'main'})});
+  if(!r.ok){const t=await r.text().catch(()=>'');if(r.status===403)throw new Error('Il token non ha permesso di scrittura. Usa Contents: Read and write.');if(r.status===404&&silent404)return false;throw new Error(`GitHub ${r.status}${t?`: ${t.slice(0,140)}`:''}`);}
+  return true;
+}
+async function githubWriteText(repoPath,textContent,message='Recall: aggiorna dati'){
+  if(!navigator.onLine) return false;
+  const cfg=getGithubConfig(), token=await getGithubToken(); if(!token)return false;
+  const existing=await githubExistingFile(repoPath);
+  const content=btoa(unescape(encodeURIComponent(String(textContent))));
+  const body={message,content,branch:cfg.branch||'main'};if(existing?.sha)body.sha=existing.sha;
+  const url=`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ghEncodePath(repoPath)}`;
+  const r=await fetch(url,{method:'PUT',headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2026-03-10'},body:JSON.stringify(body)});
+  if(!r.ok){const t=await r.text().catch(()=>'');if(r.status===403)throw new Error('Token senza permesso di scrittura');throw new Error(`GitHub ${r.status}${t?`: ${t.slice(0,120)}`:''}`);}
+  return true;
+}
+async function githubReadText(repoPath){
+  try{const r=await githubApi(`contents/${ghEncodePath(repoPath)}`,{raw:true});return await r.text();}
+  catch(e){if(String(e.message).includes('404'))return null;throw e;}
+}
+function fnv1aHash(str){let h=0x811c9dc5;for(let i=0;i<String(str).length;i++){h^=String(str).charCodeAt(i);h=Math.imul(h,0x01000193);}return (h>>>0).toString(16).padStart(8,'0');}
+function annotationRemotePath(sourcePath){return `library/.recall/annotations/${fnv1aHash(sourcePath)}.json`;}
+
 async function githubTest(){
   const cfg=getGithubConfig(), token=await getGithubToken(); if(!token) throw new Error('Inserisci il token');
   const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},cache:'no-store'});
@@ -2135,7 +2165,9 @@ async function syncGithubLibrary({silent=false}={}){
   if(!navigator.onLine || !(await hasGithubConnection())) return false;
   try{
     const [archiveFiles,studyFiles]=await Promise.all([githubWalk('library/archivio'),githubWalk('library/studi')]);
+    const archivePathSet=new Set(archiveFiles.map(f=>f.path));
     const mapPaths=new Set(state.maps.map(m=>m.pdfPath).filter(Boolean));
+    state.maps.forEach(m=>{if((m.pdfMode==="github"||(m.pdfPath||"").startsWith("library/"))&&m.pdfPath)m.githubAvailable=archivePathSet.has(m.pdfPath);});
     state.documents=(state.documents||[]).filter(d=>d.storage!=='github');
     for(const f of archiveFiles){
       if(mapPaths.has(f.path)) continue;
@@ -2203,7 +2235,7 @@ async function deletePdf(mapId){
     tx.onerror=()=>reject(tx.error);
   });
 }
-async function openPdfForMap(mapId){
+async function openPdfForMapNative(mapId){
   const map=state.maps.find(m=>m.id===mapId); if(!map){toast("Mappa non trovata");return}
   try{
     if((map.pdfMode==="github" || (map.pdfPath||'').startsWith('library/')) && map.pdfPath){
@@ -2236,7 +2268,7 @@ async function deleteGeneralFile(id){
   const db=await openFileDB();
   return new Promise((resolve,reject)=>{const tx=db.transaction(FILE_STORE,"readwrite");tx.objectStore(FILE_STORE).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
 }
-async function openGeneralFile(id){
+async function openGeneralFileNative(id){
   const doc=state.documents.find(d=>d.id===id); if(!doc){toast("Documento non trovato");return;}
   try{
     if(doc.storage==="github" && doc.path){let blob=await getGeneralFile(id);if(!blob){if(!navigator.onLine){toast('Documento non scaricato offline');return;}blob=await githubBlob(doc.path);await storeGeneralFile(id,blob);}openBlobTab(blob,doc.path);return;}
@@ -2245,12 +2277,176 @@ async function openGeneralFile(id){
 }
 
 
+
+async function openPdfForMap(mapId){return openPdfAnnotator('map',mapId);}
+async function openGeneralFile(id){
+  const rec=materialRecord('document',id);if(rec&&(isPdfFilename(rec.filename)||isPdfFilename(rec.path)))return openPdfAnnotator('document',id);
+  return openGeneralFileNative(id);
+}
+
+// Recall v1.11 — PDF reader with non-destructive annotations.
+const PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs';
+const PDFJS_WORKER_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs';
+let pdfJsPromise=null,pdfReaderDoc=null,pdfReaderState=null,pdfReaderAnnotations=null,pdfReaderTool='none',pdfReaderZoom=1,pdfDrawState=null,pdfAnnotationSyncTimer=null,pdfAnnotationDirty=false;
+function pdfAnnotationKey(sourceKey){return `ann:${fnv1aHash(sourceKey)}`;}
+function setPdfStatus(text,mode='saved'){
+  const el=document.getElementById('pdfAnnotationStatus');if(!el)return;el.textContent=text;el.className=`pdf-save-state ${mode==='saved'?'':mode}`.trim();
+}
+async function loadPdfJs(){
+  if(!pdfJsPromise)pdfJsPromise=import(PDFJS_URL).then(lib=>{lib.GlobalWorkerOptions.workerSrc=PDFJS_WORKER_URL;return lib;});
+  return pdfJsPromise;
+}
+async function materialBlobForReader(kind,id){
+  const rec=materialRecord(kind,id);if(!rec)throw new Error('Documento non trovato');
+  let blob=kind==='map'?await getPdf(id):await getGeneralFile(id);
+  if(!blob){
+    if(rec.storage==='github'&&rec.path){if(!navigator.onLine)throw new Error('Documento non scaricato offline');blob=await githubBlob(rec.path);kind==='map'?await storePdf(id,blob):await storeGeneralFile(id,blob);}
+    else throw new Error('PDF non disponibile su questo dispositivo');
+  }
+  return normalizeBlobMime(blob,rec.path||rec.filename);
+}
+async function loadPdfAnnotations(sourceKey,remoteAllowed){
+  let local=await ghKvGet(pdfAnnotationKey(sourceKey));
+  let remote=null;
+  if(remoteAllowed&&navigator.onLine&&await hasGithubConnection()){
+    try{const txt=await githubReadText(annotationRemotePath(sourceKey));if(txt)remote=JSON.parse(txt);}catch(e){console.warn('Annotazioni remote non disponibili',e);}
+  }
+  let chosen=local||remote||{sourcePath:sourceKey,updatedAt:new Date(0).toISOString(),items:[]};
+  if(local&&remote){chosen=(Date.parse(remote.updatedAt||0)>Date.parse(local.updatedAt||0))?remote:local;}
+  const needsSync=!!(remoteAllowed&&local&&(!remote||Date.parse(local.updatedAt||0)>Date.parse(remote.updatedAt||0)));
+  chosen.items=Array.isArray(chosen.items)?chosen.items:[];
+  await ghKvPut(pdfAnnotationKey(sourceKey),chosen);
+  chosen.__needsSync=needsSync;
+  return chosen;
+}
+async function savePdfAnnotationsLocal(){
+  if(!pdfReaderState||!pdfReaderAnnotations)return;
+  pdfReaderAnnotations.updatedAt=new Date().toISOString();
+  pdfReaderAnnotations.sourcePath=pdfReaderState.sourceKey;
+  await ghKvPut(pdfAnnotationKey(pdfReaderState.sourceKey),pdfReaderAnnotations);
+  pdfAnnotationDirty=true;setPdfStatus(pdfReaderState.remote?'Da sincronizzare':'Salvato sul dispositivo',pdfReaderState.remote?'syncing':'saved');
+  schedulePdfAnnotationSync();
+}
+function schedulePdfAnnotationSync(){
+  if(!pdfReaderState?.remote||!navigator.onLine)return;
+  clearTimeout(pdfAnnotationSyncTimer);
+  pdfAnnotationSyncTimer=setTimeout(()=>syncPdfAnnotationsRemote(),1300);
+}
+async function syncPdfAnnotationsRemote(){
+  clearTimeout(pdfAnnotationSyncTimer);pdfAnnotationSyncTimer=null;
+  if(!pdfReaderState?.remote||!pdfReaderAnnotations||!pdfAnnotationDirty||!navigator.onLine)return true;
+  try{
+    setPdfStatus('Sincronizzazione…','syncing');
+    await githubWriteText(annotationRemotePath(pdfReaderState.sourceKey),JSON.stringify(pdfReaderAnnotations,null,2),`Recall: annotazioni ${pdfReaderState.title}`);
+    pdfAnnotationDirty=false;setPdfStatus('✓ Sincronizzato','saved');return true;
+  }catch(e){console.error(e);setPdfStatus('Salvato solo qui','error');return false;}
+}
+function setPdfTool(tool){
+  pdfReaderTool=tool;
+  document.querySelectorAll('[data-pdf-tool]').forEach(b=>b.classList.toggle('active',b.dataset.pdfTool===tool));
+  document.querySelectorAll('.pdf-annotation-layer').forEach(layer=>{
+    layer.classList.toggle('drawing',tool!=='none');layer.classList.toggle('erase',tool==='erase');
+  });
+}
+function annotationLabel(a){return a.type==='highlight'?'Evidenziazione':a.type==='underline'?'Sottolineatura':'Nota';}
+function annotationPosition(a){return `left:${a.x*100}%;top:${a.y*100}%;width:${Math.max(a.w||.03,.01)*100}%;height:${Math.max(a.h||.025,.008)*100}%`;}
+function renderPdfPageAnnotations(pageNo){
+  const layer=document.querySelector(`.pdf-annotation-layer[data-page="${pageNo}"]`);if(!layer||!pdfReaderAnnotations)return;
+  layer.querySelectorAll('.pdf-annotation').forEach(n=>n.remove());
+  const items=pdfReaderAnnotations.items.filter(a=>a.page===pageNo);
+  let noteIndex=0;
+  items.forEach(a=>{
+    const el=document.createElement('div');el.className=`pdf-annotation ${a.type}`;el.dataset.annotationId=a.id;el.style.cssText=annotationPosition(a);
+    if(a.type==='note'){noteIndex++;el.textContent='✎';el.title=a.text||'Nota';}
+    el.onclick=e=>{if(pdfReaderTool==='erase'){e.stopPropagation();removePdfAnnotation(a.id);}};
+    layer.appendChild(el);
+  });
+}
+function renderPdfAllAnnotations(){document.querySelectorAll('.pdf-annotation-layer').forEach(l=>renderPdfPageAnnotations(Number(l.dataset.page)));renderPdfNotesList();}
+function renderPdfNotesList(){
+  const list=document.getElementById('pdfNotesList'),badge=document.getElementById('pdfAnnotationCount');if(!list||!pdfReaderAnnotations)return;
+  const items=[...pdfReaderAnnotations.items].sort((a,b)=>a.page-b.page||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
+  if(badge)badge.textContent=items.length;
+  if(!items.length){list.innerHTML='<div class="pdf-note-empty">Nessuna annotazione. Scegli uno strumento e lavora direttamente sulla pagina.</div>';return;}
+  list.innerHTML=items.map(a=>`<div class="pdf-note-row" data-ann-row="${escapeHTML(a.id)}"><div class="pdf-note-row-title">Pagina ${a.page} · ${annotationLabel(a)}</div>${a.text?`<div class="pdf-note-row-text">${escapeHTML(a.text)}</div>`:''}<div class="pdf-note-row-actions"><button class="pdf-note-delete" data-ann-delete="${escapeHTML(a.id)}">Elimina</button></div></div>`).join('');
+  list.querySelectorAll('[data-ann-row]').forEach(row=>row.onclick=e=>{if(e.target.closest('button'))return;const a=pdfReaderAnnotations.items.find(x=>x.id===row.dataset.annRow);document.querySelector(`.pdf-page-wrap[data-page="${a?.page}"]`)?.scrollIntoView({behavior:'smooth',block:'center'});});
+  list.querySelectorAll('[data-ann-delete]').forEach(b=>b.onclick=e=>{e.stopPropagation();removePdfAnnotation(b.dataset.annDelete);});
+}
+async function removePdfAnnotation(id){
+  if(!pdfReaderAnnotations)return;const a=pdfReaderAnnotations.items.find(x=>x.id===id);pdfReaderAnnotations.items=pdfReaderAnnotations.items.filter(x=>x.id!==id);if(a)renderPdfPageAnnotations(a.page);renderPdfNotesList();await savePdfAnnotationsLocal();
+}
+function pagePoint(layer,event){const r=layer.getBoundingClientRect();return {x:Math.min(1,Math.max(0,(event.clientX-r.left)/r.width)),y:Math.min(1,Math.max(0,(event.clientY-r.top)/r.height))};}
+function wirePdfAnnotationLayer(layer,pageNo){
+  layer.onpointerdown=e=>{
+    if(pdfReaderTool==='none'||pdfReaderTool==='erase')return;
+    e.preventDefault();const p=pagePoint(layer,e);
+    if(pdfReaderTool==='note'){
+      const text=prompt('Scrivi la nota:','');if(text===null)return;
+      pdfReaderAnnotations.items.push({id:`a_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,page:pageNo,type:'note',x:p.x,y:p.y,w:.035,h:.035,text:text.trim(),createdAt:new Date().toISOString()});
+      renderPdfPageAnnotations(pageNo);renderPdfNotesList();savePdfAnnotationsLocal();return;
+    }
+    layer.setPointerCapture?.(e.pointerId);pdfDrawState={page:pageNo,start:p,pointerId:e.pointerId};
+    const d=document.createElement('div');d.className='pdf-draft-annotation';d.id='pdfDraftAnnotation';layer.appendChild(d);
+  };
+  layer.onpointermove=e=>{if(!pdfDrawState||pdfDrawState.page!==pageNo)return;const p=pagePoint(layer,e),s=pdfDrawState.start,x=Math.min(s.x,p.x),y=Math.min(s.y,p.y),w=Math.abs(p.x-s.x),h=Math.abs(p.y-s.y),d=document.getElementById('pdfDraftAnnotation');if(d)d.style.cssText=`left:${x*100}%;top:${y*100}%;width:${w*100}%;height:${Math.max(h,.008)*100}%`;};
+  const finish=e=>{
+    if(!pdfDrawState||pdfDrawState.page!==pageNo)return;const p=pagePoint(layer,e),s=pdfDrawState.start,x=Math.min(s.x,p.x),y=Math.min(s.y,p.y),w=Math.abs(p.x-s.x),h=Math.abs(p.y-s.y);document.getElementById('pdfDraftAnnotation')?.remove();pdfDrawState=null;
+    if(w<.008&&h<.008)return;
+    const type=pdfReaderTool==='underline'?'underline':'highlight';
+    pdfReaderAnnotations.items.push({id:`a_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,page:pageNo,type,x,y,w:Math.max(w,.012),h:Math.max(h,type==='underline'?.012:.018),createdAt:new Date().toISOString()});
+    renderPdfPageAnnotations(pageNo);renderPdfNotesList();savePdfAnnotationsLocal();
+  };
+  layer.onpointerup=finish;layer.onpointercancel=e=>{document.getElementById('pdfDraftAnnotation')?.remove();pdfDrawState=null;};
+}
+async function renderPdfDocument(){
+  const pages=document.getElementById('pdfPages'),loading=document.getElementById('pdfLoading');if(!pages||!pdfReaderDoc)return;
+  pages.innerHTML='';if(loading){loading.hidden=false;loading.textContent=`Caricamento ${pdfReaderDoc.numPages} pagine…`;}
+  const maxBase=Math.min(860,Math.max(300,(pages.parentElement?.clientWidth||850)-8));
+  for(let n=1;n<=pdfReaderDoc.numPages;n++){
+    const page=await pdfReaderDoc.getPage(n),unit=page.getViewport({scale:1}),scale=(maxBase/unit.width)*pdfReaderZoom,viewport=page.getViewport({scale}),dpr=Math.min(window.devicePixelRatio||1,2);
+    const wrap=document.createElement('div');wrap.className='pdf-page-wrap';wrap.dataset.page=n;wrap.style.width=`${viewport.width}px`;wrap.style.height=`${viewport.height}px`;
+    const canvas=document.createElement('canvas');canvas.width=Math.floor(viewport.width*dpr);canvas.height=Math.floor(viewport.height*dpr);canvas.style.width=`${viewport.width}px`;canvas.style.height=`${viewport.height}px`;
+    const layer=document.createElement('div');layer.className='pdf-annotation-layer';layer.dataset.page=n;wrap.append(canvas,layer);pages.appendChild(wrap);wirePdfAnnotationLayer(layer,n);
+    await page.render({canvasContext:canvas.getContext('2d'),viewport,transform:dpr!==1?[dpr,0,0,dpr,0,0]:null}).promise;
+    renderPdfPageAnnotations(n);setPdfTool(pdfReaderTool);
+    if(loading)loading.textContent=`Pagina ${n} di ${pdfReaderDoc.numPages}…`;
+  }
+  if(loading)loading.hidden=true;renderPdfNotesList();
+}
+async function openPdfAnnotator(kind,id){
+  const rec=materialRecord(kind,id);if(!rec){toast('PDF non trovato');return;}
+  const sourceKey=rec.path||`local:${kind}:${id}`;
+  try{
+    showView('pdfAnnotatorView');document.getElementById('pdfAnnotatorTitle').textContent=rec.title;document.getElementById('pdfLoading').hidden=false;document.getElementById('pdfLoading').textContent='Caricamento PDF…';document.getElementById('pdfPages').innerHTML='';setPdfStatus('Caricamento…','syncing');
+    const blob=await materialBlobForReader(kind,id);
+    pdfReaderState={kind,id,title:rec.title,filename:rec.filename,path:rec.path,sourceKey,remote:rec.storage==='github'&&!!rec.path,blob};
+    pdfReaderAnnotations=await loadPdfAnnotations(sourceKey,pdfReaderState.remote);pdfReaderZoom=1;pdfReaderTool='none';pdfAnnotationDirty=!!pdfReaderAnnotations.__needsSync;delete pdfReaderAnnotations.__needsSync;
+    document.getElementById('pdfZoomLabel').textContent='100%';setPdfTool('none');if(pdfAnnotationDirty)schedulePdfAnnotationSync();
+    const lib=await loadPdfJs();
+    if(pdfReaderDoc?.destroy)await pdfReaderDoc.destroy().catch(()=>{});
+    const bytes=new Uint8Array(await blob.arrayBuffer());pdfReaderDoc=await lib.getDocument({data:bytes}).promise;setPdfStatus('✓ Salvato','saved');await renderPdfDocument();
+  }catch(e){
+    console.error(e);toast(`Visualizzatore PDF: ${e.message||'errore'}`);setPdfStatus('Modalità compatibile','error');
+    if(pdfReaderState?.blob){
+      const url=URL.createObjectURL(pdfReaderState.blob),pages=document.getElementById('pdfPages'),loading=document.getElementById('pdfLoading');if(loading)loading.hidden=true;
+      if(pages)pages.innerHTML=`<iframe class="pdf-native-frame" src="${url}" title="PDF"></iframe>`;
+      setTimeout(()=>URL.revokeObjectURL(url),30*60*1000);
+      renderPdfNotesList();
+    }
+  }
+}
+async function closePdfAnnotator(){
+  await syncPdfAnnotationsRemote().catch(()=>{});if(pdfReaderDoc?.destroy)await pdfReaderDoc.destroy().catch(()=>{});pdfReaderDoc=null;pdfReaderState=null;pdfReaderAnnotations=null;pdfDrawState=null;showView('libraryView');if(document.getElementById('studiesExplorer')&&!document.getElementById('studiesExplorer').hidden)renderStudies();else renderArchive();
+}
+async function openCurrentPdfNative(){if(pdfReaderState?.blob)openBlobTab(pdfReaderState.blob,pdfReaderState.path||pdfReaderState.filename);}
+async function changePdfZoom(delta){if(!pdfReaderDoc)return;pdfReaderZoom=Math.min(1.8,Math.max(.65,pdfReaderZoom+delta));document.getElementById('pdfZoomLabel').textContent=`${Math.round(pdfReaderZoom*100)}%`;await renderPdfDocument();}
+
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.10.1";
-const OFFLINE_DOC_CACHE="recall-docs-v1101";
-const OFFLINE_CASE_CACHE="recall-cases-v1101";
+const RECALL_VERSION="1.11";
+const OFFLINE_DOC_CACHE="recall-docs-v111";
+const OFFLINE_CASE_CACHE="recall-cases-v111";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -2357,7 +2553,7 @@ function initOfflineFeatures(){
   registerRecallServiceWorker();
 }
 
-function allUnits(){ return state.maps.flatMap(m=>m.units.map(u=>({...u,mapId:m.id,mapTitle:m.title}))); }
+function allUnits(){ return state.maps.filter(m=>m.githubAvailable!==false).flatMap(m=>m.units.map(u=>({...u,mapId:m.id,mapTitle:m.title}))); }
 function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -2374,12 +2570,12 @@ function renderHome(){
   const units=allUnits(), due=units.filter(u=>u.due<=todayISO()), weak=units.filter(u=>u.mastery<55);
   document.getElementById("dueCount").textContent=due.length;
   document.getElementById("weakCount").textContent=weak.length;
-  document.getElementById("mapsCount").textContent=state.maps.length;
+  document.getElementById("mapsCount").textContent=state.maps.filter(m=>m.githubAvailable!==false).length;
   const reportBadge=document.getElementById("reportCountBadge"); if(reportBadge) reportBadge.textContent = `${reportCases.length} casi pronti`;
   document.getElementById("dueSubtitle").textContent = due.length ? `${due.length} unità pronte per il recupero attivo.` : "Nessun ripasso urgente. Puoi fare una sessione di mantenimento.";
 
   const maps=document.getElementById("mapsList");maps.innerHTML="";
-  state.maps.forEach(m=>{
+  state.maps.filter(m=>m.githubAvailable!==false).forEach(m=>{
     const avg=m.units.length?Math.round(m.units.reduce((s,u)=>s+u.mastery,0)/m.units.length):0;
     const dueN=m.units.filter(u=>u.due<=todayISO()).length;
     const row=document.createElement("div");row.className="card map-row";
@@ -2401,7 +2597,7 @@ function renderHome(){
 let archiveNav={area:null,organ:null};
 
 function archiveMaterials(){
-  const maps=state.maps.map(m=>{
+  const maps=state.maps.filter(m=>m.githubAvailable!==false).map(m=>{
     const meta=bundledArchiveMeta[m.id]||{area:m.area||"Altro",organ:m.organ||m.title};
     return {id:m.id,title:m.title,area:meta.area,organ:meta.organ,filename:m.source||"PDF",kind:"map",map:m};
   });
@@ -2463,15 +2659,56 @@ function renderMaterialRows(materials){
     const local=(m.kind==="document" && m.storage==="indexeddb");
     const offlineControl=remote?`<button class="offline-toggle" data-offline-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Controllo…</button>`:(local?`<span class="device-badge">✓ Sul dispositivo</span>`:"");
     const filename=m.filename||m.source||"Documento";
-    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title file-title">${escapeHTML(m.title||titleFromFilename(filename))}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(filename))}</div></div><div class="offline-actions">${offlineControl}<button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri</button></div></div>`;
+    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title file-title">${escapeHTML(m.title||titleFromFilename(filename))}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(filename))}</div></div><div class="offline-actions">${offlineControl}<button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri</button><button class="delete-material" data-delete-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Elimina</button></div></div>`;
   }).join("")}</div>`;
 }
 function wireMaterialRows(body){
-  body.querySelectorAll('[data-open-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();btn.dataset.kind==="map"?openPdfForMap(btn.dataset.openMaterial):openGeneralFile(btn.dataset.openMaterial);});
+  body.querySelectorAll('[data-open-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openMaterial(btn.dataset.kind,btn.dataset.openMaterial);});
   body.querySelectorAll('[data-offline-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();toggleMaterialOffline(btn);});
+  body.querySelectorAll('[data-delete-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();deleteArchiveMaterial(btn.dataset.kind,btn.dataset.deleteMaterial);});
   body.querySelectorAll('.archive-material[data-kind="map"]').forEach(el=>el.onclick=e=>{if(e.target.closest('button'))return;openMap(el.dataset.id);});
   refreshOfflineButtons(body);
 }
+
+function materialRecord(kind,id){
+  if(kind==='map'){
+    const map=state.maps.find(m=>m.id===id);if(!map)return null;
+    return {kind,id,title:map.title,filename:map.source||map.pdfPath||'PDF',path:map.pdfPath||null,storage:map.pdfMode==='github'?'github':'indexeddb',map};
+  }
+  const doc=state.documents.find(d=>d.id===id);if(!doc)return null;
+  return {kind:'document',id,title:doc.title||titleFromFilename(doc.filename||doc.path||'Documento'),filename:doc.filename||doc.path||'Documento',path:doc.path||null,storage:doc.storage||'indexeddb',doc};
+}
+function isPdfFilename(name){return /\.pdf$/i.test(String(name||''));}
+async function openMaterial(kind,id){
+  const rec=materialRecord(kind,id);if(!rec){toast('Documento non trovato');return;}
+  if(isPdfFilename(rec.filename)||isPdfFilename(rec.path)) return openPdfAnnotator(kind,id);
+  return kind==='map'?openPdfForMapNative(id):openGeneralFileNative(id);
+}
+async function deleteAnnotationDataForPath(sourcePath){
+  const key=`ann:${fnv1aHash(sourcePath)}`;
+  await ghKvDelete(key).catch(()=>{});
+  if(navigator.onLine && await hasGithubConnection()) await githubDeleteFile(annotationRemotePath(sourcePath),null,{silent404:true}).catch(()=>{});
+}
+async function deleteArchiveMaterial(kind,id){
+  const rec=materialRecord(kind,id);if(!rec){toast('File non trovato');return;}
+  if(!confirm(`Eliminare “${rec.title}”?\n\nIl file verrà rimosso dal repository GitHub privato, dalla copia offline e dalle annotazioni.`))return;
+  try{
+    if(rec.storage==='github'&&rec.path){await githubDeleteFile(rec.path);await deleteAnnotationDataForPath(rec.path);}
+    if(kind==='map'){
+      await deletePdf(id).catch(()=>{});
+      if(rec.map)rec.map.githubAvailable=false;
+    }else{
+      await deleteGeneralFile(id).catch(()=>{});
+      state.documents=(state.documents||[]).filter(d=>d.id!==id);
+      if(rec.storage!=='github') await deleteAnnotationDataForPath(`local:${kind}:${id}`);
+    }
+    save();githubLibrarySynced=false;
+    if(navigator.onLine)await syncGithubLibrary({silent:true});
+    toast('File eliminato');
+    if(document.getElementById('studiesExplorer')&&!document.getElementById('studiesExplorer').hidden)renderStudies();else renderArchive();
+  }catch(e){console.error(e);toast(`Eliminazione non riuscita: ${e.message||'errore'}`);}
+}
+
 function renderNodeList(items,kind){
   return `<div class="archive-list">${items.map(item=>{
     const count=kind==="area"?materialCount({area:item}):materialCount({area:archiveNav.area,organ:item});
@@ -2501,8 +2738,9 @@ function renderArchive(){
 function renderStudies(){
   const box=document.getElementById("studiesList"); const docs=studyMaterials();
   if(!docs.length){box.innerHTML=`<div class="card archive-empty"><b>Nessuno studio inserito</b><div class="muted small">Qui resteranno separati tesi, revisioni, protocolli e progetti scientifici.</div></div>`;return;}
-  box.innerHTML=docs.map(d=>`<div class="card archive-material"><div class="map-main"><div class="map-title">${escapeHTML(d.title)}</div><div class="muted small">${escapeHTML(d.project||d.filename||"")}</div></div><div class="offline-actions">${d.storage==="indexeddb"?'<span class="device-badge">✓ Sul dispositivo</span>':''}<button class="open-pdf" data-open-study="${d.id}">Apri</button></div></div>`).join("");
-  box.querySelectorAll('[data-open-study]').forEach(b=>b.onclick=()=>openGeneralFile(b.dataset.openStudy));
+  box.innerHTML=docs.map(d=>`<div class="card archive-material"><div class="map-main"><div class="map-title file-title">${escapeHTML(d.title)}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(d.filename||d.path||""))}</div></div><div class="offline-actions">${d.storage==="indexeddb"?'<span class="device-badge">✓ Sul dispositivo</span>':''}<button class="open-pdf" data-open-study="${d.id}">Apri</button><button class="delete-material" data-delete-study="${d.id}">Elimina</button></div></div>`).join("");
+  box.querySelectorAll('[data-open-study]').forEach(b=>b.onclick=()=>openMaterial('document',b.dataset.openStudy));
+  box.querySelectorAll('[data-delete-study]').forEach(b=>b.onclick=()=>deleteArchiveMaterial('document',b.dataset.deleteStudy));
 }
 function openLibrary(){ showView("libraryView"); openArchiveRoot(); if(!githubLibrarySynced && navigator.onLine) syncGithubLibrary({silent:true}).then(ok=>{if(ok && document.getElementById("libraryView").classList.contains("active")) renderArchive();}); }
 
@@ -3062,6 +3300,12 @@ document.getElementById("libraryBackBtn").onclick=()=>{
 document.getElementById("libraryAddBtn").onclick=()=>{showView("addMapView");syncAddMaterialForm();};
 document.getElementById("addMapBackBtn").onclick=()=>showView("homeView");
 document.getElementById("saveMapBtn").onclick=saveNewMap;
+document.getElementById("pdfAnnotatorBackBtn")?.addEventListener("click",()=>closePdfAnnotator());
+document.querySelectorAll('[data-pdf-tool]').forEach(b=>b.addEventListener('click',()=>setPdfTool(b.dataset.pdfTool)));
+document.getElementById("pdfZoomOutBtn")?.addEventListener("click",()=>changePdfZoom(-.15));
+document.getElementById("pdfZoomInBtn")?.addEventListener("click",()=>changePdfZoom(.15));
+document.getElementById("pdfOpenNativeBtn")?.addEventListener("click",openCurrentPdfNative);
+
 document.getElementById("settingsBtn").onclick=()=>{showView("settingsView");updateConnectionUI();updateInstallUI();updateCaseOfflineStatus();updateGithubSettingsUI();};
 document.getElementById("settingsBackBtn").onclick=()=>showView("homeView");
 document.getElementById("exportBtn").onclick=exportData;

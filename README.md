@@ -1,7 +1,11 @@
-# Recall v1.9
+# Recall v1.11
 
-PWA personale per biblioteca, ripasso e refertazione radiologica.
+App personale per studio radiologico con archivio GitHub privato.
 
-Questa è la parte pubblicabile su GitHub Pages. Non contiene PDF personali né immagini dei casi: vengono letti dal repository GitHub privato tramite GitHub REST API, con token read-only salvato sul dispositivo.
-
-Vedi `GITHUB_ONLY_SETUP.md`.
+Novità v1.11:
+- eliminazione dei file direttamente da Recall e dal repository GitHub privato;
+- visualizzatore PDF integrato;
+- evidenziazioni, sottolineature e note non distruttive;
+- annotazioni salvate localmente e sincronizzate nel repository privato quando online;
+- annotazioni e PDF già scaricati disponibili offline;
+- fallback al visualizzatore nativo del browser se il renderer integrato non è disponibile.

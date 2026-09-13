@@ -200,3 +200,59 @@ select{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;f
 .archive-material{padding:11px 14px;border-radius:13px}
 .archive-material .file-title{font-size:14px!important;font-weight:800}
 .archive-material .file-meta{font-size:11px}
+
+/* Recall v1.11 — eliminazione file + annotazioni PDF */
+.archive-material .delete-material{border:1px solid #fecaca;background:#fff;color:#b42318;border-radius:12px;padding:9px 11px;font-weight:800;font-size:13px;cursor:pointer}
+.archive-material .delete-material:hover{background:#fff1f2}
+
+.pdf-annotator-view{max-width:1100px;margin:0 auto}
+.pdf-reader-top{grid-template-columns:44px minmax(0,1fr) auto}
+.pdf-reader-heading{min-width:0}
+.pdf-reader-heading h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pdf-save-state{font-size:12px;font-weight:800;color:#166534;background:#dcfce7;padding:7px 10px;border-radius:999px;white-space:nowrap}
+.pdf-save-state.syncing{color:#92400e;background:#fef3c7}
+.pdf-save-state.error{color:#991b1b;background:#fee2e2}
+.pdf-toolbar{position:sticky;top:6px;z-index:8;display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:10px 12px;margin-bottom:12px;border-radius:16px}
+.pdf-tool{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:10px;padding:8px 10px;font-weight:800;font-size:12px;cursor:pointer}
+.pdf-tool.active{background:#111827;color:#fff;border-color:#111827}
+.pdf-toolbar-spacer{flex:1}
+.pdf-zoom-label{font-size:12px;font-weight:800;color:var(--muted);min-width:42px;text-align:center}
+.pdf-reader-layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:12px;align-items:start}
+.pdf-pages-shell{min-width:0}
+.pdf-loading{text-align:center;color:var(--muted);padding:28px}
+.pdf-pages{display:flex;flex-direction:column;gap:14px;align-items:center}
+.pdf-page-wrap{position:relative;background:#fff;box-shadow:0 7px 28px rgba(17,24,39,.12);border-radius:4px;overflow:hidden;touch-action:pan-y}
+.pdf-page-wrap canvas{display:block;width:100%;height:auto}
+.pdf-annotation-layer{position:absolute;inset:0;z-index:3;pointer-events:none;touch-action:none}
+.pdf-annotation-layer.drawing{pointer-events:auto;cursor:crosshair}
+.pdf-annotation{position:absolute;box-sizing:border-box;pointer-events:none}
+.pdf-annotation.highlight{background:rgba(255,226,84,.42);border-radius:2px}
+.pdf-annotation.underline{border-bottom:3px solid rgba(220,65,53,.9)}
+.pdf-annotation.note{width:24px!important;height:24px!important;min-width:24px;min-height:24px;border-radius:50%;background:#ffd54f;border:2px solid #f59e0b;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#7c2d12;box-shadow:0 2px 7px rgba(0,0,0,.16)}
+.pdf-annotation-layer.erase .pdf-annotation{pointer-events:auto;cursor:pointer}
+.pdf-draft-annotation{position:absolute;z-index:5;border:1px dashed rgba(17,24,39,.5);background:rgba(255,226,84,.22);pointer-events:none}
+.pdf-notes-panel{position:sticky;top:72px;padding:14px;border-radius:16px;max-height:calc(100vh - 95px);overflow:auto}
+.pdf-notes-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.pdf-notes-list{display:flex;flex-direction:column}
+.pdf-note-row{padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.pdf-note-row:first-child{border-top:0}
+.pdf-note-row-title{font-size:12px;font-weight:850}
+.pdf-note-row-text{font-size:12px;line-height:1.4;color:var(--muted);margin-top:4px;white-space:pre-wrap}
+.pdf-note-row-actions{display:flex;gap:6px;margin-top:7px}
+.pdf-note-delete{border:0;background:#fff1f2;color:#b42318;border-radius:8px;padding:5px 8px;font-size:11px;font-weight:800;cursor:pointer}
+.pdf-note-empty{font-size:12px;color:var(--muted);padding:8px 0}
+@media(max-width:820px){
+  .pdf-reader-layout{grid-template-columns:1fr}
+  .pdf-notes-panel{position:static;max-height:none;order:-1}
+  .pdf-toolbar{top:0}
+}
+@media(max-width:620px){
+  .pdf-reader-top{grid-template-columns:40px minmax(0,1fr)}
+  .pdf-save-state{grid-column:2;justify-self:start;margin-top:-4px}
+  .pdf-toolbar{gap:5px;padding:8px}
+  .pdf-tool{padding:8px;font-size:11px}
+  .pdf-toolbar-spacer{display:none}
+  .pdf-zoom-label{min-width:36px}
+  .pdf-pages{gap:10px}
+}
+.pdf-native-frame{width:100%;min-height:78vh;border:0;border-radius:10px;background:#fff}

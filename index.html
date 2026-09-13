@@ -170,6 +170,49 @@
       </div>
     </section>
 
+
+
+    <section id="pdfAnnotatorView" class="view pdf-annotator-view">
+      <div class="review-top pdf-reader-top">
+        <button class="ghost" id="pdfAnnotatorBackBtn">←</button>
+        <div class="pdf-reader-heading">
+          <div class="eyebrow">DOCUMENTO PDF</div>
+          <h2 id="pdfAnnotatorTitle">PDF</h2>
+        </div>
+        <div class="pdf-save-state" id="pdfAnnotationStatus">Salvato</div>
+      </div>
+
+      <div class="pdf-toolbar card">
+        <button class="pdf-tool active" data-pdf-tool="none">↕ Leggi</button>
+        <button class="pdf-tool" data-pdf-tool="highlight">▰ Evidenzia</button>
+        <button class="pdf-tool" data-pdf-tool="underline">U̲ Sottolinea</button>
+        <button class="pdf-tool" data-pdf-tool="note">✎ Nota</button>
+        <button class="pdf-tool" data-pdf-tool="erase">⌫ Gomma</button>
+        <span class="pdf-toolbar-spacer"></span>
+        <button class="pdf-tool" id="pdfZoomOutBtn">−</button>
+        <span class="pdf-zoom-label" id="pdfZoomLabel">100%</span>
+        <button class="pdf-tool" id="pdfZoomInBtn">+</button>
+        <button class="pdf-tool" id="pdfOpenNativeBtn">↗ Browser</button>
+      </div>
+
+      <div class="pdf-reader-layout">
+        <div class="pdf-pages-shell">
+          <div id="pdfLoading" class="card pdf-loading">Caricamento PDF…</div>
+          <div id="pdfPages" class="pdf-pages"></div>
+        </div>
+        <aside class="card pdf-notes-panel" id="pdfNotesPanel">
+          <div class="pdf-notes-head">
+            <div>
+              <div class="map-title">Annotazioni</div>
+              <div class="muted small">Evidenziazioni, sottolineature e note.</div>
+            </div>
+            <span class="badge" id="pdfAnnotationCount">0</span>
+          </div>
+          <div id="pdfNotesList" class="pdf-notes-list"></div>
+        </aside>
+      </div>
+    </section>
+
     <section id="reportView" class="view">
       <div class="review-top">
         <button class="ghost" id="reportBackBtn">←</button>
@@ -359,7 +402,7 @@
         <button class="danger" id="resetBtn">Ripristina demo</button>
       </div>
 
-      <div class="muted small version-label">Recall v1.10 · GitHub-only · upload diretto · PWA offline-ready</div>
+      <div class="muted small version-label">Recall v1.11 · GitHub-only · annotazioni PDF · elimina file · PWA offline-ready</div>
     </section>
   </main>
 
