@@ -1,1 +1,1 @@
-Recall v1.10 — Archivio semplice + upload diretto GitHub
+Recall v1.10.1 — rimossi definitivamente i riquadri Archivio/Studi; liste compatte

@@ -2248,9 +2248,9 @@ async function openGeneralFile(id){
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.10";
-const OFFLINE_DOC_CACHE="recall-docs-v110";
-const OFFLINE_CASE_CACHE="recall-cases-v110";
+const RECALL_VERSION="1.10.1";
+const OFFLINE_DOC_CACHE="recall-docs-v1101";
+const OFFLINE_CASE_CACHE="recall-cases-v1101";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -2417,7 +2417,7 @@ function libraryRoot(){ openArchiveRoot(); }
 function openArchiveRoot(){
   archiveNav={area:null,organ:null};
   document.getElementById("libraryTitle").textContent="Archivio";
-  document.getElementById("libraryLanding").hidden=true;
+  document.getElementById("libraryLanding")?.setAttribute("hidden","");
   document.getElementById("studiesExplorer").hidden=true;
   document.getElementById("archiveExplorer").hidden=false;
   setLibraryMode("archivio");
@@ -2426,7 +2426,7 @@ function openArchiveRoot(){
 }
 function openStudies(){
   document.getElementById("libraryTitle").textContent="Studi";
-  document.getElementById("libraryLanding").hidden=true;
+  document.getElementById("libraryLanding")?.setAttribute("hidden","");
   document.getElementById("archiveExplorer").hidden=true;
   document.getElementById("studiesExplorer").hidden=false;
   setLibraryMode("studi");
@@ -3084,8 +3084,6 @@ document.getElementById("generateImageCaseBtn").onclick=()=>generateImageTrainin
 document.getElementById("imageGenModality").onchange=populateImageGeneratorTopics;
 document.getElementById("imageGenRegion").onchange=populateImageGeneratorTopics;
 
-document.getElementById("openArchiveBtn")?.addEventListener("click",openArchiveRoot);
-document.getElementById("openStudiesBtn")?.addEventListener("click",openStudies);
 document.getElementById("libraryModeArchive")?.addEventListener("click",openArchiveRoot);
 document.getElementById("libraryModeStudies")?.addEventListener("click",openStudies);
 document.getElementById("studiesBackRoot")?.addEventListener("click",openArchiveRoot);
