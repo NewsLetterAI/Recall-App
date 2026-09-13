@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="theme-color" content="#111827"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="Recall"/>
+  <title>Recall — Ripasso intelligente</title>
+  <link rel="manifest" href="manifest.webmanifest"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" href="icon.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">RECALL</div>
+      <h1>Ripasso intelligente</h1>
+    </div>
+    <div class="top-actions">
+      <span class="connection-pill" id="connectionPill">● Online</span>
+      <button class="ghost" id="settingsBtn">⚙︎</button>
+    </div>
+  </header>
+
+  <main id="app">
+    <section id="homeView" class="view active">
+      <div class="hero card">
+        <div>
+          <div class="muted" id="todayLabel"></div>
+          <h2 id="dueTitle">Ripasso di oggi</h2>
+          <p id="dueSubtitle">Il sistema sceglie cosa farti recuperare dalla memoria.</p>
+        </div>
+        <button class="primary big" id="startReviewBtn">Inizia ripasso</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat card"><span id="dueCount">0</span><small>da ripassare</small></div>
+        <div class="stat card"><span id="weakCount">0</span><small>punti deboli</small></div>
+        <div class="stat card"><span id="mapsCount">0</span><small>mappe attive</small></div>
+      </div>
+
+      <section class="section-head">
+        <h3>Archivio recente</h3>
+        <button class="secondary" id="addMapBtn">+ Materiale</button>
+      </section>
+      <div id="mapsList" class="stack"></div>
+
+      <section class="section-head">
+        <h3>Punti deboli</h3>
+      </section>
+      <div id="weakList" class="stack"></div>
+
+      <section class="section-head">
+        <h3>Allenamento refertazione</h3>
+        <button class="secondary" id="openReportBtn">Apri</button>
+      </section>
+      <div class="card">
+        <div class="map-row">
+          <div class="meta">
+            <div class="map-title">Casi didattici</div>
+            <div class="muted small">Livello 1 = casi descrittivi · Livello 2 = immagini sintetiche + referto</div>
+          </div>
+          <span class="badge mid" id="reportCountBadge">0 casi</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="reviewView" class="view">
+      <div class="review-top">
+        <button class="ghost" id="backHomeBtn">←</button>
+        <div>
+          <div class="eyebrow" id="reviewModeLabel">FREE RECALL</div>
+          <h2 id="reviewTopic"></h2>
+        </div>
+        <div class="progress" id="progressText"></div>
+      </div>
+
+      <div class="card review-card">
+        <p class="prompt" id="reviewPrompt"></p>
+        <div id="reviewBody"></div>
+      </div>
+    </section>
+
+    <section id="mapView" class="view">
+      <div class="review-top">
+        <button class="ghost" id="mapBackBtn">←</button>
+        <div>
+          <div class="eyebrow">MAPPA</div>
+          <h2 id="mapTitle"></h2>
+        </div>
+      </div>
+      <div id="mapDetails" class="stack"></div>
+    </section>
+
+
+    <section id="libraryView" class="view">
+      <div class="review-top">
+        <button class="ghost" id="libraryBackBtn">←</button>
+        <div>
+          <div class="eyebrow">BIBLIOTECA</div>
+          <h2 id="libraryTitle">Biblioteca personale</h2>
+        </div>
+        <button class="secondary" id="libraryAddBtn">+ Materiale</button>
+      </div>
+
+      <div id="libraryLanding" class="library-home-grid">
+        <button class="library-home-card card" id="openArchiveBtn">
+          <span class="library-icon">▦</span>
+          <span class="library-home-title">Archivio</span>
+          <span class="muted small">Tutti i tuoi appunti e materiali di studio, ordinati solo per argomento.</span>
+        </button>
+        <button class="library-home-card card" id="openStudiesBtn">
+          <span class="library-icon">⌁</span>
+          <span class="library-home-title">Studi</span>
+          <span class="muted small">Tesi, revisioni, protocolli e progetti scientifici in uno spazio separato.</span>
+        </button>
+      </div>
+
+      <div id="archiveExplorer" hidden>
+        <div class="archive-breadcrumb" id="archiveBreadcrumb"></div>
+        <div class="card library-tools">
+          <input id="librarySearch" type="text" placeholder="Cerca argomento o materiale..."/>
+        </div>
+        <div id="archiveBody"></div>
+      </div>
+
+      <div id="studiesExplorer" hidden>
+        <div class="archive-breadcrumb"><button class="crumb" id="studiesBackRoot">Biblioteca</button><span>›</span><span>Studi</span></div>
+        <div id="studiesList" class="stack"></div>
+      </div>
+    </section>
+
+    <section id="addMapView" class="view">
+      <div class="review-top">
+        <button class="ghost" id="addMapBackBtn">←</button>
+        <div>
+          <div class="eyebrow">NUOVO MATERIALE</div>
+          <h2>Aggiungi alla Biblioteca</h2>
+        </div>
+      </div>
+
+      <div class="card">
+        <label class="label">Dove vuoi inserirlo?</label>
+        <select id="newMapCollection">
+          <option value="archivio">Archivio</option>
+          <option value="studi">Studi</option>
+        </select>
+
+        <label class="label">Titolo</label>
+        <input id="newMapTitle" type="text" placeholder="Es. Pancreatite cronica"/>
+
+        <div id="archiveMetadataFields">
+          <div class="form-grid">
+            <div>
+              <label class="label">Distretto</label>
+              <select id="newMapArea">
+                <option>Addome</option><option>Torace</option><option>Pelvi</option><option>Muscoloscheletrico</option>
+                <option>Neuroradiologia</option><option>Testa-collo</option><option>Cardiovascolare</option><option>Interventistica</option><option>Altro</option>
+              </select>
+            </div>
+            <div>
+              <label class="label">Organo / sede</label>
+              <input id="newMapOrgan" type="text" placeholder="Es. Pancreas" list="organSuggestions"/>
+              <datalist id="organSuggestions"></datalist>
+            </div>
+          </div>
+          <label class="label">Categoria / argomento</label>
+          <input id="newMapCategory" type="text" placeholder="Es. Pancreatiti" list="categorySuggestions"/>
+          <datalist id="categorySuggestions"></datalist>
+        </div>
+
+        <div id="studyMetadataFields" hidden>
+          <label class="label">Progetto / studio (opzionale)</label>
+          <input id="newStudyProject" type="text" placeholder="Es. Revisione sistematica UAE"/>
+        </div>
+
+        <label class="label">Tag (opzionali)</label>
+        <input id="newMapTags" type="text" placeholder="Es. RM, TC, emergenza"/>
+        <label class="label">File</label>
+        <input id="newMapFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.rtf,.jpg,.jpeg,.png,.webp"/>
+        <p class="muted small">Il formato del file non determina dove viene salvato: nell'Archivio conta solo l'argomento. PDF, Word, mappe e appunti possono stare insieme nella stessa categoria.</p>
+        <button class="primary" id="saveMapBtn">Salva materiale</button>
+      </div>
+    </section>
+
+    <section id="reportView" class="view">
+      <div class="review-top">
+        <button class="ghost" id="reportBackBtn">←</button>
+        <div>
+          <div class="eyebrow">REFERTAZIONE</div>
+          <h2>Allenamento referti</h2>
+        </div>
+        <button class="secondary" id="reportRandomTopBtn">Random</button>
+      </div>
+
+      <div id="reportHub"></div>
+    </section>
+
+    <section id="reportBrowseView" class="view">
+      <div class="review-top">
+        <button class="ghost" id="reportBrowseBackBtn">←</button>
+        <div>
+          <div class="eyebrow" id="reportBrowseEyebrow">REFERTAZIONE</div>
+          <h2 id="reportBrowseTitle">Scegli il caso</h2>
+        </div>
+        <button class="secondary" id="reportBrowseRandomBtn">Random</button>
+      </div>
+      <div id="reportBrowseControls" class="card report-browser-controls"></div>
+      <div id="reportCaseList" class="stack"></div>
+    </section>
+
+
+    <section id="imageReportGeneratorView" class="view">
+      <div class="review-top">
+        <button class="ghost" id="imageGeneratorBackBtn">←</button>
+        <div>
+          <div class="eyebrow">REFERTA CON IMMAGINI</div>
+          <h2>Genera caso</h2>
+        </div>
+        <button class="secondary" id="imageRandomBtn">Random</button>
+      </div>
+
+      <div class="card stack">
+        <div class="form-grid">
+          <div>
+            <label class="label">Metodica</label>
+            <select id="imageGenModality">
+              <option value="">Qualsiasi</option>
+              <option value="TC">TC</option>
+              <option value="RM">RM</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Distretto</label>
+            <select id="imageGenRegion">
+              <option value="">Qualsiasi</option>
+              <option>Encefalo</option>
+              <option>Testa-collo</option>
+              <option>Torace</option>
+              <option>Addome</option>
+              <option>Pelvi</option>
+              <option>Muscoloscheletrico</option>
+              <option>Cardiovascolare</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="label">Argomento</label>
+        <select id="imageGenTopic">
+          <option value="">Qualsiasi argomento disponibile</option>
+        </select>
+
+        <label class="label">Difficoltà</label>
+        <select id="imageGenDifficulty">
+          <option value="base">Base</option>
+          <option value="intermedio">Intermedio</option>
+          <option value="difficile">Difficile</option>
+        </select>
+
+        <div class="card generator-note">
+          <div class="map-title">Come funziona</div>
+          <div class="muted small">L'interfaccia è pronta per generare casi con immagini. In questa versione usa il banco di immagini sintetiche già incluso; il passo successivo sarà collegare il backend AI per creare nuove immagini on-demand direttamente dall'app.</div>
+        </div>
+
+        <button class="primary big" id="generateImageCaseBtn">Genera caso con immagini</button>
+      </div>
+    </section>
+
+    <section id="reportCaseView" class="view">
+      <div class="review-top">
+        <button class="ghost" id="reportCaseBackBtn">←</button>
+        <div>
+          <div class="eyebrow" id="reportLevelLabel">CASO</div>
+          <h2 id="reportCaseTitle"></h2>
+        </div>
+        <div class="progress" id="reportCaseTag"></div>
+      </div>
+
+      <div class="card stack">
+        <div id="reportMeta"></div>
+        <div id="reportImages" class="report-images"></div>
+        <div class="prompt" id="reportPromptText"></div>
+        <div class="muted small" id="reportTaskText"></div>
+        <textarea id="reportAnswer" placeholder="Scrivi qui il tuo referto..."></textarea>
+        <div class="actions">
+          <button class="primary" id="submitReportBtn">Correggi referto</button>
+        </div>
+        <div id="reportFeedback"></div>
+      </div>
+    </section>
+
+    <section id="settingsView" class="view">
+      <div class="review-top">
+        <button class="ghost" id="settingsBackBtn">←</button>
+        <div>
+          <div class="eyebrow">IMPOSTAZIONI</div>
+          <h2>Recall sul dispositivo</h2>
+        </div>
+      </div>
+
+
+      <div class="card stack github-private-card">
+        <div class="settings-row">
+          <div>
+            <div class="map-title">Archivio privato GitHub</div>
+            <div class="muted small">Collegamento diretto al repository privato. Il token resta solo su questo dispositivo.</div>
+          </div>
+          <span class="badge mid" id="ghConnectionStatus">Non collegato</span>
+        </div>
+        <div class="grid2 compact-grid">
+          <label>Account / owner<input id="ghOwner" value="NewsLetterAI" autocomplete="off"></label>
+          <label>Repository<input id="ghRepo" value="expert-potato9643019" autocomplete="off"></label>
+        </div>
+        <label>Branch<input id="ghBranch" value="main" autocomplete="off"></label>
+        <label>Token GitHub (sola lettura)<input id="ghToken" type="password" placeholder="github_pat_…" autocomplete="off"></label>
+        <div class="muted small">Serve una sola volta per dispositivo. Concedi solo <b>Contents: Read</b> e solo al repository Recall privato.</div>
+        <div class="actions wrap-actions">
+          <button class="secondary" id="createGithubTokenBtn">Crea token read-only</button>
+          <button class="primary" id="saveGithubBtn">Collega GitHub</button>
+          <button class="secondary" id="syncGithubBtn">Sincronizza Archivio</button>
+          <button class="ghost" id="forgetGithubBtn">Scollega dispositivo</button>
+        </div>
+      </div>
+
+      <div class="card stack offline-card">
+        <div class="settings-row">
+          <div>
+            <div class="map-title">Stato connessione</div>
+            <div class="muted small" id="offlineStatusText">Controllo in corso…</div>
+          </div>
+          <span class="badge good" id="offlineStatusBadge">Online</span>
+        </div>
+        <div class="offline-note">Quando sei offline, Recall continua ad aprirsi e mantiene disponibili ripasso, casi testuali e tutto ciò che hai già scaricato su questo dispositivo.</div>
+      </div>
+
+      <div class="card stack">
+        <div>
+          <div class="map-title">Installa Recall</div>
+          <div class="muted small">Aprilo come una vera app dalla schermata Home, senza passare ogni volta dal browser.</div>
+        </div>
+        <button class="primary" id="installAppBtn">Installa Recall</button>
+        <div class="muted small" id="installHelpText"></div>
+      </div>
+
+      <div class="card stack">
+        <div>
+          <div class="map-title">Casi con immagini offline</div>
+          <div class="muted small">Scarica sul dispositivo tutte le immagini didattiche. I casi testuali sono già inclusi nell'app.</div>
+        </div>
+        <div class="settings-row">
+          <span class="muted small" id="caseOfflineStatus">Controllo cache…</span>
+          <span class="badge mid" id="caseOfflineBadge">—</span>
+        </div>
+        <button class="secondary" id="downloadCasesOfflineBtn">Scarica immagini dei casi</button>
+        <button class="ghost compact-btn" id="clearCasesOfflineBtn">Rimuovi immagini offline</button>
+      </div>
+
+      <div class="card stack">
+        <div>
+          <div class="map-title">Documenti dell'Archivio</div>
+          <div class="muted small">L'Archivio viene letto dal repository GitHub privato. Aprendo o scaricando un documento, questo resta disponibile anche offline su questo dispositivo.</div>
+        </div>
+        <button class="secondary" id="openArchiveSettingsBtn">Vai all'Archivio</button>
+      </div>
+
+      <div class="card stack">
+        <div class="map-title">Dati e backup</div>
+        <button class="secondary" id="exportBtn">Esporta dati JSON</button>
+        <label class="secondary file-label">Importa dati JSON
+          <input id="importInput" type="file" accept="application/json" hidden/>
+        </label>
+        <button class="danger" id="resetBtn">Ripristina demo</button>
+      </div>
+
+      <div class="muted small version-label">Recall v1.9 · GitHub-only · PWA offline-ready</div>
+    </section>
+  </main>
+
+  <nav class="bottomnav">
+    <button data-view="homeView" class="navitem active">⌂<span>Home</span></button>
+    <button id="navReview" class="navitem">◎<span>Ripasso</span></button>
+    <button id="navLibrary" class="navitem">▦<span>Archivio</span></button>
+    <button id="navReports" class="navitem">✎<span>Referti</span></button>
+    <button id="navAdd" class="navitem">＋<span>Materiale</span></button>
+  </nav>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
