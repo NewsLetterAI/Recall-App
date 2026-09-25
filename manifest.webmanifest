@@ -1,7 +1,7 @@
 {
   "name": "Recall — Biblioteca e ripasso radiologico",
   "short_name": "Recall",
-  "start_url": "./",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f3f4f6",
   "theme_color": "#111827",

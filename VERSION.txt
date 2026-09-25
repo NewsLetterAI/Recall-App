@@ -1,1 +1,1 @@
-Recall v1.11 — eliminazione file + lettore PDF con evidenziazioni, sottolineature e note sincronizzate
+Recall v1.12 — apertura originale iCloud Drive tramite Comandi Rapidi; elimina file GitHub; PWA offline-ready

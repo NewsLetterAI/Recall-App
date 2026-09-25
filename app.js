@@ -2278,11 +2278,8 @@ async function openGeneralFileNative(id){
 
 
 
-async function openPdfForMap(mapId){return openPdfAnnotator('map',mapId);}
-async function openGeneralFile(id){
-  const rec=materialRecord('document',id);if(rec&&(isPdfFilename(rec.filename)||isPdfFilename(rec.path)))return openPdfAnnotator('document',id);
-  return openGeneralFileNative(id);
-}
+async function openPdfForMap(mapId){return openPdfForMapNative(mapId);}
+async function openGeneralFile(id){return openGeneralFileNative(id);}
 
 // Recall v1.11 — PDF reader with non-destructive annotations.
 const PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs';
@@ -2444,9 +2441,9 @@ async function changePdfZoom(delta){if(!pdfReaderDoc)return;pdfReaderZoom=Math.m
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.11";
-const OFFLINE_DOC_CACHE="recall-docs-v111";
-const OFFLINE_CASE_CACHE="recall-cases-v111";
+const RECALL_VERSION="1.12";
+const OFFLINE_DOC_CACHE="recall-docs-v112";
+const OFFLINE_CASE_CACHE="recall-cases-v112";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -2536,8 +2533,20 @@ async function triggerInstall(){
 async function registerRecallServiceWorker(){
   if(!('serviceWorker' in navigator)) return;
   try{
-    const reg=await navigator.serviceWorker.register('sw.js');
+    const reg=await navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'});
+    const ready=await navigator.serviceWorker.ready;
+    const worker=ready.active||ready.waiting||ready.installing;
+    worker?.postMessage?.({type:'CACHE_APP_SHELL'});
     if(navigator.onLine) reg.update().catch(()=>{});
+    // Su iOS assicura che l'app installata abbia almeno una volta il controllo del SW.
+    if(!navigator.serviceWorker.controller){
+      await new Promise(resolve=>{
+        let done=false;
+        const finish=()=>{if(done)return;done=true;resolve();};
+        navigator.serviceWorker.addEventListener('controllerchange',finish,{once:true});
+        setTimeout(finish,1800);
+      });
+    }
   }catch(e){console.warn('Service worker non registrato',e);}
 }
 function initOfflineFeatures(){
@@ -2659,11 +2668,12 @@ function renderMaterialRows(materials){
     const local=(m.kind==="document" && m.storage==="indexeddb");
     const offlineControl=remote?`<button class="offline-toggle" data-offline-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Controllo…</button>`:(local?`<span class="device-badge">✓ Sul dispositivo</span>`:"");
     const filename=m.filename||m.source||"Documento";
-    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title file-title">${escapeHTML(m.title||titleFromFilename(filename))}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(filename))}</div></div><div class="offline-actions">${offlineControl}<button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri</button><button class="delete-material" data-delete-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Elimina</button></div></div>`;
+    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title file-title">${escapeHTML(m.title||titleFromFilename(filename))}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(filename))}</div></div><div class="offline-actions">${offlineControl}<button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri in iCloud</button><button class="secondary-open" data-open-backup="${escapeHTML(m.id)}" data-kind="${m.kind}">Copia GitHub</button><button class="delete-material" data-delete-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Elimina</button></div></div>`;
   }).join("")}</div>`;
 }
 function wireMaterialRows(body){
   body.querySelectorAll('[data-open-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openMaterial(btn.dataset.kind,btn.dataset.openMaterial);});
+  body.querySelectorAll('[data-open-backup]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openMaterialBackup(btn.dataset.kind,btn.dataset.openBackup);});
   body.querySelectorAll('[data-offline-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();toggleMaterialOffline(btn);});
   body.querySelectorAll('[data-delete-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();deleteArchiveMaterial(btn.dataset.kind,btn.dataset.deleteMaterial);});
   body.querySelectorAll('.archive-material[data-kind="map"]').forEach(el=>el.onclick=e=>{if(e.target.closest('button'))return;openMap(el.dataset.id);});
@@ -2673,17 +2683,56 @@ function wireMaterialRows(body){
 function materialRecord(kind,id){
   if(kind==='map'){
     const map=state.maps.find(m=>m.id===id);if(!map)return null;
-    return {kind,id,title:map.title,filename:map.source||map.pdfPath||'PDF',path:map.pdfPath||null,storage:map.pdfMode==='github'?'github':'indexeddb',map};
+    const meta=bundledArchiveMeta[map.id]||{area:map.area||'Altro',organ:map.organ||map.title||'Altro'};
+    return {kind,id,title:map.title,filename:map.source||String(map.pdfPath||'').split('/').pop()||'PDF',path:map.pdfPath||null,storage:map.pdfMode==='github'?'github':'indexeddb',area:meta.area,organ:meta.organ,collection:'archivio',map};
   }
   const doc=state.documents.find(d=>d.id===id);if(!doc)return null;
-  return {kind:'document',id,title:doc.title||titleFromFilename(doc.filename||doc.path||'Documento'),filename:doc.filename||doc.path||'Documento',path:doc.path||null,storage:doc.storage||'indexeddb',doc};
+  return {kind:'document',id,title:doc.title||titleFromFilename(doc.filename||doc.path||'Documento'),filename:doc.filename||String(doc.path||'').split('/').pop()||'Documento',path:doc.path||null,storage:doc.storage||'indexeddb',area:doc.area||null,organ:doc.organ||null,collection:doc.collection||'archivio',project:doc.project||null,doc};
 }
 function isPdfFilename(name){return /\.pdf$/i.test(String(name||''));}
-async function openMaterial(kind,id){
+
+const ICLOUD_CFG_KEY='recall_icloud_cfg_v1';
+function getIcloudConfig(){
+  try{return {...{shortcut:'Recall Apri iCloud',root:'Recall'},...JSON.parse(localStorage.getItem(ICLOUD_CFG_KEY)||'{}')};}
+  catch(_){return {shortcut:'Recall Apri iCloud',root:'Recall'};}
+}
+function saveIcloudConfig(){
+  const cfg={
+    shortcut:(document.getElementById('icloudShortcutName')?.value||'Recall Apri iCloud').trim()||'Recall Apri iCloud',
+    root:(document.getElementById('icloudRootFolder')?.value||'Recall').trim().replace(/^\/+|\/+$/g,'')||'Recall'
+  };
+  localStorage.setItem(ICLOUD_CFG_KEY,JSON.stringify(cfg));
+  updateIcloudSettingsUI();toast('Impostazioni iCloud salvate');
+}
+function updateIcloudSettingsUI(){
+  const cfg=getIcloudConfig();
+  const n=document.getElementById('icloudShortcutName'),r=document.getElementById('icloudRootFolder');
+  if(n)n.value=cfg.shortcut;if(r)r.value=cfg.root;
+}
+function iCloudRelativePathForRecord(rec){
+  const cfg=getIcloudConfig();
+  const clean=v=>String(v||'').replace(/[\\/:*?"<>|]/g,'-').trim();
+  const filename=clean(rec.filename||String(rec.path||'').split('/').pop()||'Documento');
+  if(rec.collection==='studi'){
+    const project=String(rec.project||'').split('›').map(x=>clean(x)).filter(Boolean);
+    return [cfg.root,'Studi',...project,filename].filter(Boolean).join('/');
+  }
+  return [cfg.root,'Archivio',clean(rec.area||'Altro'),clean(rec.organ||'Altro'),filename].join('/');
+}
+function runIcloudShortcut(path){
+  const cfg=getIcloudConfig();
+  const url=`shortcuts://run-shortcut?name=${encodeURIComponent(cfg.shortcut)}&input=text&text=${encodeURIComponent(path)}`;
+  window.location.href=url;
+}
+function openMaterialInIcloud(kind,id){
   const rec=materialRecord(kind,id);if(!rec){toast('Documento non trovato');return;}
-  if(isPdfFilename(rec.filename)||isPdfFilename(rec.path)) return openPdfAnnotator(kind,id);
+  runIcloudShortcut(iCloudRelativePathForRecord(rec));
+}
+async function openMaterialBackup(kind,id){
+  const rec=materialRecord(kind,id);if(!rec){toast('Documento non trovato');return;}
   return kind==='map'?openPdfForMapNative(id):openGeneralFileNative(id);
 }
+async function openMaterial(kind,id){return openMaterialInIcloud(kind,id);}
 async function deleteAnnotationDataForPath(sourcePath){
   const key=`ann:${fnv1aHash(sourcePath)}`;
   await ghKvDelete(key).catch(()=>{});
@@ -2691,7 +2740,7 @@ async function deleteAnnotationDataForPath(sourcePath){
 }
 async function deleteArchiveMaterial(kind,id){
   const rec=materialRecord(kind,id);if(!rec){toast('File non trovato');return;}
-  if(!confirm(`Eliminare “${rec.title}”?\n\nIl file verrà rimosso dal repository GitHub privato, dalla copia offline e dalle annotazioni.`))return;
+  if(!confirm(`Eliminare “${rec.title}”?\n\nIl file verrà rimosso da Recall, dal repository GitHub privato e dalla copia offline. Il file originale in iCloud Drive NON verrà eliminato.`))return;
   try{
     if(rec.storage==='github'&&rec.path){await githubDeleteFile(rec.path);await deleteAnnotationDataForPath(rec.path);}
     if(kind==='map'){
@@ -2738,8 +2787,9 @@ function renderArchive(){
 function renderStudies(){
   const box=document.getElementById("studiesList"); const docs=studyMaterials();
   if(!docs.length){box.innerHTML=`<div class="card archive-empty"><b>Nessuno studio inserito</b><div class="muted small">Qui resteranno separati tesi, revisioni, protocolli e progetti scientifici.</div></div>`;return;}
-  box.innerHTML=docs.map(d=>`<div class="card archive-material"><div class="map-main"><div class="map-title file-title">${escapeHTML(d.title)}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(d.filename||d.path||""))}</div></div><div class="offline-actions">${d.storage==="indexeddb"?'<span class="device-badge">✓ Sul dispositivo</span>':''}<button class="open-pdf" data-open-study="${d.id}">Apri</button><button class="delete-material" data-delete-study="${d.id}">Elimina</button></div></div>`).join("");
+  box.innerHTML=docs.map(d=>`<div class="card archive-material"><div class="map-main"><div class="map-title file-title">${escapeHTML(d.title)}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(d.filename||d.path||""))}</div></div><div class="offline-actions">${d.storage==="indexeddb"?'<span class="device-badge">✓ Sul dispositivo</span>':''}<button class="open-pdf" data-open-study="${d.id}">Apri in iCloud</button><button class="secondary-open" data-open-study-backup="${d.id}">Copia GitHub</button><button class="delete-material" data-delete-study="${d.id}">Elimina</button></div></div>`).join("");
   box.querySelectorAll('[data-open-study]').forEach(b=>b.onclick=()=>openMaterial('document',b.dataset.openStudy));
+  box.querySelectorAll('[data-open-study-backup]').forEach(b=>b.onclick=()=>openMaterialBackup('document',b.dataset.openStudyBackup));
   box.querySelectorAll('[data-delete-study]').forEach(b=>b.onclick=()=>deleteArchiveMaterial('document',b.dataset.deleteStudy));
 }
 function openLibrary(){ showView("libraryView"); openArchiveRoot(); if(!githubLibrarySynced && navigator.onLine) syncGithubLibrary({silent:true}).then(ok=>{if(ok && document.getElementById("libraryView").classList.contains("active")) renderArchive();}); }
@@ -3306,7 +3356,7 @@ document.getElementById("pdfZoomOutBtn")?.addEventListener("click",()=>changePdf
 document.getElementById("pdfZoomInBtn")?.addEventListener("click",()=>changePdfZoom(.15));
 document.getElementById("pdfOpenNativeBtn")?.addEventListener("click",openCurrentPdfNative);
 
-document.getElementById("settingsBtn").onclick=()=>{showView("settingsView");updateConnectionUI();updateInstallUI();updateCaseOfflineStatus();updateGithubSettingsUI();};
+document.getElementById("settingsBtn").onclick=()=>{showView("settingsView");updateConnectionUI();updateInstallUI();updateCaseOfflineStatus();updateGithubSettingsUI();updateIcloudSettingsUI();};
 document.getElementById("settingsBackBtn").onclick=()=>showView("homeView");
 document.getElementById("exportBtn").onclick=exportData;
 document.getElementById("importInput").onchange=e=>e.target.files[0]&&importData(e.target.files[0]);
@@ -3338,6 +3388,8 @@ document.getElementById("saveGithubBtn")?.addEventListener("click",saveGithubSet
 document.getElementById("syncGithubBtn")?.addEventListener("click",()=>syncGithubLibrary());
 document.getElementById("forgetGithubBtn")?.addEventListener("click",forgetGithub);
 document.getElementById("createGithubTokenBtn")?.addEventListener("click",()=>window.open(githubTokenUrl(),"_blank"));
+document.getElementById("saveIcloudBtn")?.addEventListener("click",saveIcloudConfig);
+document.getElementById("testIcloudBtn")?.addEventListener("click",()=>runIcloudShortcut(`${getIcloudConfig().root}/Archivio/Test/README.pdf`));
 updateGithubSettingsUI();
 if(navigator.onLine) syncGithubLibrary({silent:true}).then(()=>renderHome()).catch(()=>{});
 

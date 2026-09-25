@@ -165,53 +165,12 @@
 
         <label class="label">File</label>
         <input id="newMapFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.rtf,.jpg,.jpeg,.png,.webp"/>
-        <p class="muted small">Il file verrà caricato direttamente nel repository GitHub privato. Nell'Archivio comparirà con il suo nome, dentro il distretto e l'organo scelti.</p>
+        <p class="muted small">Recall carica una copia nel repository GitHub privato. Per aprire e annotare sempre lo stesso originale con iPhone, iPad e Mac, conserva anche il file nella cartella corrispondente di <b>iCloud Drive/Recall</b> con lo stesso nome.</p>
         <button class="primary" id="saveMapBtn">Carica su GitHub</button>
       </div>
     </section>
 
 
-
-    <section id="pdfAnnotatorView" class="view pdf-annotator-view">
-      <div class="review-top pdf-reader-top">
-        <button class="ghost" id="pdfAnnotatorBackBtn">←</button>
-        <div class="pdf-reader-heading">
-          <div class="eyebrow">DOCUMENTO PDF</div>
-          <h2 id="pdfAnnotatorTitle">PDF</h2>
-        </div>
-        <div class="pdf-save-state" id="pdfAnnotationStatus">Salvato</div>
-      </div>
-
-      <div class="pdf-toolbar card">
-        <button class="pdf-tool active" data-pdf-tool="none">↕ Leggi</button>
-        <button class="pdf-tool" data-pdf-tool="highlight">▰ Evidenzia</button>
-        <button class="pdf-tool" data-pdf-tool="underline">U̲ Sottolinea</button>
-        <button class="pdf-tool" data-pdf-tool="note">✎ Nota</button>
-        <button class="pdf-tool" data-pdf-tool="erase">⌫ Gomma</button>
-        <span class="pdf-toolbar-spacer"></span>
-        <button class="pdf-tool" id="pdfZoomOutBtn">−</button>
-        <span class="pdf-zoom-label" id="pdfZoomLabel">100%</span>
-        <button class="pdf-tool" id="pdfZoomInBtn">+</button>
-        <button class="pdf-tool" id="pdfOpenNativeBtn">↗ Browser</button>
-      </div>
-
-      <div class="pdf-reader-layout">
-        <div class="pdf-pages-shell">
-          <div id="pdfLoading" class="card pdf-loading">Caricamento PDF…</div>
-          <div id="pdfPages" class="pdf-pages"></div>
-        </div>
-        <aside class="card pdf-notes-panel" id="pdfNotesPanel">
-          <div class="pdf-notes-head">
-            <div>
-              <div class="map-title">Annotazioni</div>
-              <div class="muted small">Evidenziazioni, sottolineature e note.</div>
-            </div>
-            <span class="badge" id="pdfAnnotationCount">0</span>
-          </div>
-          <div id="pdfNotesList" class="pdf-notes-list"></div>
-        </aside>
-      </div>
-    </section>
 
     <section id="reportView" class="view">
       <div class="review-top">
@@ -352,6 +311,25 @@
         </div>
       </div>
 
+      <div class="card stack icloud-card">
+        <div class="settings-row">
+          <div>
+            <div class="map-title">Apertura documenti con iCloud Drive</div>
+            <div class="muted small">Il pulsante “Apri in iCloud” avvia un Comando Rapido Apple e apre il file originale salvato in iCloud Drive, così annotazioni e disegni restano sincronizzati tra iPhone, iPad e Mac.</div>
+          </div>
+          <span class="badge good">Apple</span>
+        </div>
+        <div class="grid2 compact-grid">
+          <label>Nome Comando Rapido<input id="icloudShortcutName" value="Recall Apri iCloud" autocomplete="off"></label>
+          <label>Cartella principale iCloud<input id="icloudRootFolder" value="Recall" autocomplete="off"></label>
+        </div>
+        <div class="muted small">Struttura consigliata: <b>iCloud Drive/Recall/Archivio/Addome/Fegato/nomefile.pdf</b>. Recall ricava automaticamente il percorso da distretto, organo e nome del file.</div>
+        <div class="actions wrap-actions">
+          <button class="primary" id="saveIcloudBtn">Salva impostazioni iCloud</button>
+          <button class="secondary" id="testIcloudBtn">Testa Comando Rapido</button>
+        </div>
+      </div>
+
       <div class="card stack offline-card">
         <div class="settings-row">
           <div>
@@ -388,7 +366,7 @@
       <div class="card stack">
         <div>
           <div class="map-title">Documenti dell'Archivio</div>
-          <div class="muted small">L'Archivio viene letto dal repository GitHub privato. Aprendo o scaricando un documento, questo resta disponibile anche offline su questo dispositivo.</div>
+          <div class="muted small">L'Archivio viene indicizzato dal repository GitHub privato. Il pulsante principale apre l'originale in iCloud Drive tramite Comandi Rapidi; la copia GitHub può comunque essere scaricata offline come backup.</div>
         </div>
         <button class="secondary" id="openArchiveSettingsBtn">Vai all'Archivio</button>
       </div>
@@ -402,7 +380,7 @@
         <button class="danger" id="resetBtn">Ripristina demo</button>
       </div>
 
-      <div class="muted small version-label">Recall v1.11 · GitHub-only · annotazioni PDF · elimina file · PWA offline-ready</div>
+      <div class="muted small version-label">Recall v1.12 · GitHub + iCloud Drive · elimina file · PWA offline-ready</div>
     </section>
   </main>
 

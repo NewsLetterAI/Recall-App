@@ -256,3 +256,62 @@ select{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;f
   .pdf-pages{gap:10px}
 }
 .pdf-native-frame{width:100%;min-height:78vh;border:0;border-radius:10px;background:#fff}
+
+
+/* Recall v1.11.1 — fix iPhone: la barra inferiore non copre più i contenuti */
+@media (max-width: 620px){
+  html, body{
+    height:100%;
+  }
+  body{
+    height:100dvh;
+    min-height:100svh;
+    overflow:hidden;
+    padding-bottom:0;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{
+    flex:0 0 auto;
+    width:100%;
+    padding:14px 16px 8px;
+  }
+  main{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:8px 14px 18px;
+    overscroll-behavior-y:contain;
+  }
+  .bottomnav{
+    position:static;
+    left:auto;
+    bottom:auto;
+    transform:none;
+    flex:0 0 auto;
+    width:100%;
+    max-width:none;
+    margin:0;
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);
+    background:rgba(255,255,255,.97);
+    backdrop-filter:blur(16px);
+  }
+  .navitem{
+    padding:5px 2px;
+    gap:2px;
+    font-size:18px;
+  }
+  .navitem span{
+    font-size:10px;
+  }
+}
+
+/* Recall v1.12 — apertura iCloud Drive */
+.secondary-open{border:1px solid var(--line);background:#eef2f7;color:#111827;border-radius:12px;padding:9px 11px;font-weight:800;font-size:13px;cursor:pointer}
+.secondary-open:hover{background:#e5e7eb}
+.icloud-card{border-color:#dbeafe}
+@media(max-width:620px){
+  .archive-material .open-pdf,.archive-material .secondary-open,.archive-material .delete-material,.archive-material .offline-toggle{font-size:12px;padding:8px 10px}
+}
