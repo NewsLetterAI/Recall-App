@@ -315,3 +315,23 @@ select{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;f
 @media(max-width:620px){
   .archive-material .open-pdf,.archive-material .secondary-open,.archive-material .delete-material,.archive-material .offline-toggle{font-size:12px;padding:8px 10px}
 }
+
+/* Recall v1.13 — associazione file Recall ↔ originale iCloud */
+.icloud-link-edit{border:1px solid var(--line);background:#fff;color:#4b5563;border-radius:12px;padding:8px 10px;font-weight:900;font-size:15px;line-height:1;cursor:pointer}
+.icloud-link-edit:hover{background:#f3f4f6}
+.icloud-link-backdrop{position:fixed;inset:0;z-index:80;background:rgba(17,24,39,.32);display:flex;align-items:center;justify-content:center;padding:18px}
+.icloud-link-backdrop[hidden]{display:none!important}
+.icloud-link-dialog{width:min(560px,100%);background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 26px 80px rgba(17,24,39,.22)}
+.icloud-link-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.icloud-link-head h3{margin:0;font-size:20px}
+.icloud-link-dialog input{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px 13px;font:inherit;background:#fff}
+.icloud-link-suggestion{margin-top:10px;padding:10px 11px;border:1px dashed #d1d5db;background:#f9fafb;border-radius:12px}
+.icloud-suggestion-btn{display:block;width:100%;margin-top:5px;border:0;background:transparent;text-align:left;padding:0;color:#374151;font-size:12px;font-weight:750;word-break:break-word;cursor:pointer}
+.icloud-suggestion-btn:hover{text-decoration:underline}
+@media(max-width:620px){
+  .icloud-link-backdrop{align-items:flex-end;padding:10px}
+  .icloud-link-dialog{border-radius:20px 20px 14px 14px;padding:16px;max-height:82dvh;overflow:auto}
+  .icloud-link-dialog .actions{display:grid;grid-template-columns:1fr 1fr}
+  .icloud-link-dialog .actions .primary:last-child{grid-column:1/-1}
+  .archive-material .icloud-link-edit{padding:8px 10px}
+}

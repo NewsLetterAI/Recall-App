@@ -163,9 +163,12 @@
           <input id="newStudyProject" type="text" placeholder="Es. Revisione sistematica UAE"/>
         </div>
 
-        <label class="label">File</label>
+        <label class="label">File da caricare su Recall</label>
         <input id="newMapFile" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.rtf,.jpg,.jpeg,.png,.webp"/>
-        <p class="muted small">Recall carica una copia nel repository GitHub privato. Per aprire e annotare sempre lo stesso originale con iPhone, iPad e Mac, conserva anche il file nella cartella corrispondente di <b>iCloud Drive/Recall</b> con lo stesso nome.</p>
+
+        <label class="label">File iCloud corrispondente <span class="muted small">(opzionale)</span></label>
+        <input id="newMapIcloudPath" type="text" placeholder="Es. Recall/Archivio/Addome/Fegato/Metastasi epatiche.pdf" autocomplete="off"/>
+        <p class="muted small">Il nome del file su iCloud può essere diverso da quello visualizzato in Recall. Se lasci vuoto questo campo, potrai associarlo la prima volta che premi “Apri in iCloud”. Se scrivi solo il nome del file, Recall userà automaticamente la cartella suggerita per quel distretto/organo.</p>
         <button class="primary" id="saveMapBtn">Carica su GitHub</button>
       </div>
     </section>
@@ -323,7 +326,7 @@
           <label>Nome Comando Rapido<input id="icloudShortcutName" value="Recall Apri iCloud" autocomplete="off"></label>
           <label>Cartella principale iCloud<input id="icloudRootFolder" value="Recall" autocomplete="off"></label>
         </div>
-        <div class="muted small">Struttura consigliata: <b>iCloud Drive/Recall/Archivio/Addome/Fegato/nomefile.pdf</b>. Recall ricava automaticamente il percorso da distretto, organo e nome del file.</div>
+        <div class="muted small">Il percorso iCloud non deve più coincidere con il nome del file in Recall. Ogni documento può essere associato una volta al suo file originale, per esempio <b>Recall/Archivio/Addome/Fegato/Metastasi epatiche.pdf</b>. L’associazione viene salvata nel repository GitHub privato e sincronizzata tra i tuoi dispositivi.</div>
         <div class="actions wrap-actions">
           <button class="primary" id="saveIcloudBtn">Salva impostazioni iCloud</button>
           <button class="secondary" id="testIcloudBtn">Testa Comando Rapido</button>
@@ -380,7 +383,7 @@
         <button class="danger" id="resetBtn">Ripristina demo</button>
       </div>
 
-      <div class="muted small version-label">Recall v1.12 · GitHub + iCloud Drive · elimina file · PWA offline-ready</div>
+      <div class="muted small version-label">Recall v1.13 · GitHub + collegamenti iCloud sincronizzati · PWA offline-ready</div>
     </section>
   </main>
 
@@ -391,6 +394,31 @@
     <button id="navReports" class="navitem">✎<span>Referti</span></button>
     <button id="navAdd" class="navitem">＋<span>Materiale</span></button>
   </nav>
+
+  <div id="icloudLinkModal" class="icloud-link-backdrop" hidden>
+    <div class="icloud-link-dialog" role="dialog" aria-modal="true" aria-labelledby="icloudLinkDialogTitle">
+      <div class="icloud-link-head">
+        <div>
+          <div class="eyebrow">ICLOUD DRIVE</div>
+          <h3 id="icloudLinkDialogTitle">Associa il file iCloud</h3>
+        </div>
+        <button class="ghost compact-btn" id="icloudLinkCloseBtn" aria-label="Chiudi">×</button>
+      </div>
+      <div class="muted small" id="icloudLinkRecallLabel"></div>
+      <label class="label">Percorso del file in iCloud Drive</label>
+      <input id="icloudLinkPathInput" type="text" placeholder="Recall/Archivio/Addome/Fegato/Metastasi epatiche.pdf" autocomplete="off"/>
+      <div class="icloud-link-suggestion">
+        <span class="muted small">Suggerito:</span>
+        <button class="icloud-suggestion-btn" id="icloudUseSuggestedBtn" type="button"></button>
+      </div>
+      <p class="muted small">Puoi inserire un percorso qualsiasi relativo a <b>iCloud Drive</b>. Se scrivi solo il nome del file, Recall userà la cartella suggerita. Il file originale iCloud non viene copiato né modificato da Recall.</p>
+      <div class="actions wrap-actions">
+        <button class="secondary" id="icloudLinkCancelBtn" type="button">Annulla</button>
+        <button class="primary" id="icloudLinkSaveBtn" type="button">Salva</button>
+        <button class="primary" id="icloudLinkSaveOpenBtn" type="button">Salva e apri</button>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast"></div>
 

@@ -1,1 +1,1 @@
-Recall v1.12 — apertura originale iCloud Drive tramite Comandi Rapidi; elimina file GitHub; PWA offline-ready
+Recall v1.13 — collegamenti iCloud per file con nomi/percorso diversi, sincronizzati via GitHub privato

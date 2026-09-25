@@ -2143,6 +2143,61 @@ async function githubReadText(repoPath){
 function fnv1aHash(str){let h=0x811c9dc5;for(let i=0;i<String(str).length;i++){h^=String(str).charCodeAt(i);h=Math.imul(h,0x01000193);}return (h>>>0).toString(16).padStart(8,'0');}
 function annotationRemotePath(sourcePath){return `library/.recall/annotations/${fnv1aHash(sourcePath)}.json`;}
 
+const ICLOUD_LINKS_REMOTE_PATH='library/.recall/icloud-links.json';
+const ICLOUD_LINKS_LOCAL_KEY='icloud_links_v2';
+let iCloudLinksCache=null;
+function iCloudRecordKey(rec){
+  if(rec?.path) return `path:${rec.path}`;
+  return `id:${rec?.collection||'archivio'}:${rec?.kind||'document'}:${rec?.id||'unknown'}`;
+}
+function emptyIcloudLinks(){return {version:1,updatedAt:0,links:{}};}
+function normalizeIcloudLinks(data){
+  if(!data||typeof data!=='object')return emptyIcloudLinks();
+  return {version:1,updatedAt:Number(data.updatedAt||0),links:(data.links&&typeof data.links==='object')?data.links:{}};
+}
+function mergeIcloudLinks(a,b){
+  const A=normalizeIcloudLinks(a),B=normalizeIcloudLinks(b),out=emptyIcloudLinks();
+  const keys=new Set([...Object.keys(A.links),...Object.keys(B.links)]);
+  keys.forEach(k=>{
+    const x=A.links[k],y=B.links[k];
+    if(!x)out.links[k]=y;else if(!y)out.links[k]=x;else out.links[k]=Number(y.updatedAt||0)>=Number(x.updatedAt||0)?y:x;
+  });
+  out.updatedAt=Math.max(A.updatedAt||0,B.updatedAt||0);return out;
+}
+async function loadIcloudLinks({refreshRemote=false}={}){
+  if(iCloudLinksCache&&!refreshRemote)return iCloudLinksCache;
+  let local=normalizeIcloudLinks(await ghKvGet(ICLOUD_LINKS_LOCAL_KEY).catch(()=>null));
+  if(navigator.onLine && await hasGithubConnection()){
+    try{
+      const txt=await githubReadText(ICLOUD_LINKS_REMOTE_PATH);
+      const remote=txt?normalizeIcloudLinks(JSON.parse(txt)):emptyIcloudLinks();
+      const merged=mergeIcloudLinks(local,remote);
+      local=merged;
+      if(JSON.stringify(merged.links)!==JSON.stringify(remote.links)){
+        await githubWriteText(ICLOUD_LINKS_REMOTE_PATH,JSON.stringify(merged,null,2),'Recall: sincronizza collegamenti iCloud').catch(()=>{});
+      }
+    }catch(e){console.warn('Collegamenti iCloud remoti non disponibili',e);}
+  }
+  iCloudLinksCache=local;await ghKvPut(ICLOUD_LINKS_LOCAL_KEY,local).catch(()=>{});return local;
+}
+async function persistIcloudLinks(data){
+  const normalized=normalizeIcloudLinks(data);normalized.updatedAt=Date.now();iCloudLinksCache=normalized;
+  await ghKvPut(ICLOUD_LINKS_LOCAL_KEY,normalized).catch(()=>{});
+  if(navigator.onLine && await hasGithubConnection()){
+    await githubWriteText(ICLOUD_LINKS_REMOTE_PATH,JSON.stringify(normalized,null,2),'Recall: aggiorna collegamenti iCloud');
+  }
+  return normalized;
+}
+function icloudLinkForRecordSync(rec){return iCloudLinksCache?.links?.[iCloudRecordKey(rec)]||null;}
+async function getIcloudLinkForRecord(rec){const db=await loadIcloudLinks();return db.links[iCloudRecordKey(rec)]||null;}
+async function saveIcloudLinkForRecord(rec,path){
+  const db=await loadIcloudLinks();const key=iCloudRecordKey(rec);const clean=normalizeIcloudUserPath(path,rec);
+  db.links[key]={path:clean,title:rec.title||'',updatedAt:Date.now()};await persistIcloudLinks(db);return clean;
+}
+async function removeIcloudLinkForRecord(rec){
+  const db=await loadIcloudLinks();const key=iCloudRecordKey(rec);if(db.links[key]){delete db.links[key];await persistIcloudLinks(db);}return true;
+}
+
 async function githubTest(){
   const cfg=getGithubConfig(), token=await getGithubToken(); if(!token) throw new Error('Inserisci il token');
   const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},cache:'no-store'});
@@ -2179,7 +2234,7 @@ async function syncGithubLibrary({silent=false}={}){
       const p=f.path.split('/'), sub=p.slice(2,-1);
       state.documents.push({id:`gh_${f.sha}`,title:titleFromFilename(f.name),filename:f.name,collection:'studi',project:sub.length?sub.map(humanSlug).join(' › '):'Studi',storage:'github',path:f.path,githubSha:f.sha});
     }
-    save(); githubLibrarySynced=true; if(!silent) toast(`Archivio sincronizzato: ${archiveFiles.length+studyFiles.length} file`); return true;
+    save(); githubLibrarySynced=true; await loadIcloudLinks({refreshRemote:true}).catch(()=>{}); if(!silent) toast(`Archivio sincronizzato: ${archiveFiles.length+studyFiles.length} file`); return true;
   }catch(e){console.error(e);if(!silent)toast(`GitHub: ${e.message}`);return false;}
 }
 function openBlobTab(blob,path=''){const safe=normalizeBlobMime(blob,path);const url=URL.createObjectURL(safe);const w=window.open(url,'_blank');if(!w)toast('Consenti l’apertura delle finestre');setTimeout(()=>URL.revokeObjectURL(url),120000);}
@@ -2441,9 +2496,9 @@ async function changePdfZoom(delta){if(!pdfReaderDoc)return;pdfReaderZoom=Math.m
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.12";
-const OFFLINE_DOC_CACHE="recall-docs-v112";
-const OFFLINE_CASE_CACHE="recall-cases-v112";
+const RECALL_VERSION="1.13";
+const OFFLINE_DOC_CACHE="recall-docs-v113";
+const OFFLINE_CASE_CACHE="recall-cases-v113";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -2668,12 +2723,13 @@ function renderMaterialRows(materials){
     const local=(m.kind==="document" && m.storage==="indexeddb");
     const offlineControl=remote?`<button class="offline-toggle" data-offline-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Controllo…</button>`:(local?`<span class="device-badge">✓ Sul dispositivo</span>`:"");
     const filename=m.filename||m.source||"Documento";
-    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title file-title">${escapeHTML(m.title||titleFromFilename(filename))}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(filename))}</div></div><div class="offline-actions">${offlineControl}<button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri in iCloud</button><button class="secondary-open" data-open-backup="${escapeHTML(m.id)}" data-kind="${m.kind}">Copia GitHub</button><button class="delete-material" data-delete-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Elimina</button></div></div>`;
+    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title file-title">${escapeHTML(m.title||titleFromFilename(filename))}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(filename))}</div></div><div class="offline-actions">${offlineControl}<button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri in iCloud</button><button class="icloud-link-edit" data-edit-icloud="${escapeHTML(m.id)}" data-kind="${m.kind}" title="Cambia collegamento iCloud">⋯</button><button class="secondary-open" data-open-backup="${escapeHTML(m.id)}" data-kind="${m.kind}">Copia GitHub</button><button class="delete-material" data-delete-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Elimina</button></div></div>`;
   }).join("")}</div>`;
 }
 function wireMaterialRows(body){
   body.querySelectorAll('[data-open-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openMaterial(btn.dataset.kind,btn.dataset.openMaterial);});
   body.querySelectorAll('[data-open-backup]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openMaterialBackup(btn.dataset.kind,btn.dataset.openBackup);});
+  body.querySelectorAll('[data-edit-icloud]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();editMaterialIcloudLink(btn.dataset.kind,btn.dataset.editIcloud);});
   body.querySelectorAll('[data-offline-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();toggleMaterialOffline(btn);});
   body.querySelectorAll('[data-delete-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();deleteArchiveMaterial(btn.dataset.kind,btn.dataset.deleteMaterial);});
   body.querySelectorAll('.archive-material[data-kind="map"]').forEach(el=>el.onclick=e=>{if(e.target.closest('button'))return;openMap(el.dataset.id);});
@@ -2709,9 +2765,9 @@ function updateIcloudSettingsUI(){
   const n=document.getElementById('icloudShortcutName'),r=document.getElementById('icloudRootFolder');
   if(n)n.value=cfg.shortcut;if(r)r.value=cfg.root;
 }
-function iCloudRelativePathForRecord(rec){
+function suggestedIcloudPathForRecord(rec){
   const cfg=getIcloudConfig();
-  const clean=v=>String(v||'').replace(/[\\/:*?"<>|]/g,'-').trim();
+  const clean=v=>String(v||'').replace(/[\\:*?"<>|]/g,'-').trim();
   const filename=clean(rec.filename||String(rec.path||'').split('/').pop()||'Documento');
   if(rec.collection==='studi'){
     const project=String(rec.project||'').split('›').map(x=>clean(x)).filter(Boolean);
@@ -2719,14 +2775,51 @@ function iCloudRelativePathForRecord(rec){
   }
   return [cfg.root,'Archivio',clean(rec.area||'Altro'),clean(rec.organ||'Altro'),filename].join('/');
 }
+function normalizeIcloudUserPath(raw,rec){
+  let path=String(raw||'').trim().replace(/^icloud\s*drive[\\/]/i,'').replace(/^\/+/, '').replace(/\\/g,'/').replace(/\/{2,}/g,'/');
+  if(!path) throw new Error('Inserisci il percorso del file iCloud');
+  if(!path.includes('/')){
+    const suggested=suggestedIcloudPathForRecord(rec);const parent=suggested.split('/').slice(0,-1).join('/');path=`${parent}/${path}`;
+  }
+  return path;
+}
 function runIcloudShortcut(path){
   const cfg=getIcloudConfig();
   const url=`shortcuts://run-shortcut?name=${encodeURIComponent(cfg.shortcut)}&input=text&text=${encodeURIComponent(path)}`;
   window.location.href=url;
 }
-function openMaterialInIcloud(kind,id){
+let icloudDialogState=null;
+function closeIcloudLinkDialog(result=null){
+  const modal=document.getElementById('icloudLinkModal');if(modal)modal.hidden=true;
+  const resolver=icloudDialogState?.resolve;icloudDialogState=null;if(resolver)resolver(result);
+}
+async function showIcloudLinkDialog(rec,{openAfter=false}={}){
+  const existing=await getIcloudLinkForRecord(rec).catch(()=>null);const suggested=suggestedIcloudPathForRecord(rec);
+  const modal=document.getElementById('icloudLinkModal'),input=document.getElementById('icloudLinkPathInput'),label=document.getElementById('icloudLinkRecallLabel'),suggestBtn=document.getElementById('icloudUseSuggestedBtn');
+  if(!modal||!input)return null;
+  label.textContent=`In Recall: ${rec.title||rec.filename||'Documento'}`;input.value=existing?.path||'';suggestBtn.textContent=suggested;modal.hidden=false;setTimeout(()=>input.focus(),50);
+  return await new Promise(resolve=>{
+    icloudDialogState={rec,openAfter,resolve};
+    document.getElementById('icloudLinkCloseBtn').onclick=()=>closeIcloudLinkDialog(null);
+    document.getElementById('icloudLinkCancelBtn').onclick=()=>closeIcloudLinkDialog(null);
+    suggestBtn.onclick=()=>{input.value=suggested;input.focus();};
+    document.getElementById('icloudLinkSaveBtn').onclick=async()=>{
+      try{const path=await saveIcloudLinkForRecord(rec,input.value);toast('Collegamento iCloud salvato');closeIcloudLinkDialog({path,open:false});}catch(e){toast(e.message||'Percorso non valido');}
+    };
+    document.getElementById('icloudLinkSaveOpenBtn').onclick=async()=>{
+      try{const path=await saveIcloudLinkForRecord(rec,input.value);toast('Collegamento iCloud salvato');closeIcloudLinkDialog({path,open:true});}catch(e){toast(e.message||'Percorso non valido');}
+    };
+  });
+}
+async function openMaterialInIcloud(kind,id){
   const rec=materialRecord(kind,id);if(!rec){toast('Documento non trovato');return;}
-  runIcloudShortcut(iCloudRelativePathForRecord(rec));
+  let link=await getIcloudLinkForRecord(rec).catch(()=>null);
+  if(!link?.path){const result=await showIcloudLinkDialog(rec,{openAfter:true});if(!result?.path)return;link={path:result.path};}
+  runIcloudShortcut(link.path);
+}
+async function editMaterialIcloudLink(kind,id){
+  const rec=materialRecord(kind,id);if(!rec){toast('Documento non trovato');return;}
+  await showIcloudLinkDialog(rec,{openAfter:false});
 }
 async function openMaterialBackup(kind,id){
   const rec=materialRecord(kind,id);if(!rec){toast('Documento non trovato');return;}
@@ -2742,6 +2835,7 @@ async function deleteArchiveMaterial(kind,id){
   const rec=materialRecord(kind,id);if(!rec){toast('File non trovato');return;}
   if(!confirm(`Eliminare “${rec.title}”?\n\nIl file verrà rimosso da Recall, dal repository GitHub privato e dalla copia offline. Il file originale in iCloud Drive NON verrà eliminato.`))return;
   try{
+    await removeIcloudLinkForRecord(rec).catch(()=>{});
     if(rec.storage==='github'&&rec.path){await githubDeleteFile(rec.path);await deleteAnnotationDataForPath(rec.path);}
     if(kind==='map'){
       await deletePdf(id).catch(()=>{});
@@ -2787,8 +2881,9 @@ function renderArchive(){
 function renderStudies(){
   const box=document.getElementById("studiesList"); const docs=studyMaterials();
   if(!docs.length){box.innerHTML=`<div class="card archive-empty"><b>Nessuno studio inserito</b><div class="muted small">Qui resteranno separati tesi, revisioni, protocolli e progetti scientifici.</div></div>`;return;}
-  box.innerHTML=docs.map(d=>`<div class="card archive-material"><div class="map-main"><div class="map-title file-title">${escapeHTML(d.title)}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(d.filename||d.path||""))}</div></div><div class="offline-actions">${d.storage==="indexeddb"?'<span class="device-badge">✓ Sul dispositivo</span>':''}<button class="open-pdf" data-open-study="${d.id}">Apri in iCloud</button><button class="secondary-open" data-open-study-backup="${d.id}">Copia GitHub</button><button class="delete-material" data-delete-study="${d.id}">Elimina</button></div></div>`).join("");
+  box.innerHTML=docs.map(d=>`<div class="card archive-material"><div class="map-main"><div class="map-title file-title">${escapeHTML(d.title)}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(d.filename||d.path||""))}</div></div><div class="offline-actions">${d.storage==="indexeddb"?'<span class="device-badge">✓ Sul dispositivo</span>':''}<button class="open-pdf" data-open-study="${d.id}">Apri in iCloud</button><button class="icloud-link-edit" data-edit-study-icloud="${d.id}" title="Cambia collegamento iCloud">⋯</button><button class="secondary-open" data-open-study-backup="${d.id}">Copia GitHub</button><button class="delete-material" data-delete-study="${d.id}">Elimina</button></div></div>`).join("");
   box.querySelectorAll('[data-open-study]').forEach(b=>b.onclick=()=>openMaterial('document',b.dataset.openStudy));
+  box.querySelectorAll('[data-edit-study-icloud]').forEach(b=>b.onclick=()=>editMaterialIcloudLink('document',b.dataset.editStudyIcloud));
   box.querySelectorAll('[data-open-study-backup]').forEach(b=>b.onclick=()=>openMaterialBackup('document',b.dataset.openStudyBackup));
   box.querySelectorAll('[data-delete-study]').forEach(b=>b.onclick=()=>deleteArchiveMaterial('document',b.dataset.deleteStudy));
 }
@@ -3291,21 +3386,27 @@ async function saveNewMap(){
   if(!f){toast("Seleziona un file");return;}
   if(!(await hasGithubConnection())){toast("Collega prima GitHub dalle Impostazioni");return;}
   if(!navigator.onLine){toast("Serve internet per caricare il file su GitHub");return;}
-  let repoPath="";
+  let repoPath="", area=null, organ=null, project=null;
   if(collection==="archivio"){
-    const area=document.getElementById("newMapArea").value;
-    const organ=document.getElementById("newMapOrgan").value.trim();
+    area=document.getElementById("newMapArea").value;
+    organ=document.getElementById("newMapOrgan").value.trim();
     if(!organ){toast("Inserisci l'organo / sede");return;}
     repoPath=`library/archivio/${ghSlug(area)}/${ghSlug(organ)}/${safeGithubFilename(f.name)}`;
   }else{
-    const project=document.getElementById("newStudyProject").value.trim();
+    project=document.getElementById("newStudyProject").value.trim();
     repoPath=project?`library/studi/${ghSlug(project)}/${safeGithubFilename(f.name)}`:`library/studi/${safeGithubFilename(f.name)}`;
   }
   const btn=document.getElementById("saveMapBtn"), oldText=btn.textContent;
   try{
     btn.disabled=true;btn.textContent="Caricamento…";
     await githubUploadFile(repoPath,f);
+    const cloudInput=(document.getElementById('newMapIcloudPath')?.value||'').trim();
+    if(cloudInput){
+      const rec={kind:'document',id:`path_${fnv1aHash(repoPath)}`,title:titleFromFilename(f.name),filename:f.name,path:repoPath,storage:'github',collection,area,organ,project};
+      await saveIcloudLinkForRecord(rec,cloudInput);
+    }
     document.getElementById("newMapFile").value="";
+    const cloudField=document.getElementById('newMapIcloudPath');if(cloudField)cloudField.value='';
     const organ=document.getElementById("newMapOrgan");if(organ)organ.value="";
     const project=document.getElementById("newStudyProject");if(project)project.value="";
     githubLibrarySynced=false;

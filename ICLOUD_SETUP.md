@@ -1,55 +1,53 @@
-# Recall — configurazione iCloud Drive
+# Recall v1.13 — iCloud Drive
 
 ## Obiettivo
-Recall apre il file originale salvato in iCloud Drive tramite il Comando Rapido Apple `Recall Apri iCloud`.
-Le modifiche fatte con Anteprima/File/Markup su iPhone, iPad o Mac restano nello stesso file iCloud e si sincronizzano tramite Apple.
+Recall può mostrare un nome qualsiasi per un documento e collegarlo a un PDF iCloud con un nome o un percorso completamente diverso.
 
-## 1. Struttura iCloud consigliata
-Crea in iCloud Drive una cartella `Recall` e usa questa struttura:
+Esempio:
+- In Recall: `Lesioni cistiche`
+- In iCloud: `Recall/Archivio/Addome/Pancreas/Pancreas Neoplasie Cistiche Sierose Mucinose.pdf`
 
-- `Recall/Archivio/Addome/Fegato/`
-- `Recall/Archivio/Addome/Vie biliari/`
-- `Recall/Archivio/Addome/Pancreas/`
-- `Recall/Archivio/Addome/Reni/`
-- `Recall/Archivio/Addome/Surreni/`
-- `Recall/Archivio/Torace/Polmone/`
-- `Recall/Archivio/Torace/Mediastino/`
-- `Recall/Studi/`
+Il collegamento viene salvato in `library/.recall/icloud-links.json` nel repository GitHub privato, quindi viene condiviso tra i dispositivi che usano lo stesso archivio Recall.
 
-Il nome del file deve essere identico a quello mostrato in Recall.
-
-## 2. Crea il Comando Rapido una sola volta
-Su iPhone/iPad/Mac apri **Comandi Rapidi** e crea un comando chiamato esattamente:
+## Comando Rapido Apple
+Il comando deve chiamarsi esattamente:
 
 `Recall Apri iCloud`
 
-Azioni:
-1. Usa **Input comando rapido** come percorso testuale ricevuto da Recall.
-2. Aggiungi l'azione per ottenere/aprire un file da **iCloud Drive** usando quel percorso (nelle versioni Apple il nome può apparire come `Ottieni file` o `Ottieni file dalla cartella`). Se presente, disattiva il selettore manuale del documento.
-3. Aggiungi **Apri file**.
+Deve contenere due azioni:
 
-Salva il comando rapido. Se usi lo stesso Apple Account e la sincronizzazione iCloud di Comandi Rapidi è attiva, il comando si sincronizza tra i tuoi dispositivi Apple.
+1. **Ottieni file da iCloud Drive al percorso [Input comando rapido]**
+   - origine: iCloud Drive
+   - percorso: variabile `Input comando rapido`
+   - `Errore, se il parametro non viene trovato`: ATTIVO
 
-Recall gli passerà percorsi come:
-`Recall/Archivio/Addome/Fegato/FEGATO.pdf`
+2. **Apri [File] in [App di default]**
+   - `Mostra menu "Apri in"`: DISATTIVO
 
-## 3. Impostazioni Recall
-In Recall vai in:
-**Impostazioni → Apertura documenti con iCloud Drive**
+Recall passa al comando rapido il percorso già associato al documento.
 
-Lascia:
-- Nome Comando Rapido: `Recall Apri iCloud`
-- Cartella principale iCloud: `Recall`
+## Prima associazione
+Quando premi `Apri in iCloud` su un file non ancora associato, Recall apre una finestra.
 
-Poi premi **Salva impostazioni iCloud**.
+Inserisci il percorso relativo alla radice di iCloud Drive, ad esempio:
 
-## 4. Uso quotidiano
-- Metti il PDF originale nella cartella corretta di iCloud Drive.
-- Carica una copia in Recall con `+ Materiale` scegliendo lo stesso distretto/organo.
-- Nell'Archivio premi **Apri in iCloud**.
-- Annota il PDF con gli strumenti Apple. Le modifiche restano sul file iCloud originale.
+`Recall/Archivio/Addome/Fegato/Metastasi epatiche.pdf`
 
-Il pulsante **Copia GitHub** apre invece la copia di backup presente nel repository privato.
+Puoi anche scrivere solo il nome del file, ad esempio:
 
-## 5. Offline
-Recall continua ad aprirsi offline come PWA. Per usare anche un PDF iCloud senza rete, assicurati che quel file sia già scaricato localmente nell'app File/Finder (su iPhone/iPad puoi usare l'opzione per mantenerlo scaricato).
+`Metastasi epatiche.pdf`
+
+In questo caso Recall usa automaticamente la cartella suggerita in base a distretto e organo.
+
+Premi `Salva e apri`.
+
+## Modificare un collegamento
+Nell'Archivio, accanto ad `Apri in iCloud`, premi `⋯` per cambiare il file iCloud associato.
+
+## Nuovi documenti
+Durante `+ Materiale` puoi compilare subito il campo `File iCloud corrispondente`. È facoltativo: se lo lasci vuoto, farai l'associazione al primo utilizzo.
+
+## Importante
+- Il PDF originale iCloud non viene cancellato quando elimini la copia da Recall/GitHub.
+- Recall non modifica il PDF iCloud: lo apre tramite Comandi Rapidi e le annotazioni vengono gestite dalle app Apple.
+- Per l'uso senza rete, il PDF deve essere già disponibile localmente in iCloud Drive sul dispositivo.
