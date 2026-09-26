@@ -2152,7 +2152,15 @@ function annotationRemotePath(sourcePath){return `library/.recall/annotations/${
 
 const ICLOUD_LINKS_REMOTE_PATH='library/.recall/icloud-links.json';
 const ICLOUD_LINKS_LOCAL_KEY='icloud_links_v2';
+const ICLOUD_LINKS_FAST_KEY='recall_icloud_links_fast_v1';
 let iCloudLinksCache=null;
+function readFastIcloudLinks(){
+  try{return normalizeIcloudLinks(JSON.parse(localStorage.getItem(ICLOUD_LINKS_FAST_KEY)||'null'));}
+  catch(_){return emptyIcloudLinks();}
+}
+function writeFastIcloudLinks(data){
+  try{localStorage.setItem(ICLOUD_LINKS_FAST_KEY,JSON.stringify(normalizeIcloudLinks(data)));}catch(_){}
+}
 function iCloudRecordKey(rec){
   if(rec?.path) return `path:${rec.path}`;
   return `id:${rec?.collection||'archivio'}:${rec?.kind||'document'}:${rec?.id||'unknown'}`;
@@ -2173,36 +2181,53 @@ function mergeIcloudLinks(a,b){
 }
 async function loadIcloudLinks({refreshRemote=false}={}){
   if(iCloudLinksCache&&!refreshRemote)return iCloudLinksCache;
-  let local=normalizeIcloudLinks(await ghKvGet(ICLOUD_LINKS_LOCAL_KEY).catch(()=>null));
+  const fast=readFastIcloudLinks();
+  const kv=normalizeIcloudLinks(await ghKvGet(ICLOUD_LINKS_LOCAL_KEY).catch(()=>null));
+  let local=mergeIcloudLinks(fast,kv);
+  iCloudLinksCache=local;writeFastIcloudLinks(local);
   if(navigator.onLine && await hasGithubConnection()){
     try{
       const txt=await githubReadText(ICLOUD_LINKS_REMOTE_PATH);
       const remote=txt?normalizeIcloudLinks(JSON.parse(txt)):emptyIcloudLinks();
       const merged=mergeIcloudLinks(local,remote);
-      local=merged;
+      local=merged;iCloudLinksCache=merged;writeFastIcloudLinks(merged);
+      ghKvPut(ICLOUD_LINKS_LOCAL_KEY,merged).catch(()=>{});
       if(JSON.stringify(merged.links)!==JSON.stringify(remote.links)){
-        await githubWriteText(ICLOUD_LINKS_REMOTE_PATH,JSON.stringify(merged,null,2),'Recall: sincronizza collegamenti iCloud').catch(()=>{});
+        githubWriteText(ICLOUD_LINKS_REMOTE_PATH,JSON.stringify(merged,null,2),'Recall: sincronizza collegamenti iCloud').catch(()=>{});
       }
     }catch(e){console.warn('Collegamenti iCloud remoti non disponibili',e);}
   }
-  iCloudLinksCache=local;await ghKvPut(ICLOUD_LINKS_LOCAL_KEY,local).catch(()=>{});return local;
+  iCloudLinksCache=local;writeFastIcloudLinks(local);ghKvPut(ICLOUD_LINKS_LOCAL_KEY,local).catch(()=>{});return local;
 }
 async function persistIcloudLinks(data){
   const normalized=normalizeIcloudLinks(data);normalized.updatedAt=Date.now();iCloudLinksCache=normalized;
-  await ghKvPut(ICLOUD_LINKS_LOCAL_KEY,normalized).catch(()=>{});
-  if(navigator.onLine && await hasGithubConnection()){
-    await githubWriteText(ICLOUD_LINKS_REMOTE_PATH,JSON.stringify(normalized,null,2),'Recall: aggiorna collegamenti iCloud');
+  // Salvataggio locale immediato: l'apertura iCloud non deve aspettare GitHub.
+  writeFastIcloudLinks(normalized);
+  ghKvPut(ICLOUD_LINKS_LOCAL_KEY,normalized).catch(()=>{});
+  if(navigator.onLine){
+    (async()=>{
+      try{if(await hasGithubConnection())await githubWriteText(ICLOUD_LINKS_REMOTE_PATH,JSON.stringify(normalized,null,2),'Recall: aggiorna collegamenti iCloud');}
+      catch(e){console.warn('Sincronizzazione collegamenti iCloud rimandata',e);}
+    })();
   }
   return normalized;
 }
-function icloudLinkForRecordSync(rec){return iCloudLinksCache?.links?.[iCloudRecordKey(rec)]||null;}
-async function getIcloudLinkForRecord(rec){const db=await loadIcloudLinks();return db.links[iCloudRecordKey(rec)]||null;}
+function icloudLinkForRecordSync(rec){
+  const key=iCloudRecordKey(rec);
+  return iCloudLinksCache?.links?.[key]||readFastIcloudLinks().links?.[key]||null;
+}
+async function getIcloudLinkForRecord(rec){
+  const fast=icloudLinkForRecordSync(rec);if(fast)return fast;
+  const db=await loadIcloudLinks();return db.links[iCloudRecordKey(rec)]||null;
+}
 async function saveIcloudLinkForRecord(rec,path){
-  const db=await loadIcloudLinks();const key=iCloudRecordKey(rec);const clean=normalizeIcloudUserPath(path,rec);
+  const db=mergeIcloudLinks(readFastIcloudLinks(),iCloudLinksCache||emptyIcloudLinks());
+  const key=iCloudRecordKey(rec),clean=normalizeIcloudUserPath(path,rec);
   db.links[key]={path:clean,title:rec.title||'',updatedAt:Date.now()};await persistIcloudLinks(db);return clean;
 }
 async function removeIcloudLinkForRecord(rec){
-  const db=await loadIcloudLinks();const key=iCloudRecordKey(rec);if(db.links[key]){delete db.links[key];await persistIcloudLinks(db);}return true;
+  const db=mergeIcloudLinks(readFastIcloudLinks(),iCloudLinksCache||emptyIcloudLinks());
+  const key=iCloudRecordKey(rec);if(db.links[key]){delete db.links[key];await persistIcloudLinks(db);}return true;
 }
 
 async function githubTest(){
@@ -2252,7 +2277,7 @@ async function syncGithubLibrary({silent=false}={}){
       const p=f.path.split('/'), sub=p.slice(2,-1);
       state.documents.push({id:`gh_${f.sha}`,title:titleFromFilename(f.name),filename:f.name,collection:'studi',project:sub.length?sub.map(humanSlug).join(' › '):'Studi',storage:'github',path:f.path,githubSha:f.sha});
     }
-    save(); githubLibrarySynced=true; await loadIcloudLinks({refreshRemote:true}).catch(()=>{}); if(!silent) toast(`Archivio sincronizzato: ${archiveFiles.length+studyFiles.length} file`); return true;
+    save(); githubLibrarySynced=true; loadIcloudLinks({refreshRemote:true}).catch(()=>{}); if(!silent) toast(`Archivio sincronizzato: ${archiveFiles.length+studyFiles.length} file`); return true;
   }catch(e){console.error(e);if(!silent)toast(`GitHub: ${e.message}`);return false;}
 }
 function openBlobTab(blob,path=''){const safe=normalizeBlobMime(blob,path);const url=URL.createObjectURL(safe);const w=window.open(url,'_blank');if(!w)toast('Consenti l’apertura delle finestre');setTimeout(()=>URL.revokeObjectURL(url),120000);}
@@ -2514,9 +2539,9 @@ async function changePdfZoom(delta){if(!pdfReaderDoc)return;pdfReaderZoom=Math.m
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.14";
-const OFFLINE_DOC_CACHE="recall-docs-v114";
-const OFFLINE_CASE_CACHE="recall-cases-v114";
+const RECALL_VERSION="1.14.1";
+const OFFLINE_DOC_CACHE="recall-docs-v1141";
+const OFFLINE_CASE_CACHE="recall-cases-v1141";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -2827,6 +2852,14 @@ async function showIcloudLinkDialog(rec,{openAfter=false}={}){
 }
 async function openMaterialInIcloud(kind,id){
   const rec=materialRecord(kind,id);if(!rec){toast('Documento non trovato');return;}
+  // Percorso locale sincrono: evita attese GitHub/IndexedDB e mantiene il tap come gesto utente.
+  const fastLink=icloudLinkForRecordSync(rec);
+  if(fastLink?.path){
+    runIcloudShortcut(fastLink.path);
+    // Allinea eventuali modifiche remote in background, senza rallentare l'apertura.
+    if(navigator.onLine)loadIcloudLinks({refreshRemote:true}).catch(()=>{});
+    return;
+  }
   let link=await getIcloudLinkForRecord(rec).catch(()=>null);
   if(!link?.path){const result=await showIcloudLinkDialog(rec,{openAfter:true});if(!result?.path)return;link={path:result.path};}
   runIcloudShortcut(link.path);
