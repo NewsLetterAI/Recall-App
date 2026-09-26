@@ -1465,13 +1465,20 @@ const archiveTaxonomy = {
     "Prostata": ["PI-RADS", "Staging"],
     "Retto": ["Staging RM", "Follow-up"]
   },
-  "Muscoloscheletrico": {
+  "MSK": {
     "Ginocchio": ["Menischi", "Legamenti", "Cartilagine", "Osso / midollo", "Post-operatorio"],
     "Spalla": ["Cuffia", "Labrum", "Instabilità"],
     "Anca": ["Generale", "Impingement", "Artrosi"],
     "Rachide": ["Degenerativo", "Trauma", "Neoplasie / infezioni"],
     "Caviglia / piede": ["Legamenti", "Tendini", "Osso"],
     "Gomito / polso / mano": ["Generale"]
+  },
+  "Urgenze / emergenze": {
+    "Addome": ["Dolore addominale acuto", "Occlusione / perforazione", "Ischemia", "Emorragia", "Trauma"],
+    "Torace": ["Embolia polmonare", "Sindrome aortica acuta", "Pneumotorace", "Trauma", "Infezioni acute"],
+    "Pelvi": ["Torsione", "Emorragia", "Trauma", "Infezioni acute"],
+    "MSK": ["Trauma", "Fratture", "Lussazioni", "Infezioni"],
+    "Vascolare": ["Emorragia attiva", "Ischemia", "Trombosi", "Aneurismi / rottura"]
   },
   "Neuroradiologia": {
     "Encefalo": ["Vascolare", "Neoplasie", "Infezioni", "Demyelinating", "Emergenze"],
@@ -2203,8 +2210,18 @@ async function githubTest(){
   const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},cache:'no-store'});
   if(!r.ok) throw new Error(`Accesso negato (${r.status})`); return await r.json();
 }
-function humanSlug(s){const known={'vie-biliari':'Vie biliari','peritoneo-retroperitoneo':'Peritoneo / retroperitoneo','testa-collo':'Testa-collo','muscoloscheletrico':'Muscoloscheletrico','neuroradiologia':'Neuroradiologia','gastrointestinale':'Gastrointestinale','cardiovascolare':'Cardiovascolare','interventistica':'Interventistica'};return known[s]||String(s||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
+function humanSlug(s){const known={'vie-biliari':'Vie biliari','peritoneo-retroperitoneo':'Peritoneo / retroperitoneo','testa-collo':'Testa-collo','muscoloscheletrico':'MSK','msk':'MSK','urgenze-emergenze':'Urgenze / emergenze','urgenze':'Urgenze / emergenze','neuroradiologia':'Neuroradiologia','gastrointestinale':'Gastrointestinale','cardiovascolare':'Cardiovascolare','interventistica':'Interventistica'};return known[s]||String(s||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
 const GH_FILE_EXT=/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|md|rtf|png|jpe?g|webp)$/i;
+async function githubRecursiveTree(){
+  const cfg=getGithubConfig(),token=await getGithubToken();
+  if(!token) throw new Error('GitHub non collegato');
+  const url=`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/git/trees/${encodeURIComponent(cfg.branch||'main')}?recursive=1`;
+  const r=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},cache:'no-store'});
+  if(!r.ok){const t=await r.text().catch(()=>"");throw new Error(`GitHub ${r.status}${t?`: ${t.slice(0,120)}`:""}`);}
+  const data=await r.json();
+  if(data.truncated) return null;
+  return (data.tree||[]).filter(it=>it.type==='blob'&&GH_FILE_EXT.test(it.path)).map(it=>({path:it.path,name:it.path.split('/').pop(),sha:it.sha,type:'file'}));
+}
 async function githubWalk(root){
   let out=[]; let items=[];
   try{items=await githubListDir(root);}catch(e){if(String(e.message).includes('404'))return out;throw e;}
@@ -2219,7 +2236,8 @@ function titleFromFilename(name){return name.replace(/\.[^.]+$/,'').replace(/_/g
 async function syncGithubLibrary({silent=false}={}){
   if(!navigator.onLine || !(await hasGithubConnection())) return false;
   try{
-    const [archiveFiles,studyFiles]=await Promise.all([githubWalk('library/archivio'),githubWalk('library/studi')]);
+    const tree=await githubRecursiveTree();
+    const [archiveFiles,studyFiles]=tree?[(tree.filter(f=>f.path.startsWith('library/archivio/'))),(tree.filter(f=>f.path.startsWith('library/studi/')))]:await Promise.all([githubWalk('library/archivio'),githubWalk('library/studi')]);
     const archivePathSet=new Set(archiveFiles.map(f=>f.path));
     const mapPaths=new Set(state.maps.map(m=>m.pdfPath).filter(Boolean));
     state.maps.forEach(m=>{if((m.pdfMode==="github"||(m.pdfPath||"").startsWith("library/"))&&m.pdfPath)m.githubAvailable=archivePathSet.has(m.pdfPath);});
@@ -2496,9 +2514,9 @@ async function changePdfZoom(delta){if(!pdfReaderDoc)return;pdfReaderZoom=Math.m
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.13";
-const OFFLINE_DOC_CACHE="recall-docs-v113";
-const OFFLINE_CASE_CACHE="recall-cases-v113";
+const RECALL_VERSION="1.14";
+const OFFLINE_DOC_CACHE="recall-docs-v114";
+const OFFLINE_CASE_CACHE="recall-cases-v114";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -2719,28 +2737,24 @@ function renderMaterialRows(materials){
   if(!materials.length) return `<div class="card archive-empty"><b>Nessun file ancora</b><div class="muted small">Aggiungilo con “+ Materiale”.</div></div>`;
   const sorted=[...materials].sort((a,b)=>String(a.title||'').localeCompare(String(b.title||''),'it'));
   return `<div class="stack">${sorted.map(m=>{
-    const remote=(m.kind==="map" && m.map?.pdfPath) || (m.kind==="document" && m.storage==="github" && m.path);
-    const local=(m.kind==="document" && m.storage==="indexeddb");
-    const offlineControl=remote?`<button class="offline-toggle" data-offline-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Controllo…</button>`:(local?`<span class="device-badge">✓ Sul dispositivo</span>`:"");
     const filename=m.filename||m.source||"Documento";
-    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title file-title">${escapeHTML(m.title||titleFromFilename(filename))}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(filename))}</div></div><div class="offline-actions">${offlineControl}<button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri in iCloud</button><button class="icloud-link-edit" data-edit-icloud="${escapeHTML(m.id)}" data-kind="${m.kind}" title="Cambia collegamento iCloud">⋯</button><button class="secondary-open" data-open-backup="${escapeHTML(m.id)}" data-kind="${m.kind}">Copia GitHub</button><button class="delete-material" data-delete-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Elimina</button></div></div>`;
+    return `<div class="card archive-material" data-kind="${m.kind}" data-id="${escapeHTML(m.id)}"><div class="map-main"><div class="map-title file-title">${escapeHTML(m.title||titleFromFilename(filename))}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(filename))}</div></div><div class="offline-actions"><button class="open-pdf" data-open-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Apri in iCloud</button><button class="icloud-link-edit" data-edit-icloud="${escapeHTML(m.id)}" data-kind="${m.kind}" title="Cambia collegamento iCloud">⋯</button><button class="secondary-open" data-open-backup="${escapeHTML(m.id)}" data-kind="${m.kind}">Copia GitHub</button><button class="delete-material" data-delete-material="${escapeHTML(m.id)}" data-kind="${m.kind}">Elimina</button></div></div>`;
   }).join("")}</div>`;
 }
 function wireMaterialRows(body){
   body.querySelectorAll('[data-open-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openMaterial(btn.dataset.kind,btn.dataset.openMaterial);});
   body.querySelectorAll('[data-open-backup]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();openMaterialBackup(btn.dataset.kind,btn.dataset.openBackup);});
   body.querySelectorAll('[data-edit-icloud]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();editMaterialIcloudLink(btn.dataset.kind,btn.dataset.editIcloud);});
-  body.querySelectorAll('[data-offline-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();toggleMaterialOffline(btn);});
   body.querySelectorAll('[data-delete-material]').forEach(btn=>btn.onclick=e=>{e.stopPropagation();deleteArchiveMaterial(btn.dataset.kind,btn.dataset.deleteMaterial);});
   body.querySelectorAll('.archive-material[data-kind="map"]').forEach(el=>el.onclick=e=>{if(e.target.closest('button'))return;openMap(el.dataset.id);});
-  refreshOfflineButtons(body);
 }
 
 function materialRecord(kind,id){
   if(kind==='map'){
     const map=state.maps.find(m=>m.id===id);if(!map)return null;
     const meta=bundledArchiveMeta[map.id]||{area:map.area||'Altro',organ:map.organ||map.title||'Altro'};
-    return {kind,id,title:map.title,filename:map.source||String(map.pdfPath||'').split('/').pop()||'PDF',path:map.pdfPath||null,storage:map.pdfMode==='github'?'github':'indexeddb',area:meta.area,organ:meta.organ,collection:'archivio',map};
+    const remotePath=String(map.pdfPath||'').startsWith('library/');
+    return {kind,id,title:map.title,filename:map.source||String(map.pdfPath||'').split('/').pop()||'PDF',path:map.pdfPath||null,storage:(map.pdfMode==='github'||remotePath)?'github':'indexeddb',area:meta.area,organ:meta.organ,collection:'archivio',map};
   }
   const doc=state.documents.find(d=>d.id===id);if(!doc)return null;
   return {kind:'document',id,title:doc.title||titleFromFilename(doc.filename||doc.path||'Documento'),filename:doc.filename||String(doc.path||'').split('/').pop()||'Documento',path:doc.path||null,storage:doc.storage||'indexeddb',area:doc.area||null,organ:doc.organ||null,collection:doc.collection||'archivio',project:doc.project||null,doc};
@@ -2833,10 +2847,10 @@ async function deleteAnnotationDataForPath(sourcePath){
 }
 async function deleteArchiveMaterial(kind,id){
   const rec=materialRecord(kind,id);if(!rec){toast('File non trovato');return;}
-  if(!confirm(`Eliminare “${rec.title}”?\n\nIl file verrà rimosso da Recall, dal repository GitHub privato e dalla copia offline. Il file originale in iCloud Drive NON verrà eliminato.`))return;
+  if(!confirm(`Eliminare “${rec.title}”?\n\nIl file verrà rimosso da Recall e dal repository GitHub privato. Il file originale in iCloud Drive NON verrà eliminato.`))return;
   try{
     await removeIcloudLinkForRecord(rec).catch(()=>{});
-    if(rec.storage==='github'&&rec.path){await githubDeleteFile(rec.path);await deleteAnnotationDataForPath(rec.path);}
+    if(rec.path && (rec.storage==='github'||String(rec.path).startsWith('library/'))){await githubDeleteFile(rec.path,null,{silent404:true});await deleteAnnotationDataForPath(rec.path);}
     if(kind==='map'){
       await deletePdf(id).catch(()=>{});
       if(rec.map)rec.map.githubAvailable=false;
@@ -2881,7 +2895,7 @@ function renderArchive(){
 function renderStudies(){
   const box=document.getElementById("studiesList"); const docs=studyMaterials();
   if(!docs.length){box.innerHTML=`<div class="card archive-empty"><b>Nessuno studio inserito</b><div class="muted small">Qui resteranno separati tesi, revisioni, protocolli e progetti scientifici.</div></div>`;return;}
-  box.innerHTML=docs.map(d=>`<div class="card archive-material"><div class="map-main"><div class="map-title file-title">${escapeHTML(d.title)}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(d.filename||d.path||""))}</div></div><div class="offline-actions">${d.storage==="indexeddb"?'<span class="device-badge">✓ Sul dispositivo</span>':''}<button class="open-pdf" data-open-study="${d.id}">Apri in iCloud</button><button class="icloud-link-edit" data-edit-study-icloud="${d.id}" title="Cambia collegamento iCloud">⋯</button><button class="secondary-open" data-open-study-backup="${d.id}">Copia GitHub</button><button class="delete-material" data-delete-study="${d.id}">Elimina</button></div></div>`).join("");
+  box.innerHTML=docs.map(d=>`<div class="card archive-material"><div class="map-main"><div class="map-title file-title">${escapeHTML(d.title)}</div><div class="muted file-meta">${escapeHTML(fileTypeLabel(d.filename||d.path||""))}</div></div><div class="offline-actions"><button class="open-pdf" data-open-study="${d.id}">Apri in iCloud</button><button class="icloud-link-edit" data-edit-study-icloud="${d.id}" title="Cambia collegamento iCloud">⋯</button><button class="secondary-open" data-open-study-backup="${d.id}">Copia GitHub</button><button class="delete-material" data-delete-study="${d.id}">Elimina</button></div></div>`).join("");
   box.querySelectorAll('[data-open-study]').forEach(b=>b.onclick=()=>openMaterial('document',b.dataset.openStudy));
   box.querySelectorAll('[data-edit-study-icloud]').forEach(b=>b.onclick=()=>editMaterialIcloudLink('document',b.dataset.editStudyIcloud));
   box.querySelectorAll('[data-open-study-backup]').forEach(b=>b.onclick=()=>openMaterialBackup('document',b.dataset.openStudyBackup));

@@ -1,1 +1,1 @@
-Recall v1.13 — collegamenti iCloud per file con nomi/percorso diversi, sincronizzati via GitHub privato
+Recall v1.14 — MSK + Urgenze/emergenze, eliminazione GitHub corretta, niente tasto offline, sync Archivio più veloce

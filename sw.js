@@ -1,4 +1,4 @@
-const VERSION="v113";
+const VERSION="v114";
 const CORE_CACHE=`recall-core-${VERSION}`;
 const RUNTIME_CACHE=`recall-runtime-${VERSION}`;
 const DOC_CACHE=`recall-docs-${VERSION}`;

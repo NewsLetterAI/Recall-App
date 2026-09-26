@@ -12,3 +12,11 @@ Novità v1.13:
 - Pulsante `⋯` per cambiare il collegamento iCloud di un documento.
 
 Vedi `ICLOUD_SETUP.md` per la configurazione del Comando Rapido.
+
+
+## v1.14
+- Archivio: Muscoloscheletrico rinominato in MSK.
+- Nuovo distretto Urgenze / emergenze.
+- Corretto Elimina: rimuove realmente il file dal repository privato GitHub (iCloud non viene toccato).
+- Rimosso il tasto Scarica offline dai documenti dell Archivio/Studi.
+- Sincronizzazione GitHub ottimizzata con una singola lettura ricorsiva dell albero del repository, con fallback al metodo precedente.
