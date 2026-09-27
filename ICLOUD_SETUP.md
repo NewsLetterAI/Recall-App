@@ -51,3 +51,6 @@ Durante `+ Materiale` puoi compilare subito il campo `File iCloud corrispondente
 - Il PDF originale iCloud non viene cancellato quando elimini la copia da Recall/GitHub.
 - Recall non modifica il PDF iCloud: lo apre tramite Comandi Rapidi e le annotazioni vengono gestite dalle app Apple.
 - Per l'uso senza rete, il PDF deve essere già disponibile localmente in iCloud Drive sul dispositivo.
+
+## Nota v1.15
+Per Urgenze / emergenze e Interventistica il percorso iCloud suggerito non contiene sottocartelle. Per MSK e Pelvi puoi usare direttamente la cartella principale oppure, rispettivamente, `Osso` e `Utero`.

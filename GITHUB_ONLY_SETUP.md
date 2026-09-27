@@ -14,3 +14,6 @@ Recall conserva nel repository privato soltanto l'associazione fra documento Rec
 `library/.recall/icloud-links.json`
 
 Il sito pubblico non contiene il token GitHub né i percorsi salvati nel repository privato.
+
+## Struttura v1.15
+I nuovi file di `Urgenze / emergenze` e `Interventistica` vengono salvati direttamente nella rispettiva cartella principale. In `MSK` e `Pelvi` puoi salvare direttamente alla radice oppure usare rispettivamente `Osso` e `Utero`.

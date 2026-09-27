@@ -1,22 +1,13 @@
-# Recall v1.13
+# Recall v1.15
 
-PWA personale per studio radiologico e refertazione.
+Archivio personale di radiologia collegato a GitHub privato e iCloud Drive.
 
-Novità v1.13:
-- Archivio compatto per distretto → organo → file reali.
-- Upload e cancellazione diretti sul repository GitHub privato.
-- PWA offline-ready con fix iPhone.
-- Apertura degli originali tramite iCloud Drive e Comandi Rapidi Apple.
-- Associazione indipendente tra nome/file Recall e file iCloud.
-- Collegamenti iCloud sincronizzati tramite il repository GitHub privato.
-- Pulsante `⋯` per cambiare il collegamento iCloud di un documento.
+## Struttura Archivio aggiornata
+- **Addome**: Fegato, Vie biliari, Pancreas, Reni, Surreni, Milza, Gastrointestinale, Peritoneo/retroperitoneo.
+- **Torace**: Polmone, Mediastino, Pleura, Parete toracica, Vascolare toracico.
+- **Pelvi**: file direttamente in Pelvi + unica sottocartella **Utero**.
+- **MSK**: file direttamente in MSK + unica sottocartella **Osso**.
+- **Urgenze / emergenze**: nessuna sottocartella; tutti i file direttamente nella cartella principale.
+- **Interventistica**: nessuna sottocartella; tutti i file direttamente nella cartella principale.
 
-Vedi `ICLOUD_SETUP.md` per la configurazione del Comando Rapido.
-
-
-## v1.14
-- Archivio: Muscoloscheletrico rinominato in MSK.
-- Nuovo distretto Urgenze / emergenze.
-- Corretto Elimina: rimuove realmente il file dal repository privato GitHub (iCloud non viene toccato).
-- Rimosso il tasto Scarica offline dai documenti dell Archivio/Studi.
-- Sincronizzazione GitHub ottimizzata con una singola lettura ricorsiva dell albero del repository, con fallback al metodo precedente.
+Le vecchie cartelle di Urgenze, Interventistica, MSK e Pelvi vengono appiattite nella visualizzazione senza spostare automaticamente i file già esistenti nel repository.

@@ -1442,67 +1442,58 @@ const reportRegions = ["Encefalo","Testa-collo","Torace","Addome","Pelvi","Musco
 
 const archiveTaxonomy = {
   "Addome": {
-    "Fegato": ["Generale", "Protocollo RM", "Lesioni focali benigne", "HCC / LI-RADS", "Metastasi", "Cirrosi e ipertensione portale", "Steatosi / pseudolesioni", "Sovraccarico di ferro", "Infezioni / ascessi"],
-    "Vie biliari": ["Generale", "Anatomia / MRCP", "Malattie infiammatorie", "Malformazioni / ectasie", "Ostruzione biliare", "Colangiocarcinoma"],
-    "Pancreas": ["Generale", "Pancreatiti", "Raccolte", "Lesioni cistiche", "IPMN", "Neoplasie / PDAC", "Staging e resecabilità"],
-    "Reni": ["Generale", "Cisti e malattie cistiche", "Masse renali", "Infezioni", "Uropatia ostruttiva", "Trauma"],
-    "Surreni": ["Generale", "Adenoma", "Feocromocitoma", "Metastasi", "Incidentaloma"],
-    "Milza": ["Generale", "Lesioni focali", "Infarto / trauma", "Splenomegalia"],
-    "Gastrointestinale": ["Esofago / stomaco", "Intestino tenue", "Colon", "Appendice", "Emergenze"],
-    "Peritoneo / retroperitoneo": ["Peritoneo", "Retroperitoneo", "Carcinosi", "Raccolte"]
+    "Fegato": [],
+    "Vie biliari": [],
+    "Pancreas": [],
+    "Reni": [],
+    "Surreni": [],
+    "Milza": [],
+    "Gastrointestinale": [],
+    "Peritoneo / retroperitoneo": []
   },
   "Torace": {
-    "Polmone": ["Noduli polmonari", "Neoplasie", "Infezioni", "Interstiziopatie", "Vie aeree", "Emergenze"],
-    "Mediastino": ["Masse mediastiniche", "Linfonodi", "Timo", "Esofago"],
-    "Pleura": ["Versamento", "Pneumotorace", "Ispessimenti / placche", "Neoplasie pleuriche"],
-    "Parete toracica": ["Coste", "Sterno", "Tessuti molli"],
-    "Vascolare toracico": ["Aorta", "Embolia polmonare", "Arterie polmonari", "Vene cave"]
+    "Polmone": [],
+    "Mediastino": [],
+    "Pleura": [],
+    "Parete toracica": [],
+    "Vascolare toracico": []
   },
   "Pelvi": {
-    "Ovaio / annessi": ["Cisti", "Endometriosi", "Masse ovariche", "Torsione", "O-RADS"],
-    "Utero": ["Miomi", "Endometrio", "Cervice"],
-    "Vescica": ["Generale", "Neoplasie"],
-    "Prostata": ["PI-RADS", "Staging"],
-    "Retto": ["Staging RM", "Follow-up"]
+    "Utero": []
   },
   "MSK": {
-    "Ginocchio": ["Menischi", "Legamenti", "Cartilagine", "Osso / midollo", "Post-operatorio"],
-    "Spalla": ["Cuffia", "Labrum", "Instabilità"],
-    "Anca": ["Generale", "Impingement", "Artrosi"],
-    "Rachide": ["Degenerativo", "Trauma", "Neoplasie / infezioni"],
-    "Caviglia / piede": ["Legamenti", "Tendini", "Osso"],
-    "Gomito / polso / mano": ["Generale"]
+    "Osso": []
   },
-  "Urgenze / emergenze": {
-    "Addome": ["Dolore addominale acuto", "Occlusione / perforazione", "Ischemia", "Emorragia", "Trauma"],
-    "Torace": ["Embolia polmonare", "Sindrome aortica acuta", "Pneumotorace", "Trauma", "Infezioni acute"],
-    "Pelvi": ["Torsione", "Emorragia", "Trauma", "Infezioni acute"],
-    "MSK": ["Trauma", "Fratture", "Lussazioni", "Infezioni"],
-    "Vascolare": ["Emorragia attiva", "Ischemia", "Trombosi", "Aneurismi / rottura"]
-  },
+  "Urgenze / emergenze": {},
   "Neuroradiologia": {
-    "Encefalo": ["Vascolare", "Neoplasie", "Infezioni", "Demyelinating", "Emergenze"],
-    "Rachide": ["Midollo", "Degenerativo", "Neoplasie"],
-    "Ipofisi": ["Adenomi", "Regione sellare"],
-    "Orbite": ["Generale"]
+    "Encefalo": [],
+    "Rachide": [],
+    "Ipofisi": [],
+    "Orbite": []
   },
   "Testa-collo": {
-    "Collo": ["Linfonodi", "Spazi cervicali"],
-    "Faringe / laringe": ["Neoplasie", "Infezioni"],
-    "Ghiandole salivari": ["Parotide", "Sottomandibolare"]
+    "Collo": [],
+    "Faringe / laringe": [],
+    "Ghiandole salivari": []
   },
   "Cardiovascolare": {
-    "Aorta": ["Aneurisma", "Dissezione", "Sindrome aortica acuta"],
-    "Cuore": ["Generale", "Cardio-RM"],
-    "Arterie periferiche": ["PAD", "Aneurismi"],
-    "Vene": ["Trombosi", "Malformazioni"]
+    "Aorta": [],
+    "Cuore": [],
+    "Arterie periferiche": [],
+    "Vene": []
   },
-  "Interventistica": {
-    "Embolizzazione": ["Emorragie", "Tumori", "UAE"],
-    "Drenaggi / biopsie": ["Drenaggi", "Biopsie"],
-    "Accessi / procedure": ["Accessi", "Complicanze"]
-  }
+  "Interventistica": {}
 };
+
+const DIRECT_ROOT_AREAS = new Set(["Urgenze / emergenze","Interventistica"]);
+const OPTIONAL_ROOT_FOLDERS = {
+  "MSK": new Set(["Osso"]),
+  "Pelvi": new Set(["Utero"])
+};
+function isRootDirectArea(area){ return DIRECT_ROOT_AREAS.has(area); }
+function isOptionalRootArea(area){ return !!OPTIONAL_ROOT_FOLDERS[area]; }
+function allowedSubfolders(area){ return [...(OPTIONAL_ROOT_FOLDERS[area]||[])]; }
+
 
 const bundledArchiveMeta = {
   fegato:{area:"Addome",organ:"Fegato",category:"Generale"},
@@ -2269,9 +2260,24 @@ async function syncGithubLibrary({silent=false}={}){
     state.documents=(state.documents||[]).filter(d=>d.storage!=='github');
     for(const f of archiveFiles){
       if(mapPaths.has(f.path)) continue;
-      const p=f.path.split('/'), area=humanSlug(p[2]||'Altro'), organ=humanSlug(p[3]||'Altro');
-      const sub=p.slice(4,-1); const category=sub.length?sub.map(humanSlug).join(' › '):'Generale';
-      state.documents.push({id:`gh_${f.sha}`,title:titleFromFilename(f.name),filename:f.name,collection:'archivio',area,organ,category:'Generale',tags:[organ],storage:'github',path:f.path,githubSha:f.sha});
+      const p=f.path.split('/');
+      let area=humanSlug(p[2]||'Altro');
+      const rawFolder=p.length>4?humanSlug(p[3]||''):'';
+      let organ=rawFolder||null;
+
+      // Migrazione visuale delle vecchie strutture: i file non vengono spostati su GitHub,
+      // ma vengono mostrati nella nuova cartella corretta.
+      if(area==='Addome' && /urgen|emergen/i.test(String(organ||''))){
+        area='Urgenze / emergenze'; organ=null;
+      }else if(isRootDirectArea(area)){
+        organ=null;
+      }else if(area==='MSK'){
+        organ=(String(organ||'').toLowerCase()==='osso')?'Osso':null;
+      }else if(area==='Pelvi'){
+        organ=(String(organ||'').toLowerCase()==='utero')?'Utero':null;
+      }
+
+      state.documents.push({id:`gh_${f.sha}`,title:titleFromFilename(f.name),filename:f.name,collection:'archivio',area,organ,category:'Generale',tags:organ?[organ]:[],storage:'github',path:f.path,githubSha:f.sha});
     }
     for(const f of studyFiles){
       const p=f.path.split('/'), sub=p.slice(2,-1);
@@ -2539,9 +2545,9 @@ async function changePdfZoom(delta){if(!pdfReaderDoc)return;pdfReaderZoom=Math.m
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.14.1";
-const OFFLINE_DOC_CACHE="recall-docs-v1141";
-const OFFLINE_CASE_CACHE="recall-cases-v1141";
+const RECALL_VERSION="1.15";
+const OFFLINE_DOC_CACHE="recall-docs-v115";
+const OFFLINE_CASE_CACHE="recall-cases-v115";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -2739,10 +2745,19 @@ function archiveAreas(){
   const all=new Set(Object.keys(archiveTaxonomy)); archiveMaterials().forEach(m=>all.add(m.area||"Altro")); return [...all];
 }
 function archiveOrgans(area){
-  const all=new Set(Object.keys(archiveTaxonomy[area]||{})); archiveMaterials().filter(m=>m.area===area).forEach(m=>all.add(m.organ||"Altro")); return [...all];
+  if(isRootDirectArea(area)) return [];
+  const allowed=OPTIONAL_ROOT_FOLDERS[area];
+  if(allowed) return [...allowed];
+  const all=new Set(Object.keys(archiveTaxonomy[area]||{}));
+  archiveMaterials().filter(m=>m.area===area&&m.organ).forEach(m=>all.add(m.organ));
+  return [...all].filter(Boolean);
 }
-function materialCount(filter){
-  return archiveMaterials().filter(m=>(!filter.area||m.area===filter.area)&&(!filter.organ||m.organ===filter.organ)).length;
+function materialCount(filter={}){
+  return archiveMaterials().filter(m=>{
+    if(filter.area && m.area!==filter.area) return false;
+    if(Object.prototype.hasOwnProperty.call(filter,'organ') && m.organ!==filter.organ) return false;
+    return true;
+  }).length;
 }
 function escapeHTML(s){ return String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
 function renderBreadcrumb(){
@@ -2812,7 +2827,7 @@ function suggestedIcloudPathForRecord(rec){
     const project=String(rec.project||'').split('›').map(x=>clean(x)).filter(Boolean);
     return [cfg.root,'Studi',...project,filename].filter(Boolean).join('/');
   }
-  return [cfg.root,'Archivio',clean(rec.area||'Altro'),clean(rec.organ||'Altro'),filename].join('/');
+  return [cfg.root,'Archivio',clean(rec.area||'Altro'),rec.organ?clean(rec.organ):null,filename].filter(Boolean).join('/');
 }
 function normalizeIcloudUserPath(raw,rec){
   let path=String(raw||'').trim().replace(/^icloud\s*drive[\\/]/i,'').replace(/^\/+/, '').replace(/\\/g,'/').replace(/\/{2,}/g,'/');
@@ -2917,12 +2932,32 @@ function renderArchive(){
     body.innerHTML=`<div class="archive-section-title">Scegli il distretto</div>${renderNodeList(archiveAreas(),"area")}`;
     body.querySelectorAll('[data-area]').forEach(x=>x.onclick=()=>{archiveNav.area=x.dataset.area;renderArchive();}); return;
   }
+
+  const area=archiveNav.area;
+  const directFiles=archiveMaterials().filter(m=>m.area===area&&!m.organ);
+
+  // Urgenze/emergenze e Interventistica: nessuna sottocartella.
+  if(isRootDirectArea(area)){
+    body.innerHTML=`<div class="archive-section-title">${escapeHTML(area)}</div>${renderMaterialRows(directFiles)}`;
+    wireMaterialRows(body); return;
+  }
+
+  // MSK e Pelvi: file direttamente nella cartella principale + una sola sottocartella consentita.
+  if(isOptionalRootArea(area) && !archiveNav.organ){
+    const organs=archiveOrgans(area);
+    const folders=organs.length?`<div class="archive-section-title">Cartelle</div>${renderNodeList(organs,"organ")}`:'';
+    const files=`<div class="archive-section-title">File</div>${renderMaterialRows(directFiles)}`;
+    body.innerHTML=`${files}${folders}`;
+    body.querySelectorAll('[data-organ]').forEach(x=>x.onclick=()=>{archiveNav.organ=x.dataset.organ;renderArchive();});
+    wireMaterialRows(body); return;
+  }
+
   if(!archiveNav.organ){
-    const organs=archiveOrgans(archiveNav.area);
-    body.innerHTML=`<div class="archive-section-title">${escapeHTML(archiveNav.area)}</div>${renderNodeList(organs,"organ")}`;
+    const organs=archiveOrgans(area);
+    body.innerHTML=`<div class="archive-section-title">${escapeHTML(area)}</div>${renderNodeList(organs,"organ")}`;
     body.querySelectorAll('[data-organ]').forEach(x=>x.onclick=()=>{archiveNav.organ=x.dataset.organ;renderArchive();}); return;
   }
-  const mats=archiveMaterials().filter(m=>m.area===archiveNav.area&&m.organ===archiveNav.organ);
+  const mats=archiveMaterials().filter(m=>m.area===area&&m.organ===archiveNav.organ);
   body.innerHTML=`<div class="archive-section-title">${escapeHTML(archiveNav.organ)}</div>${renderMaterialRows(mats)}`; wireMaterialRows(body);
 }
 function renderStudies(){
@@ -3436,9 +3471,17 @@ async function saveNewMap(){
   let repoPath="", area=null, organ=null, project=null;
   if(collection==="archivio"){
     area=document.getElementById("newMapArea").value;
-    organ=document.getElementById("newMapOrgan").value.trim();
-    if(!organ){toast("Inserisci l'organo / sede");return;}
-    repoPath=`library/archivio/${ghSlug(area)}/${ghSlug(organ)}/${safeGithubFilename(f.name)}`;
+    organ=document.getElementById("newMapOrgan").value.trim()||null;
+    if(isRootDirectArea(area)) organ=null;
+    if(isOptionalRootArea(area)){
+      const allowed=OPTIONAL_ROOT_FOLDERS[area];
+      if(organ && !allowed.has(organ)){toast(`In ${area} puoi lasciare il file direttamente nella cartella principale${allowed.size?` oppure usare: ${[...allowed].join(', ')}`:''}.`);return;}
+    }else if(!organ){
+      toast("Inserisci l'organo / sede");return;
+    }
+    repoPath=organ
+      ?`library/archivio/${ghSlug(area)}/${ghSlug(organ)}/${safeGithubFilename(f.name)}`
+      :`library/archivio/${ghSlug(area)}/${safeGithubFilename(f.name)}`;
   }else{
     project=document.getElementById("newStudyProject").value.trim();
     repoPath=project?`library/studi/${ghSlug(project)}/${safeGithubFilename(f.name)}`:`library/studi/${safeGithubFilename(f.name)}`;
@@ -3473,8 +3516,32 @@ function syncAddMaterialForm(){
   document.getElementById("archiveMetadataFields").hidden=!isArchive;
   document.getElementById("studyMetadataFields").hidden=isArchive;
   const area=document.getElementById("newMapArea")?.value||"Addome";
+  const organWrap=document.getElementById('newMapOrganWrap');
+  const organInput=document.getElementById("newMapOrgan");
+  const organLabel=document.getElementById('newMapOrganLabel');
+  const organHelp=document.getElementById('newMapOrganHelp');
   const organList=document.getElementById("organSuggestions");
-  if(organList) organList.innerHTML=Object.keys(archiveTaxonomy[area]||{}).map(x=>`<option value="${x}">`).join("");
+
+  if(isRootDirectArea(area)){
+    if(organWrap)organWrap.hidden=true;
+    if(organInput)organInput.value='';
+    if(organHelp)organHelp.textContent='I file vengono inseriti direttamente nella cartella principale.';
+    return;
+  }
+
+  if(organWrap)organWrap.hidden=false;
+  if(isOptionalRootArea(area)){
+    const folders=allowedSubfolders(area);
+    if(organLabel)organLabel.textContent='Sottocartella (opzionale)';
+    if(organInput){organInput.placeholder=folders.length?`Lascia vuoto oppure usa ${folders.join(' / ')}`:'Lascia vuoto';if(organInput.value && !folders.includes(organInput.value))organInput.value='';}
+    if(organHelp)organHelp.textContent=`Puoi caricare il file direttamente in ${area}${folders.length?` oppure nella cartella ${folders.join(' / ')}`:''}.`;
+    if(organList)organList.innerHTML=folders.map(x=>`<option value="${x}">`).join("");
+  }else{
+    if(organLabel)organLabel.textContent='Organo / sede';
+    if(organInput)organInput.placeholder='Es. Pancreas';
+    if(organHelp)organHelp.textContent='';
+    if(organList)organList.innerHTML=Object.keys(archiveTaxonomy[area]||{}).map(x=>`<option value="${x}">`).join("");
+  }
 }
 
 function exportData(){
