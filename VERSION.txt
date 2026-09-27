@@ -1,1 +1,1 @@
-Recall v1.15 — archivio semplificato: Urgenze/Interventistica dirette, MSK con solo Osso, Pelvi con solo Utero
+Recall v1.15.1 — fix caricamento diretto in MSK e sottocartelle opzionali

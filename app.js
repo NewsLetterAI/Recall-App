@@ -2545,9 +2545,9 @@ async function changePdfZoom(delta){if(!pdfReaderDoc)return;pdfReaderZoom=Math.m
 function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
-const RECALL_VERSION="1.15";
-const OFFLINE_DOC_CACHE="recall-docs-v115";
-const OFFLINE_CASE_CACHE="recall-cases-v115";
+const RECALL_VERSION="1.15.1";
+const OFFLINE_DOC_CACHE="recall-docs-v1151";
+const OFFLINE_CASE_CACHE="recall-cases-v1151";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -3471,13 +3471,19 @@ async function saveNewMap(){
   let repoPath="", area=null, organ=null, project=null;
   if(collection==="archivio"){
     area=document.getElementById("newMapArea").value;
-    organ=document.getElementById("newMapOrgan").value.trim()||null;
-    if(isRootDirectArea(area)) organ=null;
-    if(isOptionalRootArea(area)){
+    const organInput=document.getElementById("newMapOrgan");
+    const subfolderInput=document.getElementById("newMapSubfolder");
+    organ=null;
+    if(isRootDirectArea(area)){
+      organ=null;
+    }else if(isOptionalRootArea(area)){
+      // MSK e Pelvi: per default il file viene caricato direttamente nella cartella principale.
+      organ=(subfolderInput?.value||'').trim()||null;
       const allowed=OPTIONAL_ROOT_FOLDERS[area];
-      if(organ && !allowed.has(organ)){toast(`In ${area} puoi lasciare il file direttamente nella cartella principale${allowed.size?` oppure usare: ${[...allowed].join(', ')}`:''}.`);return;}
-    }else if(!organ){
-      toast("Inserisci l'organo / sede");return;
+      if(organ && !allowed.has(organ)){toast(`Sottocartella non valida per ${area}`);return;}
+    }else{
+      organ=(organInput?.value||'').trim()||null;
+      if(!organ){toast("Inserisci l'organo / sede");return;}
     }
     repoPath=organ
       ?`library/archivio/${ghSlug(area)}/${ghSlug(organ)}/${safeGithubFilename(f.name)}`
@@ -3498,6 +3504,7 @@ async function saveNewMap(){
     document.getElementById("newMapFile").value="";
     const cloudField=document.getElementById('newMapIcloudPath');if(cloudField)cloudField.value='';
     const organ=document.getElementById("newMapOrgan");if(organ)organ.value="";
+    const subfolder=document.getElementById("newMapSubfolder");if(subfolder)subfolder.value="";
     const project=document.getElementById("newStudyProject");if(project)project.value="";
     githubLibrarySynced=false;
     await syncGithubLibrary({silent:true});
@@ -3521,27 +3528,42 @@ function syncAddMaterialForm(){
   const organLabel=document.getElementById('newMapOrganLabel');
   const organHelp=document.getElementById('newMapOrganHelp');
   const organList=document.getElementById("organSuggestions");
+  const subWrap=document.getElementById('newMapSubfolderWrap');
+  const subSelect=document.getElementById('newMapSubfolder');
+  const subLabel=document.getElementById('newMapSubfolderLabel');
+  const subHelp=document.getElementById('newMapSubfolderHelp');
+
+  if(subWrap)subWrap.hidden=true;
+  if(organWrap)organWrap.hidden=false;
 
   if(isRootDirectArea(area)){
     if(organWrap)organWrap.hidden=true;
     if(organInput)organInput.value='';
-    if(organHelp)organHelp.textContent='I file vengono inseriti direttamente nella cartella principale.';
+    if(subSelect)subSelect.innerHTML='';
     return;
   }
 
-  if(organWrap)organWrap.hidden=false;
   if(isOptionalRootArea(area)){
+    // Per MSK/Pelvi non chiediamo mai "Organo / sede".
+    if(organWrap)organWrap.hidden=true;
+    if(organInput)organInput.value='';
+    if(subWrap)subWrap.hidden=false;
     const folders=allowedSubfolders(area);
-    if(organLabel)organLabel.textContent='Sottocartella (opzionale)';
-    if(organInput){organInput.placeholder=folders.length?`Lascia vuoto oppure usa ${folders.join(' / ')}`:'Lascia vuoto';if(organInput.value && !folders.includes(organInput.value))organInput.value='';}
-    if(organHelp)organHelp.textContent=`Puoi caricare il file direttamente in ${area}${folders.length?` oppure nella cartella ${folders.join(' / ')}`:''}.`;
-    if(organList)organList.innerHTML=folders.map(x=>`<option value="${x}">`).join("");
-  }else{
-    if(organLabel)organLabel.textContent='Organo / sede';
-    if(organInput)organInput.placeholder='Es. Pancreas';
-    if(organHelp)organHelp.textContent='';
-    if(organList)organList.innerHTML=Object.keys(archiveTaxonomy[area]||{}).map(x=>`<option value="${x}">`).join("");
+    if(subLabel)subLabel.textContent='Sottocartella (opzionale)';
+    if(subSelect){
+      subSelect.innerHTML=`<option value="">Direttamente in ${area}</option>`+folders.map(x=>`<option value="${x}">${x}</option>`).join('');
+      subSelect.value='';
+    }
+    if(subHelp)subHelp.textContent=area==='MSK'
+      ?'Lascia “Direttamente in MSK” per inserire il file nella cartella MSK. Scegli Osso solo se vuoi usare quella sottocartella.'
+      :`Lascia “Direttamente in ${area}” per inserire il file nella cartella principale.`;
+    return;
   }
+
+  if(organLabel)organLabel.textContent='Organo / sede';
+  if(organInput)organInput.placeholder='Es. Pancreas';
+  if(organHelp)organHelp.textContent='';
+  if(organList)organList.innerHTML=Object.keys(archiveTaxonomy[area]||{}).map(x=>`<option value="${x}">`).join("");
 }
 
 function exportData(){
