@@ -114,7 +114,16 @@
       <div id="archiveExplorer" hidden>
         <div class="archive-breadcrumb" id="archiveBreadcrumb"></div>
         <div class="card library-tools">
-          <input id="librarySearch" type="text" placeholder="Cerca argomento o materiale..."/>
+          <div class="archive-tools-row">
+            <input id="librarySearch" type="text" placeholder="Cerca argomento o materiale..."/>
+            <div class="archive-quick-actions">
+              <button class="primary compact-btn" id="archiveQuickUploadBtn">＋ File</button>
+              <button class="secondary compact-btn" id="archiveNewFolderBtn">＋ Cartella</button>
+              <button class="ghost compact-btn" id="archiveSyncBtn" title="Sincronizza Archivio">↻</button>
+            </div>
+          </div>
+          <input id="archiveQuickFileInput" type="file" multiple hidden/>
+          <div class="muted small archive-context-help" id="archiveContextHelp">Apri una cartella per aggiungere file direttamente qui.</div>
         </div>
         <div id="archiveBody"></div>
       </div>
@@ -375,13 +384,24 @@
       <div class="card stack">
         <div>
           <div class="map-title">Documenti dell'Archivio</div>
-          <div class="muted small">L'Archivio viene indicizzato dal repository GitHub privato. Il pulsante principale apre l'originale in iCloud Drive tramite Comandi Rapidi; la copia GitHub può comunque essere scaricata offline come backup.</div>
+          <div class="muted small">L'Archivio viene indicizzato dal repository GitHub privato. Il pulsante principale apre l'originale in iCloud Drive tramite Comandi Rapidi; “Copia GitHub” resta disponibile come backup/fallback.</div>
         </div>
         <button class="secondary" id="openArchiveSettingsBtn">Vai all'Archivio</button>
       </div>
 
       <div class="card stack">
-        <div class="map-title">Dati e backup</div>
+        <div>
+          <div class="map-title">Backup e continuità del progetto</div>
+          <div class="muted small">Questo prompt riassume architettura, decisioni, funzioni e roadmap di Recall. Se questa chat non fosse più disponibile, incollalo in una nuova conversazione per continuare senza ricostruire il progetto da zero.</div>
+        </div>
+        <div class="actions wrap-actions">
+          <button class="primary" id="copyProjectPromptBtn">Copia prompt progetto</button>
+          <a class="secondary button-link" href="RECALL_PROJECT_BACKUP_PROMPT.md" download>Scarica prompt .md</a>
+        </div>
+      </div>
+
+      <div class="card stack">
+        <div class="map-title">Dati e backup dell'app</div>
         <button class="secondary" id="exportBtn">Esporta dati JSON</button>
         <label class="secondary file-label">Importa dati JSON
           <input id="importInput" type="file" accept="application/json" hidden/>
@@ -389,7 +409,7 @@
         <button class="danger" id="resetBtn">Ripristina demo</button>
       </div>
 
-      <div class="muted small version-label">Recall v1.13 · GitHub + collegamenti iCloud sincronizzati · PWA offline-ready</div>
+      <div class="muted small version-label">Recall v1.16 · gestione Archivio + backup progetto · GitHub + iCloud · PWA offline-ready</div>
     </section>
   </main>
 

@@ -1,13 +1,15 @@
-# Recall v1.15
+# Recall v1.16
 
-Archivio personale di radiologia collegato a GitHub privato e iCloud Drive.
+PWA personale per studio, Archivio, ripasso e refertazione.
 
-## Struttura Archivio aggiornata
-- **Addome**: Fegato, Vie biliari, Pancreas, Reni, Surreni, Milza, Gastrointestinale, Peritoneo/retroperitoneo.
-- **Torace**: Polmone, Mediastino, Pleura, Parete toracica, Vascolare toracico.
-- **Pelvi**: file direttamente in Pelvi + unica sottocartella **Utero**.
-- **MSK**: file direttamente in MSK + unica sottocartella **Osso**.
-- **Urgenze / emergenze**: nessuna sottocartella; tutti i file direttamente nella cartella principale.
-- **Interventistica**: nessuna sottocartella; tutti i file direttamente nella cartella principale.
+## Novità v1.16
+- toolbar contestuale nell’Archivio: **+ File**, **+ Cartella**, **↻ Sincronizza**;
+- caricamento multiplo diretto nella cartella aperta;
+- cartelle personalizzate sincronizzate nel repository privato tramite `library/.recall/archive-folders.json`;
+- cancellazione sicura delle cartelle personalizzate vuote;
+- prompt di continuità `RECALL_PROJECT_BACKUP_PROMPT.md`, copiabile/scaricabile dalle Impostazioni;
+- mantiene struttura semplificata per MSK, Pelvi, Urgenze/emergenze e Interventistica;
+- mantiene GitHub privato + collegamenti iCloud + PWA offline.
 
-Le vecchie cartelle di Urgenze, Interventistica, MSK e Pelvi vengono appiattite nella visualizzazione senza spostare automaticamente i file già esistenti nel repository.
+## Repository
+Il codice di questa PWA va nel repository pubblico `Recall-App`. I documenti personali restano nel repository GitHub privato configurato dall’utente e/o in iCloud Drive.

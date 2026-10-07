@@ -1,4 +1,4 @@
-# Recall v1.13 — iCloud Drive
+# Recall v1.16 — iCloud Drive
 
 ## Obiettivo
 Recall può mostrare un nome qualsiasi per un documento e collegarlo a un PDF iCloud con un nome o un percorso completamente diverso.

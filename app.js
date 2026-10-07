@@ -2138,6 +2138,75 @@ async function githubReadText(repoPath){
   try{const r=await githubApi(`contents/${ghEncodePath(repoPath)}`,{raw:true});return await r.text();}
   catch(e){if(String(e.message).includes('404'))return null;throw e;}
 }
+
+// Recall v1.16 — cartelle personalizzate dell'Archivio.
+// Git non conserva cartelle vuote: le cartelle create dall'utente vengono quindi
+// registrate in un piccolo manifest nel repository privato e sincronizzate tra dispositivi.
+const ARCHIVE_FOLDERS_REMOTE_PATH='library/.recall/archive-folders.json';
+const ARCHIVE_FOLDERS_LOCAL_KEY='recall_archive_folders_v1';
+let customArchiveFolders={version:1,updatedAt:0,folders:[]};
+function emptyArchiveFolders(){return {version:1,updatedAt:0,folders:[]};}
+function cleanArchiveFolderName(value){return String(value||'').replace(/[\\/]+/g,' ').replace(/\s+/g,' ').trim().slice(0,80);}
+function normalizeArchiveFolders(data){
+  if(!data||typeof data!=='object')return emptyArchiveFolders();
+  const seen=new Set(),folders=[];
+  for(const raw of Array.isArray(data.folders)?data.folders:[]){
+    const area=cleanArchiveFolderName(raw?.area), organ=raw?.organ?cleanArchiveFolderName(raw.organ):null;
+    if(!area)continue;
+    const key=`${area.toLocaleLowerCase('it')}|${String(organ||'').toLocaleLowerCase('it')}`;
+    if(seen.has(key))continue;seen.add(key);
+    folders.push({area,organ:organ||null,createdAt:Number(raw?.createdAt||Date.now())});
+  }
+  return {version:1,updatedAt:Number(data.updatedAt||0),folders};
+}
+function readLocalArchiveFolders(){
+  try{return normalizeArchiveFolders(JSON.parse(localStorage.getItem(ARCHIVE_FOLDERS_LOCAL_KEY)||'null'));}
+  catch(_){return emptyArchiveFolders();}
+}
+function writeLocalArchiveFolders(data){
+  const n=normalizeArchiveFolders(data);customArchiveFolders=n;
+  try{localStorage.setItem(ARCHIVE_FOLDERS_LOCAL_KEY,JSON.stringify(n));}catch(_){}
+  return n;
+}
+async function loadArchiveFolders({refreshRemote=false}={}){
+  let local=readLocalArchiveFolders();
+  if(!refreshRemote && customArchiveFolders?.folders?.length)return customArchiveFolders;
+  if(navigator.onLine && await hasGithubConnection()){
+    try{
+      const txt=await githubReadText(ARCHIVE_FOLDERS_REMOTE_PATH);
+      if(txt){
+        const remote=normalizeArchiveFolders(JSON.parse(txt));
+        if(remote.updatedAt>=local.updatedAt)local=remote;
+        else await githubWriteText(ARCHIVE_FOLDERS_REMOTE_PATH,JSON.stringify(local,null,2),'Recall: sincronizza cartelle Archivio');
+      }else if(local.updatedAt||local.folders.length){
+        await githubWriteText(ARCHIVE_FOLDERS_REMOTE_PATH,JSON.stringify(local,null,2),'Recall: crea indice cartelle Archivio');
+      }
+    }catch(e){console.warn('Cartelle Archivio remote non disponibili',e);}
+  }
+  return writeLocalArchiveFolders(local);
+}
+async function persistArchiveFolders(data){
+  const n=normalizeArchiveFolders(data);n.updatedAt=Date.now();writeLocalArchiveFolders(n);
+  if(navigator.onLine && await hasGithubConnection()){
+    await githubWriteText(ARCHIVE_FOLDERS_REMOTE_PATH,JSON.stringify(n,null,2),'Recall: aggiorna cartelle Archivio');
+  }
+  return n;
+}
+function customFolderEntries(){return normalizeArchiveFolders(customArchiveFolders).folders;}
+function isCustomArchiveFolder(area,organ=null){
+  const a=String(area||'').toLocaleLowerCase('it'),o=String(organ||'').toLocaleLowerCase('it');
+  return customFolderEntries().some(f=>f.area.toLocaleLowerCase('it')===a&&String(f.organ||'').toLocaleLowerCase('it')===o);
+}
+function customAreaNames(){return customFolderEntries().filter(f=>!f.organ).map(f=>f.area);}
+function customOrganNames(area){return customFolderEntries().filter(f=>f.organ&&f.area.toLocaleLowerCase('it')===String(area||'').toLocaleLowerCase('it')).map(f=>f.organ);}
+function displayArchiveAreaSlug(slug){
+  const hit=customFolderEntries().find(f=>!f.organ&&ghSlug(f.area)===String(slug||''));
+  return hit?.area||humanSlug(slug);
+}
+function displayArchiveOrganSlug(area,slug){
+  const hit=customFolderEntries().find(f=>f.organ&&f.area.toLocaleLowerCase('it')===String(area||'').toLocaleLowerCase('it')&&ghSlug(f.organ)===String(slug||''));
+  return hit?.organ||humanSlug(slug);
+}
 function fnv1aHash(str){let h=0x811c9dc5;for(let i=0;i<String(str).length;i++){h^=String(str).charCodeAt(i);h=Math.imul(h,0x01000193);}return (h>>>0).toString(16).padStart(8,'0');}
 function annotationRemotePath(sourcePath){return `library/.recall/annotations/${fnv1aHash(sourcePath)}.json`;}
 
@@ -2252,6 +2321,7 @@ function titleFromFilename(name){return name.replace(/\.[^.]+$/,'').replace(/_/g
 async function syncGithubLibrary({silent=false}={}){
   if(!navigator.onLine || !(await hasGithubConnection())) return false;
   try{
+    await loadArchiveFolders({refreshRemote:true});
     const tree=await githubRecursiveTree();
     const [archiveFiles,studyFiles]=tree?[(tree.filter(f=>f.path.startsWith('library/archivio/'))),(tree.filter(f=>f.path.startsWith('library/studi/')))]:await Promise.all([githubWalk('library/archivio'),githubWalk('library/studi')]);
     const archivePathSet=new Set(archiveFiles.map(f=>f.path));
@@ -2261,8 +2331,8 @@ async function syncGithubLibrary({silent=false}={}){
     for(const f of archiveFiles){
       if(mapPaths.has(f.path)) continue;
       const p=f.path.split('/');
-      let area=humanSlug(p[2]||'Altro');
-      const rawFolder=p.length>4?humanSlug(p[3]||''):'';
+      let area=displayArchiveAreaSlug(p[2]||'Altro');
+      const rawFolder=p.length>4?displayArchiveOrganSlug(area,p[3]||''):'';
       let organ=rawFolder||null;
 
       // Migrazione visuale delle vecchie strutture: i file non vengono spostati su GitHub,
@@ -2546,8 +2616,8 @@ function save(){ localStorage.setItem("recall_state", JSON.stringify(state)); }
 
 // Recall v1.8 — PWA / offline manager
 const RECALL_VERSION="1.15.1";
-const OFFLINE_DOC_CACHE="recall-docs-v1151";
-const OFFLINE_CASE_CACHE="recall-cases-v1151";
+const OFFLINE_DOC_CACHE="recall-docs-v116";
+const OFFLINE_CASE_CACHE="recall-cases-v116";
 let deferredInstallPrompt=null;
 
 function absUrl(path){ return new URL(path,window.location.href).href; }
@@ -2725,6 +2795,7 @@ function setLibraryMode(mode){
 function libraryRoot(){ openArchiveRoot(); }
 function openArchiveRoot(){
   archiveNav={area:null,organ:null};
+  writeLocalArchiveFolders(readLocalArchiveFolders());
   document.getElementById("libraryTitle").textContent="Archivio";
   document.getElementById("libraryLanding")?.setAttribute("hidden","");
   document.getElementById("studiesExplorer").hidden=true;
@@ -2742,15 +2813,19 @@ function openStudies(){
   renderStudies();
 }
 function archiveAreas(){
-  const all=new Set(Object.keys(archiveTaxonomy)); archiveMaterials().forEach(m=>all.add(m.area||"Altro")); return [...all];
+  const all=new Set(Object.keys(archiveTaxonomy));
+  customAreaNames().forEach(x=>all.add(x));
+  archiveMaterials().forEach(m=>all.add(m.area||"Altro"));
+  return [...all].filter(Boolean).sort((a,b)=>String(a).localeCompare(String(b),'it'));
 }
 function archiveOrgans(area){
   if(isRootDirectArea(area)) return [];
   const allowed=OPTIONAL_ROOT_FOLDERS[area];
   if(allowed) return [...allowed];
   const all=new Set(Object.keys(archiveTaxonomy[area]||{}));
+  customOrganNames(area).forEach(x=>all.add(x));
   archiveMaterials().filter(m=>m.area===area&&m.organ).forEach(m=>all.add(m.organ));
-  return [...all].filter(Boolean);
+  return [...all].filter(Boolean).sort((a,b)=>String(a).localeCompare(String(b),'it'));
 }
 function materialCount(filter={}){
   return archiveMaterials().filter(m=>{
@@ -2914,51 +2989,116 @@ async function deleteArchiveMaterial(kind,id){
   }catch(e){console.error(e);toast(`Eliminazione non riuscita: ${e.message||'errore'}`);}
 }
 
+function archiveCurrentRepoBase(){
+  if(!archiveNav.area)return null;
+  return archiveNav.organ
+    ?`library/archivio/${ghSlug(archiveNav.area)}/${ghSlug(archiveNav.organ)}`
+    :`library/archivio/${ghSlug(archiveNav.area)}`;
+}
+function updateArchiveActionState(){
+  const uploadBtn=document.getElementById('archiveQuickUploadBtn');
+  const folderBtn=document.getElementById('archiveNewFolderBtn');
+  const help=document.getElementById('archiveContextHelp');
+  const atRoot=!archiveNav.area, inSub=!!archiveNav.organ;
+  if(uploadBtn){uploadBtn.disabled=atRoot;uploadBtn.title=atRoot?'Apri prima una cartella dell’Archivio':'Aggiungi file direttamente qui';}
+  let canFolder=true,folderReason='';
+  if(inSub){canFolder=false;folderReason='Recall usa al massimo due livelli di cartelle';}
+  else if(archiveNav.area && (isRootDirectArea(archiveNav.area)||isOptionalRootArea(archiveNav.area))){
+    canFolder=false;folderReason=`${archiveNav.area} mantiene la struttura semplificata concordata`;
+  }
+  if(folderBtn){folderBtn.disabled=!canFolder;folderBtn.title=canFolder?'Crea una cartella qui':folderReason;}
+  if(help){
+    if(atRoot)help.textContent='Apri un distretto/cartella per aggiungere file. Da qui puoi creare una nuova cartella principale.';
+    else if(inSub)help.textContent=`Destinazione rapida: Archivio › ${archiveNav.area} › ${archiveNav.organ}`;
+    else help.textContent=`Destinazione rapida: Archivio › ${archiveNav.area}`;
+  }
+}
+async function quickUploadArchiveFiles(fileList){
+  const files=[...(fileList||[])];if(!files.length)return;
+  const base=archiveCurrentRepoBase();if(!base){toast('Apri prima la cartella in cui vuoi inserire i file');return;}
+  if(!(await hasGithubConnection())){toast('Collega prima GitHub dalle Impostazioni');return;}
+  if(!navigator.onLine){toast('Serve internet per caricare su GitHub');return;}
+  const btn=document.getElementById('archiveQuickUploadBtn'),old=btn?.textContent||'＋ File';
+  let done=0;
+  try{
+    if(btn)btn.disabled=true;
+    for(let i=0;i<files.length;i++){
+      if(btn)btn.textContent=`Carico ${i+1}/${files.length}…`;
+      const f=files[i],repoPath=`${base}/${safeGithubFilename(f.name)}`;
+      await githubUploadFile(repoPath,f);done++;
+    }
+    githubLibrarySynced=false;await syncGithubLibrary({silent:true});
+    toast(done===1?'File caricato':`${done} file caricati`);renderArchive();
+  }catch(e){console.error(e);if(String(e.message)!=='Caricamento annullato')toast(e.message||'Caricamento non riuscito');}
+  finally{if(btn){btn.textContent=old;btn.disabled=false;}const input=document.getElementById('archiveQuickFileInput');if(input)input.value='';updateArchiveActionState();}
+}
+async function createArchiveFolder(){
+  if(archiveNav.organ){toast('Non sono previste cartelle dentro una sottocartella');return;}
+  if(archiveNav.area && (isRootDirectArea(archiveNav.area)||isOptionalRootArea(archiveNav.area))){
+    toast(`${archiveNav.area} mantiene la struttura senza nuove sottocartelle`);return;
+  }
+  const parent=archiveNav.area;
+  const label=parent?`Nome della nuova cartella dentro “${parent}”`:'Nome della nuova cartella principale';
+  const raw=prompt(label);if(raw===null)return;
+  const name=cleanArchiveFolderName(raw);if(!name){toast('Inserisci un nome per la cartella');return;}
+  const exists=parent
+    ?archiveOrgans(parent).some(x=>x.toLocaleLowerCase('it')===name.toLocaleLowerCase('it'))
+    :archiveAreas().some(x=>x.toLocaleLowerCase('it')===name.toLocaleLowerCase('it'));
+  if(exists){toast('Esiste già una cartella con questo nome');return;}
+  const db=normalizeArchiveFolders(customArchiveFolders);db.folders.push({area:parent||name,organ:parent?name:null,createdAt:Date.now()});
+  try{await persistArchiveFolders(db);toast('Cartella creata');renderArchive();}
+  catch(e){console.error(e);toast(`Cartella salvata solo su questo dispositivo: ${e.message||'sincronizzazione non riuscita'}`);renderArchive();}
+}
+async function deleteCustomArchiveFolder(area,organ=null){
+  if(!isCustomArchiveFolder(area,organ)){toast('Questa cartella fa parte della struttura base di Recall');return;}
+  const count=organ?materialCount({area,organ}):materialCount({area});
+  const children=!organ?customFolderEntries().filter(f=>f.organ&&f.area.toLocaleLowerCase('it')===String(area).toLocaleLowerCase('it')).length:0;
+  if(count>0){toast('La cartella contiene file: elimina o sposta prima i file');return;}
+  if(children>0){toast('Elimina prima le sottocartelle');return;}
+  if(!confirm(`Eliminare la cartella vuota “${organ||area}”?`))return;
+  const db=normalizeArchiveFolders(customArchiveFolders);
+  db.folders=db.folders.filter(f=>!(f.area.toLocaleLowerCase('it')===String(area).toLocaleLowerCase('it')&&String(f.organ||'').toLocaleLowerCase('it')===String(organ||'').toLocaleLowerCase('it')));
+  try{await persistArchiveFolders(db);toast('Cartella eliminata');if(organ&&archiveNav.organ===organ)archiveNav.organ=null;if(!organ&&archiveNav.area===area)archiveNav={area:null,organ:null};renderArchive();}
+  catch(e){console.error(e);toast(e.message||'Eliminazione cartella non riuscita');}
+}
 function renderNodeList(items,kind){
   return `<div class="archive-list">${items.map(item=>{
-    const count=kind==="area"?materialCount({area:item}):materialCount({area:archiveNav.area,organ:item});
-    const noun=count===1?'file':'file';
-    const attr=kind==="area"?`data-area="${escapeHTML(item)}"`:`data-organ="${escapeHTML(item)}"`;
-    return `<button class="archive-list-row" ${attr}><div class="archive-list-main"><div class="archive-list-title">${escapeHTML(item)}</div><div class="archive-list-meta">${count} ${noun}</div></div><span class="archive-list-arrow">›</span></button>`;
-  }).join("")}</div>`;
+    const count=kind==='area'?materialCount({area:item}):materialCount({area:archiveNav.area,organ:item});
+    const attr=kind==='area'?`data-area="${escapeHTML(item)}"`:`data-organ="${escapeHTML(item)}"`;
+    const area=kind==='area'?item:archiveNav.area,organ=kind==='organ'?item:null;
+    const custom=isCustomArchiveFolder(area,organ);
+    const more=custom?`<button class="archive-folder-more" data-delete-folder="1" data-folder-area="${escapeHTML(area)}" data-folder-organ="${escapeHTML(organ||'')}" title="Elimina cartella vuota">⋯</button>`:'';
+    return `<div class="archive-list-item"><button class="archive-list-row" ${attr}><div class="archive-list-main"><div class="archive-list-title">${escapeHTML(item)}</div><div class="archive-list-meta">${count} ${count===1?'file':'file'}</div></div><span class="archive-list-arrow">›</span></button>${more}</div>`;
+  }).join('')}</div>`;
+}
+function wireArchiveNodes(body){
+  body.querySelectorAll('[data-area]').forEach(x=>x.onclick=()=>{archiveNav.area=x.dataset.area;archiveNav.organ=null;renderArchive();});
+  body.querySelectorAll('[data-organ]').forEach(x=>x.onclick=()=>{archiveNav.organ=x.dataset.organ;renderArchive();});
+  body.querySelectorAll('[data-delete-folder]').forEach(x=>x.onclick=e=>{e.stopPropagation();deleteCustomArchiveFolder(x.dataset.folderArea,x.dataset.folderOrgan||null);});
 }
 function renderArchive(){
-  renderBreadcrumb(); const body=document.getElementById("archiveBody"); const q=norm(document.getElementById("librarySearch")?.value||"");
+  renderBreadcrumb();updateArchiveActionState();
+  const body=document.getElementById('archiveBody');const q=norm(document.getElementById('librarySearch')?.value||'');
   if(q){
-    const found=archiveMaterials().filter(m=>norm([m.title,m.filename,m.area,m.organ].join(" ")).includes(q));
-    body.innerHTML=`<div class="archive-section-title">Risultati</div>${renderMaterialRows(found)}`; wireMaterialRows(body); return;
+    const found=archiveMaterials().filter(m=>norm([m.title,m.filename,m.area,m.organ].join(' ')).includes(q));
+    body.innerHTML=`<div class="archive-section-title">Risultati</div>${renderMaterialRows(found)}`;wireMaterialRows(body);return;
   }
   if(!archiveNav.area){
-    body.innerHTML=`<div class="archive-section-title">Scegli il distretto</div>${renderNodeList(archiveAreas(),"area")}`;
-    body.querySelectorAll('[data-area]').forEach(x=>x.onclick=()=>{archiveNav.area=x.dataset.area;renderArchive();}); return;
+    body.innerHTML=`<div class="archive-section-title">Scegli il distretto</div>${renderNodeList(archiveAreas(),'area')}`;
+    wireArchiveNodes(body);return;
   }
-
   const area=archiveNav.area;
+  if(archiveNav.organ){
+    const mats=archiveMaterials().filter(m=>m.area===area&&m.organ===archiveNav.organ);
+    body.innerHTML=`<div class="archive-section-title">${escapeHTML(archiveNav.organ)}</div>${renderMaterialRows(mats)}`;
+    wireMaterialRows(body);return;
+  }
   const directFiles=archiveMaterials().filter(m=>m.area===area&&!m.organ);
-
-  // Urgenze/emergenze e Interventistica: nessuna sottocartella.
-  if(isRootDirectArea(area)){
-    body.innerHTML=`<div class="archive-section-title">${escapeHTML(area)}</div>${renderMaterialRows(directFiles)}`;
-    wireMaterialRows(body); return;
-  }
-
-  // MSK e Pelvi: file direttamente nella cartella principale + una sola sottocartella consentita.
-  if(isOptionalRootArea(area) && !archiveNav.organ){
-    const organs=archiveOrgans(area);
-    const folders=organs.length?`<div class="archive-section-title">Cartelle</div>${renderNodeList(organs,"organ")}`:'';
-    const files=`<div class="archive-section-title">File</div>${renderMaterialRows(directFiles)}`;
-    body.innerHTML=`${files}${folders}`;
-    body.querySelectorAll('[data-organ]').forEach(x=>x.onclick=()=>{archiveNav.organ=x.dataset.organ;renderArchive();});
-    wireMaterialRows(body); return;
-  }
-
-  if(!archiveNav.organ){
-    const organs=archiveOrgans(area);
-    body.innerHTML=`<div class="archive-section-title">${escapeHTML(area)}</div>${renderNodeList(organs,"organ")}`;
-    body.querySelectorAll('[data-organ]').forEach(x=>x.onclick=()=>{archiveNav.organ=x.dataset.organ;renderArchive();}); return;
-  }
-  const mats=archiveMaterials().filter(m=>m.area===area&&m.organ===archiveNav.organ);
-  body.innerHTML=`<div class="archive-section-title">${escapeHTML(archiveNav.organ)}</div>${renderMaterialRows(mats)}`; wireMaterialRows(body);
+  const organs=archiveOrgans(area);
+  const fileSection=(directFiles.length||!organs.length)?`<div class="archive-section-title">File</div>${renderMaterialRows(directFiles)}`:'';
+  const folderSection=organs.length?`<div class="archive-section-title">Cartelle</div>${renderNodeList(organs,'organ')}`:'';
+  body.innerHTML=`${fileSection}${folderSection}`;
+  wireArchiveNodes(body);wireMaterialRows(body);
 }
 function renderStudies(){
   const box=document.getElementById("studiesList"); const docs=studyMaterials();
@@ -3566,6 +3706,18 @@ function syncAddMaterialForm(){
   if(organList)organList.innerHTML=Object.keys(archiveTaxonomy[area]||{}).map(x=>`<option value="${x}">`).join("");
 }
 
+async function copyProjectPrompt(){
+  try{
+    const r=await fetch('RECALL_PROJECT_BACKUP_PROMPT.md',{cache:'no-store'});
+    if(!r.ok)throw new Error('Prompt non disponibile');
+    const text=await r.text();
+    await navigator.clipboard.writeText(text);
+    toast('Prompt del progetto copiato');
+  }catch(e){
+    console.error(e);toast('Non riesco a copiarlo automaticamente: usa “Scarica prompt .md”');
+  }
+}
+
 function exportData(){
   const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="recall-backup.json";a.click();URL.revokeObjectURL(a.href);
@@ -3585,6 +3737,17 @@ document.getElementById("libraryBackBtn").onclick=()=>{
   showView("homeView");
 };
 document.getElementById("libraryAddBtn").onclick=()=>{showView("addMapView");syncAddMaterialForm();};
+document.getElementById("archiveQuickUploadBtn")?.addEventListener("click",()=>{
+  if(!archiveNav.area){toast("Apri prima la cartella di destinazione");return;}
+  document.getElementById("archiveQuickFileInput")?.click();
+});
+document.getElementById("archiveQuickFileInput")?.addEventListener("change",e=>quickUploadArchiveFiles(e.target.files));
+document.getElementById("archiveNewFolderBtn")?.addEventListener("click",createArchiveFolder);
+document.getElementById("archiveSyncBtn")?.addEventListener("click",async()=>{
+  const b=document.getElementById("archiveSyncBtn"),old=b?.textContent||"↻";
+  try{if(b){b.disabled=true;b.textContent="…";}await syncGithubLibrary({silent:true});renderArchive();toast("Archivio sincronizzato");}
+  finally{if(b){b.disabled=false;b.textContent=old;}}
+});
 document.getElementById("addMapBackBtn").onclick=()=>showView("homeView");
 document.getElementById("saveMapBtn").onclick=saveNewMap;
 document.getElementById("pdfAnnotatorBackBtn")?.addEventListener("click",()=>closePdfAnnotator());
@@ -3595,6 +3758,7 @@ document.getElementById("pdfOpenNativeBtn")?.addEventListener("click",openCurren
 
 document.getElementById("settingsBtn").onclick=()=>{showView("settingsView");updateConnectionUI();updateInstallUI();updateCaseOfflineStatus();updateGithubSettingsUI();updateIcloudSettingsUI();};
 document.getElementById("settingsBackBtn").onclick=()=>showView("homeView");
+document.getElementById("copyProjectPromptBtn")?.addEventListener("click",copyProjectPrompt);
 document.getElementById("exportBtn").onclick=exportData;
 document.getElementById("importInput").onchange=e=>e.target.files[0]&&importData(e.target.files[0]);
 document.getElementById("resetBtn").onclick=()=>{if(confirm("Ripristinare la demo?")){localStorage.removeItem("recall_state");location.reload();}};
