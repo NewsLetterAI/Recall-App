@@ -1464,7 +1464,7 @@ const archiveTaxonomy = {
   "MSK": {
     "Osso": []
   },
-  "Urgenze / emergenze": {},
+  "Urgenza": {},
   "Neuroradiologia": {
     "Encefalo": [],
     "Rachide": [],
@@ -1485,7 +1485,14 @@ const archiveTaxonomy = {
   "Interventistica": {}
 };
 
-const DIRECT_ROOT_AREAS = new Set(["Urgenze / emergenze","Interventistica"]);
+// Alias storici: i documenti gia' presenti nel repository privato non vengono spostati.
+// Solo il nome mostrato e i nuovi percorsi diventano "Urgenza".
+function canonicalArchiveArea(value){
+  const key=String(value||'').toLocaleLowerCase('it').replace(/[\s\/_-]+/g,' ').trim();
+  return ['urgenza','urgenze','urgenza emergenza','urgenze emergenze'].includes(key)
+    ?'Urgenza':value;
+}
+const DIRECT_ROOT_AREAS = new Set(["Urgenza","Interventistica"]);
 const OPTIONAL_ROOT_FOLDERS = {
   "MSK": new Set(["Osso"]),
   "Pelvi": new Set(["Utero"])
@@ -2151,7 +2158,7 @@ function normalizeArchiveFolders(data){
   if(!data||typeof data!=='object')return emptyArchiveFolders();
   const seen=new Set(),folders=[];
   for(const raw of Array.isArray(data.folders)?data.folders:[]){
-    const area=cleanArchiveFolderName(raw?.area), organ=raw?.organ?cleanArchiveFolderName(raw.organ):null;
+    const area=canonicalArchiveArea(cleanArchiveFolderName(raw?.area)), organ=raw?.organ?cleanArchiveFolderName(raw.organ):null;
     if(!area)continue;
     const key=`${area.toLocaleLowerCase('it')}|${String(organ||'').toLocaleLowerCase('it')}`;
     if(seen.has(key))continue;seen.add(key);
@@ -2201,7 +2208,7 @@ function customAreaNames(){return customFolderEntries().filter(f=>!f.organ).map(
 function customOrganNames(area){return customFolderEntries().filter(f=>f.organ&&f.area.toLocaleLowerCase('it')===String(area||'').toLocaleLowerCase('it')).map(f=>f.organ);}
 function displayArchiveAreaSlug(slug){
   const hit=customFolderEntries().find(f=>!f.organ&&ghSlug(f.area)===String(slug||''));
-  return hit?.area||humanSlug(slug);
+  return canonicalArchiveArea(hit?.area||humanSlug(slug));
 }
 function displayArchiveOrganSlug(area,slug){
   const hit=customFolderEntries().find(f=>f.organ&&f.area.toLocaleLowerCase('it')===String(area||'').toLocaleLowerCase('it')&&ghSlug(f.organ)===String(slug||''));
@@ -2274,11 +2281,11 @@ async function persistIcloudLinks(data){
 }
 function icloudLinkForRecordSync(rec){
   const key=iCloudRecordKey(rec);
-  return iCloudLinksCache?.links?.[key]||readFastIcloudLinks().links?.[key]||null;
+  return normalizedIcloudLinkForRecord(rec,iCloudLinksCache?.links?.[key]||readFastIcloudLinks().links?.[key]||null);
 }
 async function getIcloudLinkForRecord(rec){
   const fast=icloudLinkForRecordSync(rec);if(fast)return fast;
-  const db=await loadIcloudLinks();return db.links[iCloudRecordKey(rec)]||null;
+  const db=await loadIcloudLinks();return normalizedIcloudLinkForRecord(rec,db.links[iCloudRecordKey(rec)]||null);
 }
 async function saveIcloudLinkForRecord(rec,path){
   const db=mergeIcloudLinks(readFastIcloudLinks(),iCloudLinksCache||emptyIcloudLinks());
@@ -2295,7 +2302,7 @@ async function githubTest(){
   const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},cache:'no-store'});
   if(!r.ok) throw new Error(`Accesso negato (${r.status})`); return await r.json();
 }
-function humanSlug(s){const known={'vie-biliari':'Vie biliari','peritoneo-retroperitoneo':'Peritoneo / retroperitoneo','testa-collo':'Testa-collo','muscoloscheletrico':'MSK','msk':'MSK','urgenze-emergenze':'Urgenze / emergenze','urgenze':'Urgenze / emergenze','neuroradiologia':'Neuroradiologia','gastrointestinale':'Gastrointestinale','cardiovascolare':'Cardiovascolare','interventistica':'Interventistica'};return known[s]||String(s||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
+function humanSlug(s){const known={'vie-biliari':'Vie biliari','peritoneo-retroperitoneo':'Peritoneo / retroperitoneo','testa-collo':'Testa-collo','muscoloscheletrico':'MSK','msk':'MSK','urgenze-emergenze':'Urgenza','urgenza-emergenza':'Urgenza','urgenze':'Urgenza','urgenza':'Urgenza','neuroradiologia':'Neuroradiologia','gastrointestinale':'Gastrointestinale','cardiovascolare':'Cardiovascolare','interventistica':'Interventistica'};return known[s]||String(s||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
 const GH_FILE_EXT=/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|md|rtf|png|jpe?g|webp)$/i;
 async function githubRecursiveTree(){
   const cfg=getGithubConfig(),token=await getGithubToken();
@@ -2338,7 +2345,7 @@ async function syncGithubLibrary({silent=false}={}){
       // Migrazione visuale delle vecchie strutture: i file non vengono spostati su GitHub,
       // ma vengono mostrati nella nuova cartella corretta.
       if(area==='Addome' && /urgen|emergen/i.test(String(organ||''))){
-        area='Urgenze / emergenze'; organ=null;
+        area='Urgenza'; organ=null;
       }else if(isRootDirectArea(area)){
         organ=null;
       }else if(area==='MSK'){
@@ -2782,9 +2789,9 @@ let archiveNav={area:null,organ:null};
 function archiveMaterials(){
   const maps=state.maps.filter(m=>m.githubAvailable!==false).map(m=>{
     const meta=bundledArchiveMeta[m.id]||{area:m.area||"Altro",organ:m.organ||m.title};
-    return {id:m.id,title:m.title,area:meta.area,organ:meta.organ,filename:m.source||"PDF",kind:"map",map:m};
+    return {id:m.id,title:m.title,area:canonicalArchiveArea(meta.area),organ:meta.organ,filename:m.source||"PDF",kind:"map",map:m};
   });
-  const docs=(state.documents||[]).filter(d=>d.collection==="archivio").map(d=>({...d,kind:"document"}));
+  const docs=(state.documents||[]).filter(d=>d.collection==="archivio").map(d=>({...d,area:canonicalArchiveArea(d.area),kind:"document"}));
   return [...maps,...docs];
 }
 function studyMaterials(){ return (state.documents||[]).filter(d=>d.collection==="studi"); }
@@ -2902,7 +2909,28 @@ function suggestedIcloudPathForRecord(rec){
     const project=String(rec.project||'').split('›').map(x=>clean(x)).filter(Boolean);
     return [cfg.root,'Studi',...project,filename].filter(Boolean).join('/');
   }
-  return [cfg.root,'Archivio',clean(rec.area||'Altro'),rec.organ?clean(rec.organ):null,filename].filter(Boolean).join('/');
+  return [cfg.root,'Archivio',clean(canonicalArchiveArea(rec.area)||'Altro'),rec.organ?clean(rec.organ):null,filename].filter(Boolean).join('/');
+}
+// Il vecchio nome "Urgenze / emergenze" conteneva uno slash, interpretato
+// come separatore di cartelle. Correggiamo soltanto i percorsi standard iCloud
+// degli elementi di Urgenza; collegamenti personalizzati altrove restano intatti.
+function canonicalIcloudUrgencyPath(raw,rec){
+  const path=String(raw||'');
+  if(canonicalArchiveArea(rec?.area)!=='Urgenza')return path;
+  const root=getIcloudConfig().root;
+  const prefix=`${root}/Archivio/`;
+  if(!path.startsWith(prefix))return path;
+  const parts=path.slice(prefix.length).split('/');
+  const first=String(parts[0]||'').toLocaleLowerCase('it').trim().replace(/[\s_-]+/g,' ');
+  const second=String(parts[1]||'').toLocaleLowerCase('it').trim();
+  if(!['urgenza','urgenze','urgenza emergenza','urgenze emergenze'].includes(first))return path;
+  const take=(['urgenza','urgenze'].includes(first)&&['emergenza','emergenze'].includes(second))?2:1;
+  return prefix+['Urgenza',...parts.slice(take)].join('/');
+}
+function normalizedIcloudLinkForRecord(rec,link){
+  if(!link?.path)return link;
+  const path=canonicalIcloudUrgencyPath(link.path,rec);
+  return path===link.path?link:{...link,path};
 }
 function normalizeIcloudUserPath(raw,rec){
   let path=String(raw||'').trim().replace(/^icloud\s*drive[\\/]/i,'').replace(/^\/+/, '').replace(/\\/g,'/').replace(/\/{2,}/g,'/');
@@ -2910,7 +2938,7 @@ function normalizeIcloudUserPath(raw,rec){
   if(!path.includes('/')){
     const suggested=suggestedIcloudPathForRecord(rec);const parent=suggested.split('/').slice(0,-1).join('/');path=`${parent}/${path}`;
   }
-  return path;
+  return canonicalIcloudUrgencyPath(path,rec);
 }
 function runIcloudShortcut(path){
   const cfg=getIcloudConfig();

@@ -1,8 +1,8 @@
-const VERSION="v116";
+const VERSION="v1161";
 const CORE_CACHE=`recall-core-${VERSION}`;
 const RUNTIME_CACHE=`recall-runtime-${VERSION}`;
-const DOC_CACHE=`recall-docs-${VERSION}`;
-const CASE_CACHE=`recall-cases-${VERSION}`;
+const DOC_CACHE="recall-docs-v116"; // Conserva la cache dei PDF gia disponibili offline.
+const CASE_CACHE="recall-cases-v116"; // Conserva la cache dei casi gia scaricati.
 
 const scopeURL=self.registration.scope;
 const APP_ENTRY=new URL("index.html",scopeURL).href;
