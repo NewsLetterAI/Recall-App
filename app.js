@@ -1333,7 +1333,283 @@ const reportCases = [
     images:["assets/cases/case_rm_steatosis_panel.png"],
     findings:[["Drop di segnale nelle sequenze opposed-phase nelle aree steatosiche","drop di segnale|opposed-phase|out of phase|steatosi"],["Area di focal fatty sparing in fegato steatosico","fatty sparing|risparmio focale|area risparmiata"],["Distribuzione tipica peri-falciforme / fossa colecistica","peri-falciform|fossa colecistica|subcapsular|segmentaria"],["Assenza di effetto massa o distorsione vascolare","assenza di effetto massa|nessun effetto massa|non distorce i vasi"],["Conclusione per steatosi focale/focal fatty sparing","steatosi focale|focal fatty sparing"]],
     sampleReport:"Nelle sequenze opposed-phase si apprezza marcato drop di segnale di alcune aree parenchimali, compatibile con steatosi focale, mentre altre aree relativamente iperintense rappresentano focal fatty sparing su fegato diffusamente steatosico. I reperti non determinano effetto massa né distorsione dei vasi, favorendo natura pseudolesionale."
+  },
+  // ---------- URGENZE / EMERGENZE: ANEURISMI AORTA ADDOMINALE ----------
+  {
+    id:"case_em_aaa_rupture_active", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: ANEURISMI AORTA ADDOMINALE",
+    mapId:"urgenze_aaa", modalityCode:"TC", region:"Cardiovascolare", topic:"AAA rotto", emergency:true,
+    title:"Angio-TC — AAA infrarenale rotto con sanguinamento attivo", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC aorta toraco-addominale",
+    clinical:"Uomo di 76 anni con dolore addomino-lombare improvviso, ipotensione e massa addominale pulsante.",
+    prompt:"Scrivi un referto urgente, sintetico ma completo, evidenziando subito i reperti che cambiano il management.",
+    task:"Obiettivo: sede e diametro massimo dell'AAA, estensione, ematoma retroperitoneale/periaortico, eventuale stravaso attivo, colletto prossimale e assi iliaci utili al planning urgente.",
+    criticalFindings:[
+      ["Rottura dell'AAA con ematoma retroperitoneale/periaortico","rottura|rotto|ematoma retroperitoneale|ematoma periaortico|emorragia retroperitoneale"],
+      ["Stravaso attivo di mezzo di contrasto","stravaso|extravaso|sanguinamento attivo"],
+      ["Comunicazione urgente / quadro emergenziale","urgente|emergenza|chirurg|vascolare|team aortico"]
+    ],
+    findings:[
+      ["AAA infrarenale","aneurisma|aaa|infrarenale"],
+      ["Diametro massimo esterno-esterno su piano ortogonale","diametro massimo|mm|cm|esterno|ortogonale"],
+      ["Trombo murale se presente","trombo murale|trombo"],
+      ["Ematoma retroperitoneale/periaortico","ematoma retroperitoneale|ematoma periaortico|retroperitoneale"],
+      ["Stravaso di contrasto","stravaso|extravaso|sanguinamento attivo"],
+      ["Colletto prossimale / rapporto con arterie renali","colletto|arterie renali|renali"],
+      ["Assi iliaci e accessi","iliache|iliaci|femorali|accesso"],
+      ["Conclusione esplicita di AAA rotto","aaa rotto|aneurisma rotto|rottura aneurisma"]
+    ],
+    sampleReport:"Voluminosa dilatazione aneurismatica fusiforme dell'aorta addominale infrarenale, con diametro massimo esterno-esterno di circa 72 mm su piano ortogonale all'asse aortico, parzialmente trombizzata. Ampio ematoma periaortico e retroperitoneale, prevalente a sinistra, con focale stravaso di mezzo di contrasto compatibile con sanguinamento attivo. Il colletto prossimale è subrenale; assi iliaci pervi, da valutare ai fini dell'accesso endovascolare. Quadro di AAA rotto con emorragia attiva: reperto emergenziale da comunicare immediatamente al team vascolare." 
+  },
+  {
+    id:"case_em_aaa_impending", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ANEURISMI AORTA ADDOMINALE",
+    mapId:"urgenze_aaa", modalityCode:"TC", region:"Cardiovascolare", topic:"Segni di rottura imminente", emergency:true,
+    title:"TC — AAA sintomatico con segni di rottura imminente", area:"Urgenze / emergenze", organ:"Aorta", modality:"TC addome con e senza mdc",
+    clinical:"Uomo di 71 anni con AAA noto e nuovo dolore lombare; parametri emodinamici stabili.",
+    prompt:"Referta il caso distinguendo chiaramente i segni di instabilità della sacca dall'assenza di rottura franca.",
+    task:"Obiettivo: cercare crescent sign, fissurazione del trombo, discontinuità/tangential calcium sign, stranding periaortico e specificare se manca ematoma o stravaso franco.",
+    criticalFindings:[
+      ["Segni TC di instabilità / rottura imminente","rottura imminente|instabil|crescent|fissurazione|tangential calcium"],
+      ["Assenza o presenza di rottura franca","assenza di rottura|senza rottura franca|ematoma|stravaso"]
+    ],
+    findings:[
+      ["AAA di grandi dimensioni","aneurisma|aaa|diametro|mm|cm"],
+      ["Crescent sign / sangue fresco nella parete o nel trombo","crescent|semilunare iperdensa|iperdensità|sangue fresco"],
+      ["Fissurazione del trombo murale","fissurazione|trombo|passaggio di contrasto nel trombo"],
+      ["Discontinuità o orientamento anomalo delle calcificazioni","calcific|tangential calcium|discontinuità"],
+      ["Stranding / alterazione periaortica","stranding|periaort|grasso periaortico"],
+      ["Assenza di ematoma retroperitoneale franco","assenza di ematoma|senza ematoma|non ematoma"],
+      ["Assenza di stravaso attivo se non presente","assenza di stravaso|senza stravaso|non si osserva stravaso"],
+      ["Conclusione per AAA instabile / a rischio di rottura","instabile|rottura imminente|alto rischio"]
+    ],
+    sampleReport:"AAA infrarenale di circa 66 mm, con trombo murale eccentrico. Nel contesto del trombo si apprezza area semilunare iperdensa nelle scansioni basali, associata a fissurazione del trombo e focale discontinuità/orientamento tangenziale di calcificazione parietale; modesto stranding periaortico. Non evidenza di ematoma retroperitoneale né di stravaso attivo. Quadro di AAA sintomatico con segni TC di instabilità/rottura imminente, meritevole di valutazione vascolare urgente." 
+  },
+  {
+    id:"case_em_aaa_contained", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ANEURISMI AORTA ADDOMINALE",
+    mapId:"urgenze_aaa", modalityCode:"TC", region:"Cardiovascolare", topic:"Rottura contenuta", emergency:true,
+    title:"Angio-TC — rottura contenuta con draped aorta sign", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC aorta addominale",
+    clinical:"Paziente con dolore lombare persistente e aneurisma aortico noto, senza shock.",
+    prompt:"Descrivi il reperto che suggerisce rottura contenuta e distinguilo dalla morfologia di un aneurisma stabile.",
+    task:"Obiettivo: perdita del normale profilo convesso posteriore, parete che si modella sulla colonna (draped aorta sign), eventuale erosione vertebrale e conclusione urgente.",
+    criticalFindings:[
+      ["Draped aorta sign","draped aorta|parete posteriore|colonna vertebrale|profilo convesso"],
+      ["Conclusione di rottura contenuta","rottura contenuta|contained rupture"]
+    ],
+    findings:[
+      ["AAA voluminoso","aneurisma|aaa|diametro"],
+      ["Perdita del contorno convesso posteriore","contorno convesso|profilo convesso|parete posteriore"],
+      ["Aorta modellata/appoggiata alla colonna","appoggia|modella|colonna|vertebr"],
+      ["Draped aorta sign","draped aorta"],
+      ["Assenza di stravaso franco se non presente","assenza di stravaso|senza stravaso"],
+      ["Conclusione di rottura contenuta","rottura contenuta|contained"]
+    ],
+    sampleReport:"Voluminoso AAA infrarenale con perdita del normale profilo convesso della parete posteriore, che appare modellata sul profilo anteriore dei corpi vertebrali, configurando draped aorta sign. Non si documenta stravaso attivo di mezzo di contrasto. Il quadro è altamente suggestivo per rottura contenuta dell'aneurisma e richiede valutazione vascolare urgente." 
+  },
+  {
+    id:"case_em_aaa_aortocaval", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ANEURISMI AORTA ADDOMINALE",
+    mapId:"urgenze_aaa", modalityCode:"TC", region:"Cardiovascolare", topic:"Fistola aorto-cavale", emergency:true,
+    title:"Angio-TC — AAA complicato da fistola aorto-cavale", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC aorta addominale",
+    clinical:"Uomo con AAA noto, dispnea acuta, edema periferico e segni di scompenso destro.",
+    prompt:"Scrivi il referto mettendo in evidenza il segno vascolare decisivo.",
+    task:"Obiettivo: comunicazione aorta-VCI e opacizzazione precoce della vena cava in fase arteriosa, anche in assenza di franco ematoma retroperitoneale.",
+    criticalFindings:[
+      ["Opacizzazione precoce della vena cava inferiore","vena cava|vci|opacizzazione precoce|precoce opacizzazione"],
+      ["Fistola aorto-cavale","fistola aorto-cavale|aortocavale|aorto cavale"]
+    ],
+    findings:[
+      ["AAA","aneurisma|aaa"],
+      ["Comunicazione tra aorta e vena cava","comunicazione|fistola|aorta|vena cava"],
+      ["Opacizzazione precoce della VCI in fase arteriosa","opacizzazione precoce|vena cava|vci|fase arteriosa"],
+      ["Segni di shunt artero-venoso","shunt|artero-venoso|av"],
+      ["Valutazione di ematoma/rottura associata","ematoma|rottura|retroperitoneale"],
+      ["Conclusione per fistola aorto-cavale","aorto-cavale|aortocavale"]
+    ],
+    sampleReport:"AAA infrarenale complicato da comunicazione diretta con la vena cava inferiore. In fase arteriosa si osserva precoce e intensa opacizzazione della VCI, compatibile con shunt artero-venoso ad alto flusso. Non si apprezza franco ematoma retroperitoneale. Quadro di fistola aorto-cavale associata ad AAA, da comunicare con urgenza al team vascolare." 
+  },
+  {
+    id:"case_em_aaa_aortoenteric", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ANEURISMI AORTA ADDOMINALE",
+    mapId:"urgenze_aaa", modalityCode:"TC", region:"Cardiovascolare", topic:"Fistola aorto-enterica", emergency:true,
+    title:"TC — sospetta fistola aorto-enterica", area:"Urgenze / emergenze", organ:"Aorta", modality:"TC addome multiphasica con mdc",
+    clinical:"Paziente con pregresso trattamento aortico e sanguinamento gastrointestinale.",
+    prompt:"Referta i reperti sospetti per comunicazione aorto-enterica, specificando il segmento intestinale coinvolto quando riconoscibile.",
+    task:"Obiettivo: rapporto con III-IV porzione duodenale, gas periaortico extraluminale, ematoma e/o stravaso di contrasto nel lume intestinale.",
+    criticalFindings:[
+      ["Gas periaortico extraluminale sospetto","gas periaortico|bolle aeree|gas extraluminale"],
+      ["Comunicazione/stravaso verso il duodeno o intestino","duodeno|intestino|stravaso|fistola"],
+      ["Conclusione di fistola aorto-enterica","fistola aorto-enterica|aortoenterica"]
+    ],
+    findings:[
+      ["Stretto rapporto tra aorta e III-IV porzione duodenale","duodeno|terza porzione|quarta porzione|iii|iv"],
+      ["Gas periaortico extraluminale","gas periaortico|bolle aeree|gas extraluminale"],
+      ["Ematoma periaortico/retroperitoneale se presente","ematoma|retroperitoneale|periaortico"],
+      ["Stravaso di contrasto nel tratto intestinale se presente","stravaso|intestino|duodeno|lume"],
+      ["Conclusione per fistola aorto-enterica","fistola aorto-enterica|aortoenterica"]
+    ],
+    sampleReport:"In sede aortica trattata si osserva marcato addensamento dei tessuti periaortici con piccole bolle gassose extraluminali a stretto contatto con la III-IV porzione duodenale. In fase contrastografica si apprezza focale passaggio di mezzo di contrasto verso il lume duodenale. Reperti altamente sospetti per fistola aorto-enterica, complicanza potenzialmente fatale da comunicare immediatamente." 
+  },
+  {
+    id:"case_em_aaa_endoleak_highpressure", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ANEURISMI AORTA ADDOMINALE",
+    mapId:"urgenze_aaa", modalityCode:"TC", region:"Cardiovascolare", topic:"Endoleak ad alta pressione", emergency:true,
+    title:"Angio-TC post-EVAR — endoleak ad alta pressione", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC post-EVAR",
+    clinical:"Paziente post-EVAR con dolore addominale e incremento dimensionale della sacca al follow-up urgente.",
+    prompt:"Classifica l'endoleak e indica perché è una complicanza da gestione urgente.",
+    task:"Obiettivo: riconoscere leak in sede di sealing prossimale/distale o difetto tra componenti del graft, riempimento pressurizzato della sacca e crescita della sacca.",
+    criticalFindings:[
+      ["Endoleak di tipo I o III","tipo i|tipo 1|tipo iii|tipo 3|endoleak"],
+      ["Sacca aneurismatica in crescita / pressurizzata","aumento|crescita|espansione|sacca"],
+      ["Necessità di trattamento urgente","urgente|trattamento|vascolare|endovascolare"]
+    ],
+    findings:[
+      ["Endoprotesi aortica in sede","endoprotesi|evar|graft"],
+      ["Sede del leak rispetto al graft","prossimale|distale|componenti|difetto del graft"],
+      ["Riempimento della sacca aneurismatica","sacca|riempimento|contrasto"],
+      ["Classificazione tipo I o III","tipo i|tipo 1|tipo iii|tipo 3"],
+      ["Aumento delle dimensioni della sacca","aumento|incremento|crescita|espansione"],
+      ["Conclusione per endoleak ad alta pressione","alta pressione|endoleak tipo"],
+      ["Indicazione a valutazione urgente","urgente|trattamento|vascolare"]
+    ],
+    sampleReport:"Endoprotesi aorto-bi-iliaca in sede. Si documenta focale passaggio di mezzo di contrasto adiacente al sealing prossimale con riempimento diretto della sacca aneurismatica, compatibile con endoleak di tipo Ia; la sacca risulta aumentata di calibro rispetto al precedente controllo. Quadro di endoleak ad alta pressione con rischio di ulteriore espansione/rottura, da sottoporre a valutazione endovascolare urgente." 
+  },
+
+  // ---------- URGENZE / EMERGENZE: DISSEZIONE AORTICA ----------
+  {
+    id:"case_em_dissection_typeA_rupture", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: DISSEZIONE AORTICA",
+    mapId:"urgenze_dissezione", modalityCode:"TC", region:"Cardiovascolare", topic:"Dissezione tipo A complicata", emergency:true,
+    title:"Angio-TC — dissezione Stanford A con emopericardio", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC aorta toraco-addominale",
+    clinical:"Dolore toracico trafittivo improvviso, ipotensione e sincope.",
+    prompt:"Scrivi un referto urgente mettendo subito in evidenza classificazione, estensione e segni di rottura.",
+    task:"Obiettivo: coinvolgimento dell'ascendente = Stanford A, entry tear se visibile, vero/falso lume, estensione e emopericardio come segno di rottura.",
+    criticalFindings:[
+      ["Coinvolgimento dell'aorta ascendente / Stanford A","aorta ascendente|stanford a|tipo a"],
+      ["Emopericardio / rottura","emopericardio|rottura|versamento pericardico ematico"],
+      ["Valutazione cardiochirurgica urgente","cardiochirurg|urgente|emergenza"]
+    ],
+    findings:[
+      ["Flap intimomediale con vero e falso lume","flap|vero lume|falso lume|tl|fl"],
+      ["Coinvolgimento dell'aorta ascendente","ascendente|stanford a|tipo a"],
+      ["Sede dell'entry tear se identificabile","entry tear|breccia intimale|tear"],
+      ["Estensione della dissezione","estensione|arco|discendente|addominale"],
+      ["Emopericardio","emopericardio|pericardio"],
+      ["Rami principali / malperfusione","rami|malperfusione|coronarie|epiaortici|viscerali|renali"],
+      ["Conclusione di dissezione A complicata da rottura","dissezione tipo a|stanford a|rottura"]
+    ],
+    sampleReport:"Dissezione aortica acuta con flap intimomediale che interessa l'aorta ascendente e prosegue nell'arco e nella discendente, configurando Stanford A. Vero lume compresso dal falso lume. È presente emopericardio, reperto compatibile con rottura contenuta nello spazio pericardico. Da definire la sede del primary entry tear e l'eventuale coinvolgimento dei rami aortici. Quadro cardiochirurgico emergenziale da comunicare immediatamente." 
+  },
+  {
+    id:"case_em_dissection_typeA_supraaortic", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: DISSEZIONE AORTICA",
+    mapId:"urgenze_dissezione", modalityCode:"TC", region:"Cardiovascolare", topic:"Dissezione tipo A complicata", emergency:true,
+    title:"Angio-TC — dissezione A con coinvolgimento dei vasi epiaortici", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC aorta toraco-addominale",
+    clinical:"Dolore toracico acuto associato a deficit neurologico focale.",
+    prompt:"Referta la dissezione e descrivi sistematicamente il coinvolgimento dei tronchi sovra-aortici.",
+    task:"Obiettivo: tipo A, estensione del flap nei rami, origine dei rami da TL/FL/entrambi, stenosi/occlusione e segni di malperfusione distale.",
+    criticalFindings:[
+      ["Stanford A","stanford a|tipo a|aorta ascendente"],
+      ["Coinvolgimento dei tronchi sovra-aortici","tronco brachiocefalico|carotide|succlavia|sovra-aortici|epiaortici"],
+      ["Malperfusione / stenosi o occlusione di un ramo","malperfusione|stenosi|occlusione|collasso del vero lume"]
+    ],
+    findings:[
+      ["Flap con vero e falso lume","flap|vero lume|falso lume"],
+      ["Coinvolgimento ascendente","ascendente|tipo a|stanford a"],
+      ["Estensione al tronco brachiocefalico","brachiocefalico|bca"],
+      ["Valutazione carotide comune sinistra","carotide comune sinistra|carotide"],
+      ["Valutazione succlavia sinistra","succlavia sinistra|lsa|succlavia"],
+      ["Origine dei rami da TL/FL/entrambi","vero lume|falso lume|entrambi|origina"],
+      ["Stenosi/occlusione e opacizzazione distale","stenosi|occlusione|opacizzazione distale"],
+      ["Conclusione con possibile malperfusione cerebrale","malperfusione|cerebral|neurolog"]
+    ],
+    sampleReport:"Dissezione aortica Stanford A con estensione del flap all'arco e ai tronchi sovra-aortici. Il flap interessa il tronco brachiocefalico con marcata compressione del vero lume e ridotta opacizzazione distale; coinvolgimento anche della carotide comune sinistra, mentre la succlavia sinistra è pervia. Reperti compatibili con malperfusione dei vasi epiaortici nel contesto di dissezione A, da comunicare urgentemente al team cardiochirurgico." 
+  },
+  {
+    id:"case_em_dissection_typeB_malperfusion", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: DISSEZIONE AORTICA",
+    mapId:"urgenze_dissezione", modalityCode:"TC", region:"Cardiovascolare", topic:"Dissezione tipo B con malperfusione", emergency:true,
+    title:"Angio-TC — TBAD complicata da malperfusione reno-mesenterica", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC aorta toraco-addominale",
+    clinical:"Dolore toraco-addominale acuto, lattati elevati e peggioramento della funzione renale.",
+    prompt:"Referta la dissezione e descrivi la malperfusione d'organo in modo orientato al trattamento.",
+    task:"Obiettivo: Stanford B, primary entry tear, vero/falso lume, AMS e renali, origine dei rami e ipoenhancement d'organo; se riconoscibile, indica meccanismo statico o dinamico.",
+    criticalFindings:[
+      ["Dissezione Stanford B complicata","stanford b|tipo b|dissezione b|complicata"],
+      ["Malperfusione mesenterica e/o renale","malperfusione|mesenterica|renale|ipoenhancement"],
+      ["Ridotta opacizzazione del vaso / organo","ridotta opacizzazione|assente opacizzazione|ipoenhancement|enhancement ridotto"]
+    ],
+    findings:[
+      ["Entry tear in aorta discendente","entry tear|discendente|zona"],
+      ["Vero e falso lume","vero lume|falso lume|tl|fl"],
+      ["Estensione della dissezione","estensione|addominale|iliache"],
+      ["Valutazione AMS","arteria mesenterica superiore|ams"],
+      ["Valutazione arterie renali","arteria renale|renali"],
+      ["Origine dei rami da TL/FL/entrambi","vero lume|falso lume|entrambi|origina"],
+      ["Ipoenhancement intestinale o renale","ipoenhancement|rene|intestino|ischemia"],
+      ["Static vs dynamic obstruction se riconoscibile","static|dynamic|statica|dinamica"],
+      ["Conclusione di TBAD complicata da malperfusione","complicata|malperfusione|tevar"]
+    ],
+    sampleReport:"Dissezione aortica Stanford B con primary entry tear nella discendente prossimale e propagazione fino all'aorta addominale. Marcata compressione del vero lume da parte del falso lume. Il flap si estende all'arteria renale destra con stenosi del vero lume e ridotto enhancement del rene destro; l'ostio dell'AMS risulta inoltre compresso con ridotta opacizzazione distale e ipoenhancement di alcune anse. Quadro di TBAD complicata da malperfusione reno-mesenterica, meritevole di valutazione endovascolare urgente." 
+  },
+  {
+    id:"case_em_dissection_dynamic", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: DISSEZIONE AORTICA",
+    mapId:"urgenze_dissezione", modalityCode:"TC", region:"Cardiovascolare", topic:"Ostruzione statica vs dinamica", emergency:true,
+    title:"Angio-TC — malperfusione dinamica in dissezione B", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC aorta toraco-addominale",
+    clinical:"Dissezione tipo B con dolore addominale intermittente e lattati in incremento.",
+    prompt:"Indica se il pattern suggerisce ostruzione dinamica o statica e motiva la scelta nel referto.",
+    task:"Obiettivo: distinguere compressione dell'ostio da parte del falso lume/flap mobile (dinamica) da estensione del flap nel ramo con stenosi fissa/trombosi (statica).",
+    criticalFindings:[
+      ["Malperfusione viscerale","malperfusione|viscerale|mesenterica|ischemia"],
+      ["Meccanismo dinamico o statico esplicitato","dinamica|dynamic|statica|static"]
+    ],
+    findings:[
+      ["Dissezione tipo B","stanford b|tipo b"],
+      ["Compressione del vero lume aortico","compressione|collasso|vero lume"],
+      ["Ostio del ramo intermittentemente compresso","ostio|compressione|ramo"],
+      ["Assenza di estensione fissa del flap nel ramo se dinamica","assenza|non si estende|flap nel ramo"],
+      ["Ridotta opacizzazione distale / ipoenhancement","ridotta opacizzazione|ipoenhancement|distale"],
+      ["Conclusione di ostruzione dinamica","dinamica|dynamic"]
+    ],
+    sampleReport:"Dissezione Stanford B con falso lume ampiamente pervio e marcata compressione del vero lume. In corrispondenza dell'origine dell'AMS il flap aortico determina compressione dell'ostio senza evidente propagazione fissa nel ramo; si associa ridotta opacizzazione distale, quadro suggestivo per meccanismo di malperfusione dinamica. Reperto da correlare con la sindrome clinica di malperfusione e da comunicare al team aortico." 
+  },
+  {
+    id:"case_em_dissection_nAnB", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: DISSEZIONE AORTICA",
+    mapId:"urgenze_dissezione", modalityCode:"TC", region:"Cardiovascolare", topic:"Dissezione non-A non-B", emergency:true,
+    title:"Angio-TC — dissezione dell'arco non-A non-B", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC aorta toraco-addominale",
+    clinical:"Dolore toracico acuto; aorta ascendente apparentemente risparmiata.",
+    prompt:"Classifica correttamente il caso evitando di ridurlo semplicemente a Stanford B.",
+    task:"Obiettivo: arco coinvolto con ascendente risparmiata, sede dell'entry tear, estensione e rapporti con i vasi epiaortici; usa la categoria non-A non-B quando appropriata.",
+    criticalFindings:[
+      ["Coinvolgimento dell'arco con ascendente risparmiata","arco|ascendente risparmiata|non-a non-b|non a non b"],
+      ["Rapporto con vasi epiaortici","brachiocefalico|carotide|succlavia|epiaortici|sovra-aortici"]
+    ],
+    findings:[
+      ["Flap intimomediale nell'arco","flap|arco aortico|arco"],
+      ["Aorta ascendente risparmiata","ascendente risparmiata|non coinvolge ascendente"],
+      ["Classificazione non-A non-B","non-a non-b|non a non b"],
+      ["Sede del primary entry tear","entry tear|tear|zona"],
+      ["Estensione prossimale e distale","estensione|prossimale|distale"],
+      ["Vasi epiaortici","brachiocefalico|carotide|succlavia|epiaortici"],
+      ["Vero/falso lume e calibro","vero lume|falso lume|diametro"],
+      ["Conclusione orientata al centro aortico","centro aortico|management|ibrid|tevar|debranching"]
+    ],
+    sampleReport:"Dissezione aortica con flap che coinvolge l'arco, con risparmio dell'aorta ascendente: configurazione non-A non-B. Il primary entry tear è localizzato nell'arco prossimale, in rapporto con l'origine del tronco brachiocefalico; il flap prosegue distalmente nella discendente. Da descrivere per ciascun vaso epiaortico l'eventuale estensione del flap e la pervietà. Anatomia complessa da discutere in centro aortico per strategia chirurgica/endovascolare dedicata." 
+  },
+  {
+    id:"case_em_dissection_highrisk", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: DISSEZIONE AORTICA",
+    mapId:"urgenze_dissezione", modalityCode:"TC", region:"Cardiovascolare", topic:"TBAD high-risk", emergency:true,
+    title:"Angio-TC — dissezione B non complicata ma high-risk", area:"Urgenze / emergenze", organ:"Aorta", modality:"Angio-TC aorta toraco-addominale",
+    clinical:"Paziente emodinamicamente stabile con dissezione B acuta, senza segni clinici di malperfusione.",
+    prompt:"Scrivi un referto che distingua 'uncomplicated' da 'high-risk' e riporti le misure utili al planning TEVAR.",
+    task:"Obiettivo: diametro aortico, falso lume, dimensione dell'entry tear, distanza dalla succlavia sinistra/LSA, piccola curvatura e malperfusione solo radiologica.",
+    criticalFindings:[
+      ["Assenza di rottura o malperfusione clinica franca","assenza di rottura|senza rottura|assenza di malperfusione|uncomplicated"],
+      ["High-risk features esplicitate","high-risk|alto rischio|40 mm|entry tear|lsa|succlavia"]
+    ],
+    findings:[
+      ["Stanford B","stanford b|tipo b"],
+      ["Diametro massimo aortico misurato ortogonalmente","diametro|ortogonale|centerline|40 mm"],
+      ["Diametro del falso lume","falso lume|fl|diametro"],
+      ["Dimensione del primary entry tear","entry tear|tear|10 mm"],
+      ["Distanza entry tear–LSA","distanza|lsa|succlavia sinistra|20 mm"],
+      ["Sede su piccola curvatura se presente","piccola curvatura"],
+      ["Ricerca di malperfusione radiologica","malperfusione|rami|ipoenhancement"],
+      ["Conclusione di TBAD high-risk","high-risk|alto rischio|tevar"]
+    ],
+    sampleReport:"Dissezione aortica Stanford B acuta con primary entry tear nella discendente prossimale. Diametro massimo della discendente pari a circa 42 mm su piano ortogonale alla centerline; falso lume ampio e pervio. Primary entry tear di circa 12 mm, localizzato a breve distanza dall'origine della succlavia sinistra. Non segni di rottura né di malperfusione d'organo clinicamente manifesta. Pur in assenza di complicanze maggiori, il quadro presenta caratteristiche morfologiche high-risk utili alla discussione multidisciplinare per eventuale strategia TEVAR precoce." 
   }
+
 
 ];
 
@@ -1434,7 +1710,20 @@ const reportTopicCatalog = [
   {sourceType:"map", mapId:"fegato", mapName:"FEGATO", modality:"RM", region:"Addome", topic:"Steatosi focale e focal fatty sparing"},
 
   // Fuori mappa: casi già presenti
-  {sourceType:"outside", mapName:null, modality:"TC", region:"Torace", topic:"Neoplasia polmonare"}
+  {sourceType:"outside", mapName:null, modality:"TC", region:"Torace", topic:"Neoplasia polmonare"},
+  // Urgenze / emergenze — prime mappe cardiovascolari
+  {sourceType:"map", mapId:"urgenze_aaa", mapName:"ANEURISMI AORTA ADDOMINALE", modality:"TC", region:"Cardiovascolare", topic:"AAA rotto", emergency:true},
+  {sourceType:"map", mapId:"urgenze_aaa", mapName:"ANEURISMI AORTA ADDOMINALE", modality:"TC", region:"Cardiovascolare", topic:"Segni di rottura imminente", emergency:true},
+  {sourceType:"map", mapId:"urgenze_aaa", mapName:"ANEURISMI AORTA ADDOMINALE", modality:"TC", region:"Cardiovascolare", topic:"Rottura contenuta", emergency:true},
+  {sourceType:"map", mapId:"urgenze_aaa", mapName:"ANEURISMI AORTA ADDOMINALE", modality:"TC", region:"Cardiovascolare", topic:"Fistola aorto-cavale", emergency:true},
+  {sourceType:"map", mapId:"urgenze_aaa", mapName:"ANEURISMI AORTA ADDOMINALE", modality:"TC", region:"Cardiovascolare", topic:"Fistola aorto-enterica", emergency:true},
+  {sourceType:"map", mapId:"urgenze_aaa", mapName:"ANEURISMI AORTA ADDOMINALE", modality:"TC", region:"Cardiovascolare", topic:"Endoleak ad alta pressione", emergency:true},
+  {sourceType:"map", mapId:"urgenze_dissezione", mapName:"DISSEZIONE AORTICA", modality:"TC", region:"Cardiovascolare", topic:"Dissezione tipo A complicata", emergency:true},
+  {sourceType:"map", mapId:"urgenze_dissezione", mapName:"DISSEZIONE AORTICA", modality:"TC", region:"Cardiovascolare", topic:"Dissezione tipo B con malperfusione", emergency:true},
+  {sourceType:"map", mapId:"urgenze_dissezione", mapName:"DISSEZIONE AORTICA", modality:"TC", region:"Cardiovascolare", topic:"Ostruzione statica vs dinamica", emergency:true},
+  {sourceType:"map", mapId:"urgenze_dissezione", mapName:"DISSEZIONE AORTICA", modality:"TC", region:"Cardiovascolare", topic:"Dissezione non-A non-B", emergency:true},
+  {sourceType:"map", mapId:"urgenze_dissezione", mapName:"DISSEZIONE AORTICA", modality:"TC", region:"Cardiovascolare", topic:"TBAD high-risk", emergency:true}
+
 ];
 
 const reportRegions = ["Encefalo","Testa-collo","Torace","Addome","Pelvi","Muscoloscheletrico","Cardiovascolare"];
@@ -1464,7 +1753,7 @@ const archiveTaxonomy = {
   "MSK": {
     "Osso": []
   },
-  "Urgenza": {},
+  "Urgenze / emergenze": {},
   "Neuroradiologia": {
     "Encefalo": [],
     "Rachide": [],
@@ -1485,14 +1774,7 @@ const archiveTaxonomy = {
   "Interventistica": {}
 };
 
-// Alias storici: i documenti gia' presenti nel repository privato non vengono spostati.
-// Solo il nome mostrato e i nuovi percorsi diventano "Urgenza".
-function canonicalArchiveArea(value){
-  const key=String(value||'').toLocaleLowerCase('it').replace(/[\s\/_-]+/g,' ').trim();
-  return ['urgenza','urgenze','urgenza emergenza','urgenze emergenze'].includes(key)
-    ?'Urgenza':value;
-}
-const DIRECT_ROOT_AREAS = new Set(["Urgenza","Interventistica"]);
+const DIRECT_ROOT_AREAS = new Set(["Urgenze / emergenze","Interventistica"]);
 const OPTIONAL_ROOT_FOLDERS = {
   "MSK": new Set(["Osso"]),
   "Pelvi": new Set(["Utero"])
@@ -2158,7 +2440,7 @@ function normalizeArchiveFolders(data){
   if(!data||typeof data!=='object')return emptyArchiveFolders();
   const seen=new Set(),folders=[];
   for(const raw of Array.isArray(data.folders)?data.folders:[]){
-    const area=canonicalArchiveArea(cleanArchiveFolderName(raw?.area)), organ=raw?.organ?cleanArchiveFolderName(raw.organ):null;
+    const area=cleanArchiveFolderName(raw?.area), organ=raw?.organ?cleanArchiveFolderName(raw.organ):null;
     if(!area)continue;
     const key=`${area.toLocaleLowerCase('it')}|${String(organ||'').toLocaleLowerCase('it')}`;
     if(seen.has(key))continue;seen.add(key);
@@ -2208,7 +2490,7 @@ function customAreaNames(){return customFolderEntries().filter(f=>!f.organ).map(
 function customOrganNames(area){return customFolderEntries().filter(f=>f.organ&&f.area.toLocaleLowerCase('it')===String(area||'').toLocaleLowerCase('it')).map(f=>f.organ);}
 function displayArchiveAreaSlug(slug){
   const hit=customFolderEntries().find(f=>!f.organ&&ghSlug(f.area)===String(slug||''));
-  return canonicalArchiveArea(hit?.area||humanSlug(slug));
+  return hit?.area||humanSlug(slug);
 }
 function displayArchiveOrganSlug(area,slug){
   const hit=customFolderEntries().find(f=>f.organ&&f.area.toLocaleLowerCase('it')===String(area||'').toLocaleLowerCase('it')&&ghSlug(f.organ)===String(slug||''));
@@ -2281,11 +2563,11 @@ async function persistIcloudLinks(data){
 }
 function icloudLinkForRecordSync(rec){
   const key=iCloudRecordKey(rec);
-  return normalizedIcloudLinkForRecord(rec,iCloudLinksCache?.links?.[key]||readFastIcloudLinks().links?.[key]||null);
+  return iCloudLinksCache?.links?.[key]||readFastIcloudLinks().links?.[key]||null;
 }
 async function getIcloudLinkForRecord(rec){
   const fast=icloudLinkForRecordSync(rec);if(fast)return fast;
-  const db=await loadIcloudLinks();return normalizedIcloudLinkForRecord(rec,db.links[iCloudRecordKey(rec)]||null);
+  const db=await loadIcloudLinks();return db.links[iCloudRecordKey(rec)]||null;
 }
 async function saveIcloudLinkForRecord(rec,path){
   const db=mergeIcloudLinks(readFastIcloudLinks(),iCloudLinksCache||emptyIcloudLinks());
@@ -2302,7 +2584,7 @@ async function githubTest(){
   const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2026-03-10'},cache:'no-store'});
   if(!r.ok) throw new Error(`Accesso negato (${r.status})`); return await r.json();
 }
-function humanSlug(s){const known={'vie-biliari':'Vie biliari','peritoneo-retroperitoneo':'Peritoneo / retroperitoneo','testa-collo':'Testa-collo','muscoloscheletrico':'MSK','msk':'MSK','urgenze-emergenze':'Urgenza','urgenza-emergenza':'Urgenza','urgenze':'Urgenza','urgenza':'Urgenza','neuroradiologia':'Neuroradiologia','gastrointestinale':'Gastrointestinale','cardiovascolare':'Cardiovascolare','interventistica':'Interventistica'};return known[s]||String(s||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
+function humanSlug(s){const known={'vie-biliari':'Vie biliari','peritoneo-retroperitoneo':'Peritoneo / retroperitoneo','testa-collo':'Testa-collo','muscoloscheletrico':'MSK','msk':'MSK','urgenze-emergenze':'Urgenze / emergenze','urgenze':'Urgenze / emergenze','neuroradiologia':'Neuroradiologia','gastrointestinale':'Gastrointestinale','cardiovascolare':'Cardiovascolare','interventistica':'Interventistica'};return known[s]||String(s||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());}
 const GH_FILE_EXT=/\.(pdf|doc|docx|ppt|pptx|xls|xlsx|txt|md|rtf|png|jpe?g|webp)$/i;
 async function githubRecursiveTree(){
   const cfg=getGithubConfig(),token=await getGithubToken();
@@ -2345,7 +2627,7 @@ async function syncGithubLibrary({silent=false}={}){
       // Migrazione visuale delle vecchie strutture: i file non vengono spostati su GitHub,
       // ma vengono mostrati nella nuova cartella corretta.
       if(area==='Addome' && /urgen|emergen/i.test(String(organ||''))){
-        area='Urgenza'; organ=null;
+        area='Urgenze / emergenze'; organ=null;
       }else if(isRootDirectArea(area)){
         organ=null;
       }else if(area==='MSK'){
@@ -2789,9 +3071,9 @@ let archiveNav={area:null,organ:null};
 function archiveMaterials(){
   const maps=state.maps.filter(m=>m.githubAvailable!==false).map(m=>{
     const meta=bundledArchiveMeta[m.id]||{area:m.area||"Altro",organ:m.organ||m.title};
-    return {id:m.id,title:m.title,area:canonicalArchiveArea(meta.area),organ:meta.organ,filename:m.source||"PDF",kind:"map",map:m};
+    return {id:m.id,title:m.title,area:meta.area,organ:meta.organ,filename:m.source||"PDF",kind:"map",map:m};
   });
-  const docs=(state.documents||[]).filter(d=>d.collection==="archivio").map(d=>({...d,area:canonicalArchiveArea(d.area),kind:"document"}));
+  const docs=(state.documents||[]).filter(d=>d.collection==="archivio").map(d=>({...d,kind:"document"}));
   return [...maps,...docs];
 }
 function studyMaterials(){ return (state.documents||[]).filter(d=>d.collection==="studi"); }
@@ -2909,28 +3191,7 @@ function suggestedIcloudPathForRecord(rec){
     const project=String(rec.project||'').split('›').map(x=>clean(x)).filter(Boolean);
     return [cfg.root,'Studi',...project,filename].filter(Boolean).join('/');
   }
-  return [cfg.root,'Archivio',clean(canonicalArchiveArea(rec.area)||'Altro'),rec.organ?clean(rec.organ):null,filename].filter(Boolean).join('/');
-}
-// Il vecchio nome "Urgenze / emergenze" conteneva uno slash, interpretato
-// come separatore di cartelle. Correggiamo soltanto i percorsi standard iCloud
-// degli elementi di Urgenza; collegamenti personalizzati altrove restano intatti.
-function canonicalIcloudUrgencyPath(raw,rec){
-  const path=String(raw||'');
-  if(canonicalArchiveArea(rec?.area)!=='Urgenza')return path;
-  const root=getIcloudConfig().root;
-  const prefix=`${root}/Archivio/`;
-  if(!path.startsWith(prefix))return path;
-  const parts=path.slice(prefix.length).split('/');
-  const first=String(parts[0]||'').toLocaleLowerCase('it').trim().replace(/[\s_-]+/g,' ');
-  const second=String(parts[1]||'').toLocaleLowerCase('it').trim();
-  if(!['urgenza','urgenze','urgenza emergenza','urgenze emergenze'].includes(first))return path;
-  const take=(['urgenza','urgenze'].includes(first)&&['emergenza','emergenze'].includes(second))?2:1;
-  return prefix+['Urgenza',...parts.slice(take)].join('/');
-}
-function normalizedIcloudLinkForRecord(rec,link){
-  if(!link?.path)return link;
-  const path=canonicalIcloudUrgencyPath(link.path,rec);
-  return path===link.path?link:{...link,path};
+  return [cfg.root,'Archivio',clean(rec.area||'Altro'),rec.organ?clean(rec.organ):null,filename].filter(Boolean).join('/');
 }
 function normalizeIcloudUserPath(raw,rec){
   let path=String(raw||'').trim().replace(/^icloud\s*drive[\\/]/i,'').replace(/^\/+/, '').replace(/\\/g,'/').replace(/\/{2,}/g,'/');
@@ -2938,7 +3199,7 @@ function normalizeIcloudUserPath(raw,rec){
   if(!path.includes('/')){
     const suggested=suggestedIcloudPathForRecord(rec);const parent=suggested.split('/').slice(0,-1).join('/');path=`${parent}/${path}`;
   }
-  return canonicalIcloudUrgencyPath(path,rec);
+  return path;
 }
 function runIcloudShortcut(path){
   const cfg=getIcloudConfig();
@@ -3145,6 +3406,8 @@ function availableCases(filters={}){
     if(filters.sourceType && c.sourceType!==filters.sourceType) return false;
     if(filters.modalityCode && c.modalityCode!==filters.modalityCode) return false;
     if(filters.region && c.region!==filters.region) return false;
+    if(filters.emergency===true && !c.emergency) return false;
+    if(filters.emergency===false && c.emergency) return false;
     if(filters.topic && c.topic!==filters.topic) return false;
     if(filters.mapId && c.mapId!==filters.mapId) return false;
     if(filters.hasImages===true && !(c.images && c.images.length)) return false;
@@ -3172,6 +3435,7 @@ function renderReportHub(){
   const tcMapCases=availableCases({sourceType:"map",modalityCode:"TC"}).length;
   const rmMapCases=availableCases({sourceType:"map",modalityCode:"RM"}).length;
   const imageMapCases=availableCases({sourceType:"map",hasImages:true}).length;
+  const emergencyCases=availableCases({sourceType:"map",emergency:true}).length;
 
   hub.innerHTML=`
     <div class="report-hub-grid">
@@ -3211,6 +3475,15 @@ function renderReportHub(){
         <span class="badge good">${imageMapCases} casi</span>
       </div>
 
+      <div class="card report-hub-card emergency-hub-card" id="hubEmergency">
+        <div>
+          <div class="report-hub-icon">⚠</div>
+          <h3>Urgenze / emergenze</h3>
+          <p class="muted small">Allenamento dedicato ai casi urgenti ricavati dalle mappe della cartella Urgenze.</p>
+        </div>
+        <span class="badge weak">${emergencyCases} casi</span>
+      </div>
+
       <div class="card report-hub-card report-hub-wide" id="hubOutside">
         <div>
           <div class="report-hub-icon">＋</div>
@@ -3226,6 +3499,7 @@ function renderReportHub(){
   document.getElementById("hubTC").onclick=()=>openReportBrowser({sourceType:"map",modalityCode:"TC"});
   document.getElementById("hubRM").onclick=()=>openReportBrowser({sourceType:"map",modalityCode:"RM"});
   document.getElementById("hubImages").onclick=openImageReportGenerator;
+  document.getElementById("hubEmergency").onclick=()=>openReportBrowser({sourceType:"map",emergency:true});
   document.getElementById("hubOutside").onclick=()=>openReportBrowser({sourceType:"outside"});
 }
 
@@ -3242,6 +3516,7 @@ function renderReportBrowser(){
   if(f.region) titleParts.push(f.region);
   if(f.hasImages===true) titleParts.push("Con immagini");
   if(f.hasImages===false) titleParts.push("Solo testuali");
+  if(f.emergency===true) titleParts.push("Urgenze / emergenze");
   if(f.sourceType==="map") titleParts.push("Dalle mie mappe");
   if(f.sourceType==="outside") titleParts.push("Non trattati nelle mappe");
   document.getElementById("reportBrowseTitle").textContent=titleParts.join(" · ") || "Scegli il caso";
@@ -3253,7 +3528,47 @@ function renderReportBrowser(){
   const modalityHtml=modalities.map(m=>`<button class="report-filter ${f.modalityCode===m?'active':''}" data-mod="${m}">${m}</button>`).join("");
   const regionsHtml=reportRegions.map(r=>`<button class="report-filter ${f.region===r?'active':''}" data-region="${r}">${r}</button>`).join("");
 
+  const emergencyMapOptions = f.emergency===true
+    ? [...new Map(reportTopicCatalog
+        .filter(t=>t.sourceType==="map" && t.emergency)
+        .map(t=>[t.mapId,{id:t.mapId,name:t.mapName||t.mapId}])).values()]
+    : [];
+  const selectedEmergencyMap = emergencyMapOptions.find(m=>m.id===f.mapId);
+  const emergencyTopics = f.emergency===true
+    ? [...new Set(reportTopicCatalog
+        .filter(t=>t.sourceType==="map" && t.emergency && (!f.mapId || t.mapId===f.mapId))
+        .map(t=>t.topic))]
+    : [];
+  const selectedCount=availableCases(f).length;
+
+  const emergencyChooserHtml=f.emergency===true ? `
+    <div class="emergency-training-panel">
+      <div class="emergency-training-head">
+        <div>
+          <div class="label">Scegli su cosa allenarti</div>
+          <div class="muted small">Puoi allenarti su tutte le urgenze, su una singola mappa oppure su uno specifico argomento.</div>
+        </div>
+        <button class="primary emergency-random-btn" id="emergencyRandomSelected">🎲 Caso casuale · ${selectedCount}</button>
+      </div>
+      <div class="training-choice-block">
+        <div class="label">Mappa</div>
+        <div class="report-filter-row">
+          <button class="report-filter ${!f.mapId?'active':''}" data-em-map="">Tutte le urgenze</button>
+          ${emergencyMapOptions.map(m=>`<button class="report-filter ${f.mapId===m.id?'active':''}" data-em-map="${m.id}">${m.name}</button>`).join('')}
+        </div>
+      </div>
+      <div class="training-choice-block">
+        <div class="label">Argomento${selectedEmergencyMap?` · ${selectedEmergencyMap.name}`:''}</div>
+        <div class="report-filter-row">
+          <button class="report-filter ${!f.topic?'active':''}" data-em-topic="">Tutti</button>
+          ${emergencyTopics.map(t=>`<button class="report-filter ${f.topic===t?'active':''}" data-em-topic="${escapeHTML(t)}">${escapeHTML(t)}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+  ` : '';
+
   controls.innerHTML=`
+    ${emergencyChooserHtml}
     <div>
       <div class="label">Metodica</div>
       <div class="report-filter-row">
@@ -3277,6 +3592,18 @@ function renderReportBrowser(){
       </div>
     </div>
   `;
+
+  controls.querySelectorAll("[data-em-map]").forEach(btn=>btn.onclick=()=>{
+    window.reportBrowserFilters.mapId=btn.dataset.emMap||undefined;
+    window.reportBrowserFilters.topic=undefined;
+    renderReportBrowser();
+  });
+  controls.querySelectorAll("[data-em-topic]").forEach(btn=>btn.onclick=()=>{
+    window.reportBrowserFilters.topic=btn.dataset.emTopic||undefined;
+    renderReportBrowser();
+  });
+  const emergencyRandomSelected=document.getElementById("emergencyRandomSelected");
+  if(emergencyRandomSelected) emergencyRandomSelected.onclick=()=>randomReportCase({...window.reportBrowserFilters});
 
   controls.querySelectorAll("[data-mod]").forEach(btn=>btn.onclick=()=>{
     window.reportBrowserFilters.modalityCode=btn.dataset.mod||undefined;
@@ -3306,6 +3633,8 @@ function renderReportTopicAndCases(){
     if(f.sourceType && t.sourceType!==f.sourceType) return false;
     if(f.modalityCode && t.modality!==f.modalityCode) return false;
     if(f.region && t.region!==f.region) return false;
+    if(f.emergency===true && !t.emergency) return false;
+    if(f.emergency===false && t.emergency) return false;
     return true;
   });
 
@@ -3329,6 +3658,7 @@ function renderReportTopicAndCases(){
         sourceType:t.sourceType,
         modalityCode:t.modality,
         region:t.region,
+        emergency:t.emergency,
         topic:t.topic,
         mapId:t.mapId,
         hasImages:f.hasImages
@@ -3347,8 +3677,10 @@ function renderReportTopicAndCases(){
           sourceType:t.sourceType,
           modalityCode:t.modality,
           region:t.region,
+          emergency:t.emergency,
           topic:t.topic,
-          mapId:t.mapId
+          mapId:t.mapId,
+          hasImages:f.hasImages
         };
         renderReportBrowser();
       };
@@ -3385,6 +3717,7 @@ function renderReportTopicAndCases(){
           <div class="case-tags">
             <span class="tag">${c.modalityCode}</span>
             <span class="tag">${c.region}</span>
+            ${c.emergency?'<span class="tag emergency-tag">URGENZA</span>':''}
             <span class="tag">${c.topic}</span>
             <span class="tag">${imgInfo}</span>
             <span class="tag">${c.images?.length ? 'con immagini' : 'testuale'}</span>
@@ -3454,7 +3787,7 @@ function openReportCase(id){
   showView("reportCaseView");
   document.getElementById("reportLevelLabel").textContent=`LIVELLO ${c.level}`;
   document.getElementById("reportCaseTitle").textContent=c.title;
-  document.getElementById("reportCaseTag").textContent=`${c.modalityCode} · ${c.region}`;
+  document.getElementById("reportCaseTag").textContent=`${c.modalityCode} · ${c.region}${c.emergency?' · URGENZA':''}`;
   document.getElementById("reportMeta").innerHTML=`
     <div class="muted small"><strong>Contesto clinico:</strong> ${c.clinical}</div>
     <div class="report-case-source ${c.sourceType}">${c.sourceLabel}</div>
@@ -3485,6 +3818,11 @@ function evaluateReportCase(){
     if(ok) hits++;
     return {label,ok};
   });
+  const criticalRows=(c.criticalFindings||[]).map(([label,patterns])=>({
+    label,
+    ok:patterns.split("|").some(p=>txt.includes(norm(p)))
+  }));
+  const criticalMissing=criticalRows.filter(r=>!r.ok).length;
   const score=Math.round(100*hits/c.findings.length);
   const fb=document.getElementById("reportFeedback");
   fb.innerHTML=`
@@ -3494,9 +3832,18 @@ function evaluateReportCase(){
         <div>
           <div class="muted small">Valutazione orientativa basata sui reperti chiave previsti dal caso.</div>
           <div class="report-case-source ${c.sourceType}">${c.sourceLabel}</div>
+          ${c.emergency ? `<div class="emergency-safety ${criticalMissing?'unsafe':'safe'}">${criticalMissing ? `⚠ Mancano ${criticalMissing} reperti critici da non perdere` : '✓ Reperti critici essenziali riconosciuti'}</div>` : ''}
         </div>
         <div class="report-score">${score}%</div>
       </div>
+      ${criticalRows.length ? `<h4>Reperti da non perdere</h4>${criticalRows.map(r=>`
+        <div class="report-check critical-check">
+          <div>
+            <div class="lbl">${r.ok?'✓':'⚠'} ${r.label}</div>
+            <div class="desc">${r.ok?'riconosciuto nel tuo referto':'NON chiaramente riportato: reperto critico'}</div>
+          </div>
+          <span class="badge ${r.ok?'good':'weak'}">${r.ok?'ok':'critico'}</span>
+        </div>`).join('')}` : ''}
       <h4>Checklist reperti</h4>
       ${rows.map(r=>`
         <div class="report-check">
@@ -3519,13 +3866,15 @@ function evaluateReportCase(){
   document.getElementById("similarReportBtn").onclick=()=>randomReportCase({
     modalityCode:c.modalityCode,
     region:c.region,
+    emergency:c.emergency,
     topic:c.topic,
     hasImages: !!(c.images && c.images.length)
   });
   document.getElementById("backToCasesBtn").onclick=()=>openReportBrowser({
     sourceType:c.sourceType,
     modalityCode:c.modalityCode,
-    region:c.region
+    region:c.region,
+    emergency:c.emergency
   });
 }
 

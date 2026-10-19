@@ -199,3 +199,28 @@ Da valutare solo se richiesto:
 - Non cambiare autonomamente la struttura dell'Archivio concordata.
 
 Continua da questo stato e chiedimi chiarimenti solo quando una decisione cambia davvero l'architettura o il comportamento desiderato.
+
+
+## AGGIORNAMENTO v1.17 — URGENZE / EMERGENZE
+Sono state integrate le prime due mappe presenti nella cartella Urgenze / emergenze:
+- **Aneurismi aorta addominale**
+- **Dissezione aortica**
+
+La sezione Refertazione ora prevede un hub dedicato **Urgenze / emergenze**. I casi urgenti restano classificati per distretto Cardiovascolare ma hanno il flag `emergency:true`, così possono essere estratti sia dal Random generale sia da un Random dedicato alle urgenze.
+
+Sono stati aggiunti 12 casi testuali basati sulle mappe: AAA rotto, segni di rottura imminente, rottura contenuta/draped aorta, fistola aorto-cavale, fistola aorto-enterica, endoleak ad alta pressione; dissezione Stanford A complicata, coinvolgimento dei vasi epiaortici, TBAD con malperfusione reno-mesenterica, ostruzione statica/dinamica, non-A non-B e TBAD high-risk.
+
+Per le urgenze la correzione distingue una normale checklist da una sezione **Reperti da non perdere**. Se il referto omette un elemento critico (es. rottura, malperfusione, emopericardio, stravaso, fistola), Recall lo segnala esplicitamente.
+
+Le nuove mappe Urgenze che verranno aggiunte in futuro devono essere integrate nello stesso sistema senza rimuovere i casi esistenti.
+
+## Aggiornamento v1.17.1 — Refertazione Urgenze / emergenze
+- Prime mappe integrate nel motore di refertazione: **Aneurismi aorta addominale** e **Dissezione aortica**.
+- Sono presenti 12 casi testuali urgenti derivati dalle mappe, con enfasi su reperti critici da non perdere.
+- Dentro **Refertazione → Urgenze / emergenze** l'utente può scegliere:
+  - tutte le urgenze;
+  - una singola mappa (AAA oppure dissezione);
+  - un argomento specifico;
+  - un caso casuale limitato ai filtri scelti.
+- La correzione dei casi urgenti distingue i reperti critici/omissioni importanti.
+- Le prossime mappe di Urgenze vanno aggiunte allo stesso catalogo senza sostituire o rimuovere queste.

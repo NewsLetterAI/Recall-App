@@ -1,1 +1,1 @@
-Recall v1.16 — gestione Archivio, cartelle personalizzate, upload rapido e backup di continuità del progetto
+Recall v1.17.1 — Urgenze / emergenze: AAA + dissezione, selezione mappa/argomento e random filtrato

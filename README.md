@@ -13,3 +13,11 @@ PWA personale per studio, Archivio, ripasso e refertazione.
 
 ## Repository
 Il codice di questa PWA va nel repository pubblico `Recall-App`. I documenti personali restano nel repository GitHub privato configurato dall’utente e/o in iCloud Drive.
+
+
+## v1.17 — Refertazione Urgenze / emergenze
+Aggiunto un percorso dedicato in Refertazione per i casi urgenti derivati dalle mappe **Aneurismi aorta addominale** e **Dissezione aortica**, con 12 casi testuali, random dedicato e controllo dei reperti critici da non perdere.
+
+
+## v1.17.1 — Scegli su cosa allenarti
+Nella sezione Urgenze / emergenze puoi scegliere tutte le urgenze, una singola mappa (Aneurismi aorta addominale o Dissezione aortica), un argomento specifico e avviare un caso casuale limitato alla selezione.
