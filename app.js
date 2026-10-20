@@ -1334,6 +1334,221 @@ const reportCases = [
     findings:[["Drop di segnale nelle sequenze opposed-phase nelle aree steatosiche","drop di segnale|opposed-phase|out of phase|steatosi"],["Area di focal fatty sparing in fegato steatosico","fatty sparing|risparmio focale|area risparmiata"],["Distribuzione tipica peri-falciforme / fossa colecistica","peri-falciform|fossa colecistica|subcapsular|segmentaria"],["Assenza di effetto massa o distorsione vascolare","assenza di effetto massa|nessun effetto massa|non distorce i vasi"],["Conclusione per steatosi focale/focal fatty sparing","steatosi focale|focal fatty sparing"]],
     sampleReport:"Nelle sequenze opposed-phase si apprezza marcato drop di segnale di alcune aree parenchimali, compatibile con steatosi focale, mentre altre aree relativamente iperintense rappresentano focal fatty sparing su fegato diffusamente steatosico. I reperti non determinano effetto massa né distorsione dei vasi, favorendo natura pseudolesionale."
   },
+  // ---------- URGENZE / EMERGENZE: TRAUMI ADDOMINALI ----------
+  {
+    id:"case_em_trauma_spleen_active_bleeding", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Addome", topic:"Trauma splenico con sanguinamento attivo", emergency:true,
+    title:"TC trauma — lesione splenica con sanguinamento attivo", area:"Urgenze / emergenze", organ:"Milza", modality:"TC addome multiphasica con mdc",
+    clinical:"Trauma chiuso dell'addome. Paziente emodinamicamente stabile dopo stabilizzazione iniziale, dolore in ipocondrio sinistro.",
+    prompt:"Scrivi un referto urgente focalizzato su lesione splenica, emoperitoneo e segni di sanguinamento attivo.",
+    task:"Obiettivo: descrivere lacerazioni/ematoma splenico, emoperitoneo e contrast blush con comportamento compatibile con sanguinamento attivo nelle fasi successive.",
+    criticalFindings:[
+      ["Sanguinamento arterioso attivo","sanguinamento attivo|stravaso|extravaso|contrast blush|blush"],
+      ["Emoperitoneo","emoperitoneo|versamento ematico|sangue libero"],
+      ["Lesione splenica traumatica","lesione splenica|lacerazione splenica|trauma splenico"]
+    ],
+    findings:[
+      ["Lacerazioni spleniche ipodense lineari","lacerazione|lineare|ipodensa|splen"],
+      ["Ematoma intraparenchimale o subcapsulare","ematoma intraparenchimale|ematoma subcapsulare|subcapsulare"],
+      ["Emoperitoneo perisplenico/periepatico","emoperitoneo|perisplenico|periepatico|versamento"],
+      ["Contrast blush / stravaso arterioso","contrast blush|blush|stravaso|sanguinamento attivo"],
+      ["Persistenza/aumento del contrasto nelle fasi successive","aumenta|incremento|persist|tardiva|fasi successive"],
+      ["Conclusione esplicita di trauma splenico con sanguinamento attivo","trauma splenico|lesione splenica|sanguinamento attivo"]
+    ],
+    sampleReport:"Multiple lacerazioni ipodense del parenchima splenico, associate a raccolta ematica subcapsulare e discreto emoperitoneo perisplenico e periepatico. In fase arteriosa si documenta focale stravaso di mezzo di contrasto intraparenchimale, con persistenza/aumento nelle acquisizioni successive, compatibile con sanguinamento arterioso attivo. Quadro di trauma splenico con emorragia attiva, da comunicare tempestivamente al team clinico/interventistico."
+  },
+  {
+    id:"case_em_trauma_spleen_pseudoaneurysm", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Addome", topic:"Pseudoaneurisma splenico post-traumatico", emergency:true,
+    title:"TC trauma — pseudoaneurisma splenico post-traumatico", area:"Urgenze / emergenze", organ:"Milza", modality:"TC addome multiphasica con mdc",
+    clinical:"Trauma chiuso dell'addome in paziente stabile; controllo TC per lesione splenica.",
+    prompt:"Distingui una lesione vascolare contenuta da un sanguinamento attivo e scrivi il referto.",
+    task:"Obiettivo: riconoscere una raccolta focale di contrasto in fase arteriosa con comportamento da lesione vascolare/pseudoaneurisma, distinta dallo stravaso attivo che aumenta nelle fasi successive.",
+    criticalFindings:[
+      ["Pseudoaneurisma post-traumatico","pseudoaneurisma|pseudo-aneurisma"],
+      ["Lesione vascolare splenica","lesione vascolare|arteria splenica|vascolare"]
+    ],
+    findings:[
+      ["Lesione splenica traumatica associata","lacerazione|ematoma|lesione splenica"],
+      ["Raccolta focale di contrasto in fase arteriosa","raccolta focale|fase arteriosa|blush"],
+      ["Comportamento non espansivo nelle fasi successive","si riduce|riduzione|non aumenta|non espansivo|fasi successive"],
+      ["Diagnosi di pseudoaneurisma","pseudoaneurisma|pseudo-aneurisma"],
+      ["Ricerca di eventuale emoperitoneo","emoperitoneo|versamento"],
+      ["Conclusione orientata a valutazione endovascolare","embolizzazione|interventistica|endovascolare"]
+    ],
+    sampleReport:"Nel contesto di lesione traumatica splenica si apprezza focale raccolta di mezzo di contrasto in fase arteriosa, ben circoscritta e non progressivamente espansiva nelle fasi successive, reperto compatibile con pseudoaneurisma post-traumatico. Associato modesto emoperitoneo. Reperto vascolare da segnalare per valutazione angiografica/endovascolare."
+  },
+  {
+    id:"case_em_trauma_liver_blush", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Addome", topic:"Trauma epatico con contrast blush", emergency:true,
+    title:"TC trauma — lacerazione epatica con contrast blush", area:"Urgenze / emergenze", organ:"Fegato", modality:"TC addome multiphasica con mdc",
+    clinical:"Trauma chiuso toraco-addominale con dolore in ipocondrio destro; paziente stabile dopo fluidi.",
+    prompt:"Referta la lesione epatica e specifica i reperti che aumentano il rischio di fallimento del trattamento non operativo.",
+    task:"Obiettivo: descrivere lacerazione/ematoma epatico, emoperitoneo, contrast blush e sua eventuale estensione oltre il parenchima.",
+    criticalFindings:[
+      ["Contrast blush / sanguinamento attivo","contrast blush|blush|sanguinamento attivo|stravaso"],
+      ["Emoperitoneo","emoperitoneo|versamento ematico|sangue libero"]
+    ],
+    findings:[
+      ["Lacerazione epatica","lacerazione|lesione epatica|trauma epatico"],
+      ["Ematoma o contusione associata","ematoma|contusione"],
+      ["Contrast blush","contrast blush|blush|stravaso"],
+      ["Valutazione dell'estensione oltre il parenchima","oltre il parenchima|extraparanchimale|extra-parenchimale"],
+      ["Emoperitoneo","emoperitoneo|versamento"],
+      ["Conclusione di trauma epatico con lesione vascolare/sanguinamento","trauma epatico|lesione epatica|sanguinamento|vascolare"]
+    ],
+    sampleReport:"Ampia lacerazione del lobo epatico destro con aree contusive associate e raccolta ematica periepatica. In fase arteriosa si evidenzia focale contrast blush nel contesto della lacerazione, con estensione oltre il margine parenchimale e associato emoperitoneo. Quadro di trauma epatico con lesione vascolare/sanguinamento attivo, reperto che richiede tempestiva comunicazione clinica e valutazione terapeutica dedicata."
+  },
+  {
+    id:"case_em_trauma_kidney_collecting_system", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Addome", topic:"Trauma renale con leak urinario", emergency:true,
+    title:"TC trauma — lacerazione renale con coinvolgimento del sistema escretore", area:"Urgenze / emergenze", organ:"Rene", modality:"TC addome multiphasica con fase escretrice",
+    clinical:"Trauma chiuso del fianco. Ematuria e dolore lombare; parametri emodinamici stabili.",
+    prompt:"Scrivi il referto distinguendo sanguinamento attivo e lesione del sistema escretore.",
+    task:"Obiettivo: descrivere lacerazione renale profonda/ematoma perirenale e identificare in fase tardiva l'extravaso urinario senza confonderlo con un blush arterioso.",
+    criticalFindings:[
+      ["Leak urinario / lesione del sistema escretore","leak urinario|stravaso urinario|sistema escretore|via escretrice"],
+      ["Valutazione del sanguinamento attivo","sanguinamento attivo|blush|stravaso arterioso|assenza di blush"]
+    ],
+    findings:[
+      ["Lacerazione renale profonda","lacerazione renale|lacerazione profonda|rene"],
+      ["Ematoma perirenale","ematoma perirenale|perirenale"],
+      ["Fase tardiva/escretrice eseguita","fase tardiva|fase escretrice|tardiva"],
+      ["Stravaso di urina/contrasto dal sistema escretore","stravaso urinario|leak urinario|sistema escretore"],
+      ["Assenza o presenza di blush arterioso separatamente descritta","blush arterioso|sanguinamento attivo|assenza di blush"],
+      ["Conclusione per trauma renale con lesione della via escretrice","trauma renale|lesione sistema escretore|leak urinario"]
+    ],
+    sampleReport:"Lacerazione profonda del rene destro associata a ematoma perirenale. Nella fase escretrice si documenta stravaso di mezzo di contrasto opacizzato all'esterno del sistema di raccolta, compatibile con leak urinario. Non si apprezza focale contrast blush in fase arteriosa. Quadro di trauma renale con coinvolgimento del sistema escretore, da correlare con il quadro clinico e da rivalutare secondo indicazione."
+  },
+  {
+    id:"case_em_trauma_kidney_infarct", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Addome", topic:"Trauma renale vascolare / infarto", emergency:true,
+    title:"TC trauma — infarto renale post-traumatico", area:"Urgenze / emergenze", organ:"Rene", modality:"TC addome con mdc",
+    clinical:"Trauma ad alta energia con dolore al fianco e ridotta perfusione renale destra.",
+    prompt:"Referta il reperto vascolare e differenzialo da lacerazione o contusione.",
+    task:"Obiettivo: riconoscere un'area nettamente delimitata di ipoperfusione non lineare, ricercare trombosi/lesione dell'arteria renale e descrivere l'estensione dell'infarto.",
+    criticalFindings:[
+      ["Infarto renale / devascolarizzazione","infarto renale|devascolarizzazione|ischemia renale"],
+      ["Lesione o trombosi dell'arteria renale","arteria renale|trombosi|occlusione"]
+    ],
+    findings:[
+      ["Area di ipodensità nettamente delimitata","ipodensità|nettamente delimitata|cuneiforme|wedge"],
+      ["Pattern non lineare, diverso da lacerazione","non lineare|non-linear|lacerazione"],
+      ["Valutazione dell'arteria renale","arteria renale|vaso renale|peduncolo"],
+      ["Trombosi/occlusione se presente","trombosi|occlusione|assenza di opacizzazione"],
+      ["Estensione dell'infarto/devascolarizzazione","infarto|devascolarizzazione|estensione"],
+      ["Conclusione per lesione vascolare renale post-traumatica","lesione vascolare renale|trauma renale|infarto renale"]
+    ],
+    sampleReport:"Ampia area di ipoenhancement nettamente delimitata del rene destro, a morfologia non lineare, compatibile con infarto post-traumatico. Si associa ridotta/assente opacizzazione di un ramo dell'arteria renale, con sospetta trombosi traumatica. Il reperto è maggiormente suggestivo per lesione vascolare con devascolarizzazione piuttosto che per semplice lacerazione o contusione."
+  },
+  {
+    id:"case_em_trauma_bladder_rupture", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Pelvi", topic:"Rottura vescicale", emergency:true,
+    title:"TC-cistografia — rottura vescicale post-traumatica", area:"Urgenze / emergenze", organ:"Vescica", modality:"TC-cistografia",
+    clinical:"Trauma pelvico con fratture del bacino ed ematuria macroscopica.",
+    prompt:"Scrivi il referto della TC-cistografia localizzando lo stravaso e descrivendone la distribuzione.",
+    task:"Obiettivo: riconoscere contrasto extravescicale negli spazi perivescicali/Retzius e descrivere il pattern della rottura.",
+    criticalFindings:[
+      ["Stravaso extravescicale di contrasto","stravaso|extravescicale|perivescicale"],
+      ["Rottura vescicale","rottura vescicale|lesione vescicale"]
+    ],
+    findings:[
+      ["Esame cistografico/vescica distesa con contrasto","cistografia|vescica|contrasto intravescicale"],
+      ["Stravaso nello spazio perivescicale/Retzius","perivescicale|retzius|retroperitoneale|stravaso"],
+      ["Distribuzione del contrasto attorno alla vescica","attorno alla vescica|perivescicale|anteriore|posteriore"],
+      ["Eventuale segno del dente molare","dente molare|molar tooth"],
+      ["Conclusione per rottura vescicale","rottura vescicale|lesione vescicale"]
+    ],
+    sampleReport:"Alla TC-cistografia si documenta stravaso di mezzo di contrasto al di fuori del lume vescicale, con diffusione nello spazio perivescicale e nel Retzius, prevalentemente anteriormente e lateralmente alla vescica. Il pattern configura lesione/rottura vescicale post-traumatica; reperto da correlare con le associate fratture pelviche."
+  },
+  {
+    id:"case_em_trauma_pancreas_duct", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Addome", topic:"Trauma pancreatico e dotto principale", emergency:true,
+    title:"TC trauma — lacerazione pancreatica con sospetto danno duttale", area:"Urgenze / emergenze", organ:"Pancreas", modality:"TC addome con mdc",
+    clinical:"Trauma chiuso epigastrico ad alta energia con dolore persistente e incremento degli enzimi pancreatici.",
+    prompt:"Referta la lesione pancreatica e indica cosa resta da chiarire sul dotto pancreatico principale.",
+    task:"Obiettivo: descrivere la lesione/lacerazione pancreatica alla TC e, se il coinvolgimento duttale non è definibile, indicare RM/MRCP per la sua caratterizzazione.",
+    criticalFindings:[
+      ["Lesione pancreatica traumatica","lesione pancreatica|lacerazione pancreatica|trauma pancreatico"],
+      ["Possibile coinvolgimento del dotto principale","dotto pancreatico|wirsung|duttale"]
+    ],
+    findings:[
+      ["Lacerazione/lesione del parenchima pancreatico","lacerazione|lesione|pancreas"],
+      ["Raccolta o imbibizione peripancreatica associata","peripancreatica|raccolta|imbibizione"],
+      ["Valutazione del dotto pancreatico principale","dotto pancreatico|wirsung|duttale"],
+      ["Limite della TC nel definire una lesione duttale","tc poco sensibile|non definibile|non valutabile|dottale"],
+      ["Indicazione a RM/MRCP se necessario","rm|mrcp|colangiopancreatograf"],
+      ["Conclusione per trauma pancreatico","trauma pancreatico|lesione pancreatica"]
+    ],
+    sampleReport:"Lacerazione del corpo pancreatico con edema e raccolta fluida peripancreatica. Alla TC non è possibile definire con certezza l'integrità del dotto pancreatico principale; in presenza di sospetto clinico di lesione duttale è indicata caratterizzazione con RM/MRCP. Quadro di trauma pancreatico da correlare con il contesto clinico-chirurgico."
+  },
+  {
+    id:"case_em_trauma_bowel_mesenteric", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Addome", topic:"Trauma intestinale / mesenterico", emergency:true,
+    title:"TC trauma — sospetta lesione intestinale e mesenterica", area:"Urgenze / emergenze", organ:"Intestino", modality:"TC addome con mdc",
+    clinical:"Trauma chiuso dell'addome con dolore progressivo e segni di irritazione peritoneale.",
+    prompt:"Scrivi un referto che distingua i segni specifici da quelli più comuni ma meno specifici di lesione intestinale.",
+    task:"Obiettivo: cercare discontinuità focale di parete/stravaso di contenuto o contrasto, associando reperti più comuni come versamento libero e mesenteric stranding.",
+    criticalFindings:[
+      ["Segno specifico di lesione intestinale","discontinuità focale|stravaso contenuto|stravaso contrasto|perforazione"],
+      ["Versamento libero / reperti mesenterici associati","versamento libero|mesenteric stranding|mesenterico"]
+    ],
+    findings:[
+      ["Ispessimento focale della parete intestinale","ispessimento focale|parete intestinale"],
+      ["Discontinuità focale della parete","discontinuità|parete"],
+      ["Stravaso di contenuto o mdc orale se presente","stravaso|contenuto|contrasto orale"],
+      ["Versamento libero","versamento libero|liquido libero|emoperitoneo"],
+      ["Mesenteric stranding / aumento densità del grasso","mesenteric stranding|stranding mesenterico|grasso mesenterico"],
+      ["Pneumoperitoneo valutato ma non considerato da solo diagnostico","pneumoperitoneo|aria libera"],
+      ["Conclusione per sospetta lesione intestinale/mesenterica","lesione intestinale|lesione mesenterica|perforazione"]
+    ],
+    sampleReport:"Ispessimento focale di un'ansa del tenue con sospetta discontinuità parietale e marcato stranding del mesentere adiacente; associato versamento libero intraperitoneale. Minima falda di aria extraluminale. Nel complesso reperti sospetti per lesione intestinale/mesenterica post-traumatica, da comunicare tempestivamente al team chirurgico."
+  },
+  {
+    id:"case_em_trauma_diaphragm", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Torace", topic:"Rottura diaframmatica post-traumatica", emergency:true,
+    title:"TC trauma — rottura diaframmatica con erniazione viscerale", area:"Urgenze / emergenze", organ:"Diaframma", modality:"TC torace-addome con mdc",
+    clinical:"Trauma ad alta energia con dispnea e dolore toraco-addominale.",
+    prompt:"Referta la lesione diaframmatica descrivendo i segni diretti e indiretti presenti.",
+    task:"Obiettivo: riconoscere erniazione di visceri nel torace, collar/hourglass sign e dependent viscera sign; sul lato destro può essere presente il cottage loaf sign.",
+    criticalFindings:[
+      ["Rottura diaframmatica","rottura diaframmatica|lesione diaframma|diaframmatica"],
+      ["Erniazione di visceri addominali nel torace","erniazione|visceri nel torace|intratoracica"]
+    ],
+    findings:[
+      ["Interruzione/lesione del profilo diaframmatico","diaframma|interruzione|discontinuità"],
+      ["Erniazione viscerale intratoracica","erniazione|intratoracica|visceri"],
+      ["Collar sign / segno della clessidra","collar sign|segno del collare|clessidra"],
+      ["Dependent viscera sign","dependent viscera|visceri dipendenti"],
+      ["Cottage loaf sign se interessato il fegato","cottage loaf|fegato erniato"],
+      ["Conclusione per rottura diaframmatica post-traumatica","rottura diaframmatica|trauma diaframma"]
+    ],
+    sampleReport:"Discontinuità dell'emidiaframma sinistro con erniazione intratoracica di stomaco e anse intestinali. In corrispondenza del passaggio transdiaframmatico è presente restringimento del viscere erniato, configurando collar/hourglass sign; i visceri erniati assumono inoltre posizione dipendente lungo la parete toracica posteriore. Quadro compatibile con rottura diaframmatica post-traumatica."
+  },
+  {
+    id:"case_em_trauma_multiorgan", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: TRAUMI ADDOMINALI",
+    mapId:"urgenze_traumi_addominali", modalityCode:"TC", region:"Addome", topic:"Trauma addominale multiorgano", emergency:true,
+    title:"TC trauma — trauma addominale multiorgano", area:"Urgenze / emergenze", organ:"Addome", modality:"TC total body / addome multiphasica con mdc",
+    clinical:"Politrauma ad alta energia, stabilizzato in shock room, inviato a TC total body.",
+    prompt:"Scrivi un referto strutturato per priorità, mettendo per primi i reperti che modificano immediatamente il management.",
+    task:"Obiettivo: integrare emoperitoneo, lesioni parenchimali, eventuale sanguinamento attivo/lesione vascolare, pneumoperitoneo e devascolarizzazione d'organo, mantenendo una gerarchia clinica chiara.",
+    criticalFindings:[
+      ["Sanguinamento attivo o lesione vascolare","sanguinamento attivo|stravaso|contrast blush|pseudoaneurisma|fistola"],
+      ["Emoperitoneo","emoperitoneo|sangue libero|versamento ematico"],
+      ["Pneumoperitoneo o sospetta lesione intestinale se presente","pneumoperitoneo|aria libera|lesione intestinale|perforazione"],
+      ["Devascolarizzazione d'organo se presente","devascolarizzazione|ischemia|infarto"]
+    ],
+    findings:[
+      ["Descrizione sistematica degli organi lesionati","fegato|milza|rene|pancreas|intestino"],
+      ["Lacerazioni / ematomi / contusioni","lacerazione|ematoma|contusione"],
+      ["Emoperitoneo","emoperitoneo|versamento"],
+      ["Ricerca di contrast blush / pseudoaneurisma / FAV","contrast blush|pseudoaneurisma|fistola|fav|sanguinamento attivo"],
+      ["Ricerca di pneumoperitoneo","pneumoperitoneo|aria libera"],
+      ["Ricerca di devascolarizzazione","devascolarizzazione|infarto|ischemia"],
+      ["Conclusione gerarchizzata per urgenza","urgente|priorità|sanguinamento|chirurg|interventistica"]
+    ],
+    sampleReport:"Emoperitoneo di discreta entità, prevalente nei quadranti superiori. Lacerazione splenica con focale contrast blush compatibile con sanguinamento attivo; concomitante contusione epatica senza evidenza di stravaso. Non pneumoperitoneo. Regolare enhancement dei reni senza aree di devascolarizzazione. Reperto prioritario: emorragia attiva da lesione splenica, da comunicare immediatamente per valutazione terapeutica urgente."
+  },
   // ---------- URGENZE / EMERGENZE: ANEURISMI AORTA ADDOMINALE ----------
   {
     id:"case_em_aaa_rupture_active", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: ANEURISMI AORTA ADDOMINALE",
@@ -1711,6 +1926,17 @@ const reportTopicCatalog = [
 
   // Fuori mappa: casi già presenti
   {sourceType:"outside", mapName:null, modality:"TC", region:"Torace", topic:"Neoplasia polmonare"},
+  // Urgenze / emergenze — traumi addominali
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Addome", topic:"Trauma splenico con sanguinamento attivo", emergency:true},
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Addome", topic:"Pseudoaneurisma splenico post-traumatico", emergency:true},
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Addome", topic:"Trauma epatico con contrast blush", emergency:true},
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Addome", topic:"Trauma renale con leak urinario", emergency:true},
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Addome", topic:"Trauma renale vascolare / infarto", emergency:true},
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Pelvi", topic:"Rottura vescicale", emergency:true},
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Addome", topic:"Trauma pancreatico e dotto principale", emergency:true},
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Addome", topic:"Trauma intestinale / mesenterico", emergency:true},
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Torace", topic:"Rottura diaframmatica post-traumatica", emergency:true},
+  {sourceType:"map", mapId:"urgenze_traumi_addominali", mapName:"TRAUMI ADDOMINALI", modality:"TC", region:"Addome", topic:"Trauma addominale multiorgano", emergency:true},
   // Urgenze / emergenze — prime mappe cardiovascolari
   {sourceType:"map", mapId:"urgenze_aaa", mapName:"ANEURISMI AORTA ADDOMINALE", modality:"TC", region:"Cardiovascolare", topic:"AAA rotto", emergency:true},
   {sourceType:"map", mapId:"urgenze_aaa", mapName:"ANEURISMI AORTA ADDOMINALE", modality:"TC", region:"Cardiovascolare", topic:"Segni di rottura imminente", emergency:true},

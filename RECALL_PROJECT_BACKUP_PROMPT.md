@@ -224,3 +224,21 @@ Le nuove mappe Urgenze che verranno aggiunte in futuro devono essere integrate n
   - un caso casuale limitato ai filtri scelti.
 - La correzione dei casi urgenti distingue i reperti critici/omissioni importanti.
 - Le prossime mappe di Urgenze vanno aggiunte allo stesso catalogo senza sostituire o rimuovere queste.
+
+
+## Aggiornamento v1.18 — TRAUMI ADDOMINALI
+È stata integrata nella Refertazione Urgenze / emergenze anche la mappa **Traumi addominali**.
+Sono stati aggiunti 10 casi testuali con `mapId: urgenze_traumi_addominali`, tutti `emergency:true`, prevalentemente TC, sui seguenti argomenti:
+- trauma splenico con sanguinamento attivo;
+- pseudoaneurisma splenico post-traumatico;
+- trauma epatico con contrast blush;
+- trauma renale con leak urinario;
+- trauma renale vascolare / infarto;
+- rottura vescicale;
+- trauma pancreatico e sospetto coinvolgimento del dotto principale;
+- trauma intestinale / mesenterico;
+- rottura diaframmatica post-traumatica;
+- trauma addominale multiorgano.
+
+La mappa compare nel selettore **Refertazione → Urgenze / emergenze → Scegli su cosa allenarti** insieme ad AAA e Dissezione. L'utente può scegliere l'intera mappa, il singolo argomento oppure fare un random limitato ai filtri scelti. Non rimuovere i casi urgenti già presenti.
+Versione di riferimento dopo questa integrazione: **Recall v1.18**.

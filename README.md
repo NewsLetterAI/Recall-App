@@ -21,3 +21,9 @@ Aggiunto un percorso dedicato in Refertazione per i casi urgenti derivati dalle 
 
 ## v1.17.1 — Scegli su cosa allenarti
 Nella sezione Urgenze / emergenze puoi scegliere tutte le urgenze, una singola mappa (Aneurismi aorta addominale o Dissezione aortica), un argomento specifico e avviare un caso casuale limitato alla selezione.
+
+
+## v1.18 — Traumi addominali in Refertazione Urgenze
+Integrata la mappa **Traumi addominali** nel motore di refertazione con 10 nuovi casi testuali urgenti.
+Argomenti: trauma splenico con sanguinamento attivo, pseudoaneurisma splenico, trauma epatico con contrast blush, trauma renale con leak urinario, trauma renale vascolare/infarto, rottura vescicale, trauma pancreatico con sospetto danno duttale, trauma intestinale/mesenterico, rottura diaframmatica e trauma addominale multiorgano.
+La mappa compare nel selettore **Refertazione → Urgenze / emergenze → Scegli su cosa allenarti** come **TRAUMI ADDOMINALI**, con possibilità di selezionare il singolo argomento o usare il random filtrato.
