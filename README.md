@@ -27,3 +27,7 @@ Nella sezione Urgenze / emergenze puoi scegliere tutte le urgenze, una singola m
 Integrata la mappa **Traumi addominali** nel motore di refertazione con 10 nuovi casi testuali urgenti.
 Argomenti: trauma splenico con sanguinamento attivo, pseudoaneurisma splenico, trauma epatico con contrast blush, trauma renale con leak urinario, trauma renale vascolare/infarto, rottura vescicale, trauma pancreatico con sospetto danno duttale, trauma intestinale/mesenterico, rottura diaframmatica e trauma addominale multiorgano.
 La mappa compare nel selettore **Refertazione → Urgenze / emergenze → Scegli su cosa allenarti** come **TRAUMI ADDOMINALI**, con possibilità di selezionare il singolo argomento o usare il random filtrato.
+
+## v1.20 — Correzione AI
+
+Aggiunta doppia correzione dei referti: checklist locale/offline e correzione ragionata via OpenAI. La chiave API non viene mai memorizzata in Recall: è custodita in un backend privato. Configurazione completa in `AI_BACKEND_SETUP.md`.

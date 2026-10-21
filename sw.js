@@ -1,4 +1,4 @@
-const VERSION="v118";
+const VERSION="v120";
 const CORE_CACHE=`recall-core-${VERSION}`;
 const RUNTIME_CACHE=`recall-runtime-${VERSION}`;
 const DOC_CACHE=`recall-docs-${VERSION}`;
@@ -6,7 +6,7 @@ const CASE_CACHE=`recall-cases-${VERSION}`;
 
 const scopeURL=self.registration.scope;
 const APP_ENTRY=new URL("index.html",scopeURL).href;
-const CORE_PATHS=["index.html","styles.css","app.js","manifest.webmanifest","icon.svg","apple-touch-icon.png","RECALL_PROJECT_BACKUP_PROMPT.md"];
+const CORE_PATHS=["index.html","styles.css","app.js","manifest.webmanifest","icon.svg","apple-touch-icon.png","RECALL_PROJECT_BACKUP_PROMPT.md","AI_BACKEND_SETUP.md"];
 const CORE_URLS=CORE_PATHS.map(p=>new URL(p,scopeURL).href);
 
 async function cacheAppShell(){

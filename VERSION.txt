@@ -1,1 +1,1 @@
-Recall v1.18 — Urgenze / emergenze: integrazione mappa Traumi addominali con 10 nuovi casi selezionabili
+Recall v1.20 · Correzione AI dei referti · backend privato richiesto

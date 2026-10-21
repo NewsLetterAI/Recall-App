@@ -1826,6 +1826,177 @@ const reportCases = [
   }
 
 
+  ,
+  // ---------- URGENZE / EMERGENZE: ISCHEMIA ARTI INFERIORI ----------
+  {
+    id:"case_em_limb_aortoiliac_acute", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA ARTI INFERIORI",
+    mapId:"urgenze_ischemia_arti_inferiori", modalityCode:"TC", region:"Cardiovascolare", topic:"Occlusione aorto-iliaca acuta", emergency:true,
+    title:"Angio-TC arti inferiori — occlusione aorto-iliaca acuta", area:"Urgenze / emergenze", organ:"Arti inferiori", modality:"Angio-TC aorta addominale e arti inferiori",
+    clinical:"Dolore improvviso bilaterale agli arti inferiori, pallore e ipotermia distale; sospetta ischemia acuta.",
+    prompt:"Scrivi un referto urgente, descrivendo sede, estensione dell'occlusione, circoli collaterali e runoff distale.",
+    task:"Obiettivo: definire l'estensione dell'occlusione aorto-iliaca, il coinvolgimento delle femorali comuni e l'eventuale riabitazione distale mediante collaterali.",
+    criticalFindings:[
+      ["Occlusione aorto-iliaca", "occlusione aort|aorto-iliac|iliache comuni|infrarenale"],
+      ["Ridotta perfusione degli arti inferiori", "ischemia|ipoperfusione|mancata opacizzazione distale"],
+      ["Comunicazione urgente", "urgente|emergenza|vascolare|rivascolarizzazione"]
+    ],
+    findings:[
+      ["Occlusione sottorenale dell'aorta", "aorta sottorenale|infrarenale|occlus"],
+      ["Coinvolgimento delle arterie iliache", "iliaca comune|iliaca esterna|iliaca interna|ipogastrica"],
+      ["Coinvolgimento delle femorali comuni", "femorale comune"],
+      ["Riabitazione della femorale profonda o poplitea", "femorale profonda|riabitazione|collaterali|poplitea"],
+      ["Descrizione del runoff distale", "runoff|uno vaso|due vasi|tre vasi|assenza di runoff"],
+      ["Conclusione di ischemia acuta aorto-iliaca", "ischemia acuta|occlusione aorto-iliaca"]
+    ],
+    sampleReport:"Si documenta completa occlusione dell'aorta addominale sottorenale, estesa alle arterie iliache comuni bilateralmente, con coinvolgimento anche dei segmenti iliaci esterni e delle femorali comuni. Le arterie femorali profonde risultano riabitate poco distalmente all'origine mediante circoli collaterali, con parziale ripresa di opacizzazione dei segmenti distali. Il runoff sottopopliteo è gravemente compromesso bilateralmente. Quadro di occlusione aorto-iliaca acuta con severa ischemia degli arti inferiori, da comunicare con urgenza al team vascolare."
+  }
+  ,{
+    id:"case_em_limb_sfa_chronic_reconstitution", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA ARTI INFERIORI",
+    mapId:"urgenze_ischemia_arti_inferiori", modalityCode:"TC", region:"Cardiovascolare", topic:"Occlusione cronica femorale superficiale con riabitazione poplitea", emergency:true,
+    title:"Angio-TC arti inferiori — occlusione cronica della femorale superficiale", area:"Urgenze / emergenze", organ:"Arti inferiori", modality:"Angio-TC aorta addominale e arti inferiori",
+    clinical:"Claudicatio severa ingravescente dell'arto inferiore destro.",
+    prompt:"Referta un'occlusione femoro-poplitea cronica sottolineando collaterali e livello di riabitazione.",
+    task:"Obiettivo: descrivere sede, estensione e morfologia dell'occlusione dell'arteria femorale superficiale e il runoff distale.",
+    criticalFindings:[
+      ["Occlusione della femorale superficiale", "femorale superficiale|SFA|occlus"],
+      ["Riabitazione poplitea da collaterali", "riabitazione|collaterali|poplitea" ]
+    ],
+    findings:[
+      ["Sede dell'occlusione", "tratto prossimale|medio|distale|femorale superficiale"],
+      ["Lunghezza dell'occlusione", "cm|estensione"],
+      ["Collaterali dalla femorale profonda", "femorale profonda|perforanti|collaterali"],
+      ["Poplitea riabitata", "poplitea|riabit"],
+      ["Runoff a uno o due vasi", "runoff|uno vaso|due vasi"],
+      ["Conclusione di quadro cronico", "cronica|collaterali|arteriopatia"]
+    ],
+    sampleReport:"A destra si documenta completa occlusione dell'arteria femorale superficiale dal tratto prossimale al terzo distale di coscia, per una lunghezza di circa 18 cm, con brusca interruzione dell'opacizzazione. La femorale profonda è pervia e sostiene validi circoli collaterali con riabitazione della poplitea sovra-articolare. Distalmente pervietà della tibiale anteriore e della peroniera fino alla caviglia, con occlusione della tibiale posteriore: runoff a due vasi. Quadro compatibile con arteriopatia femoro-poplitea cronica occlusiva."
+  }
+  ,{
+    id:"case_em_limb_popliteal_acute", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA ARTI INFERIORI",
+    mapId:"urgenze_ischemia_arti_inferiori", modalityCode:"TC", region:"Cardiovascolare", topic:"Trombosi poplitea acuta", emergency:true,
+    title:"Angio-TC arti inferiori — trombosi acuta dell'arteria poplitea", area:"Urgenze / emergenze", organ:"Arti inferiori", modality:"Angio-TC aorta addominale e arti inferiori",
+    clinical:"Esordio acuto di dolore, ipoestesia e freddo al piede sinistro.",
+    prompt:"Scrivi un referto urgente di ischemia acuta da trombosi poplitea.",
+    task:"Obiettivo: descrivere il difetto di riempimento popliteo, l'assenza di collaterali significative e il runoff distale.",
+    criticalFindings:[
+      ["Occlusione trombotica poplitea", "poplitea|trombosi|difetto di riempimento|occlus"],
+      ["Ischemia acuta", "ischemia acuta|assenza di collaterali|mancata opacizzazione distale"],
+      ["Urgenza vascolare", "urgente|vascolare|rivascolarizzazione"]
+    ],
+    findings:[
+      ["Difetto di riempimento endoluminale", "difetto di riempimento|trombot"],
+      ["Interruzione brusca del lume", "interruzione brusca|brusca"],
+      ["Scarsa o assente riabitazione collaterale", "collaterali|riabitazione"],
+      ["Compromissione degli assi tibiali", "tibiale anteriore|tibiale posteriore|peroniera"],
+      ["Runoff assente o gravemente ridotto", "assenza di runoff|runoff a un vaso|runoff"],
+      ["Conclusione di ischemia acuta poplitea", "poplitea acuta|ischemia acuta"]
+    ],
+    sampleReport:"A sinistra si osserva difetto di riempimento endoluminale dell'arteria poplitea nel tratto retroarticolare e sottoarticolare, con completa interruzione dell'opacizzazione per circa 4 cm, reperto compatibile con occlusione trombotica acuta. Distalmente minima riabitazione collaterale, con mancata opacizzazione della tibiale anteriore e della tibiale posteriore e tenue opacizzazione della sola peroniera nel terzo prossimale: runoff gravemente compromesso. Quadro di ischemia acuta dell'arto inferiore sinistro da trombosi poplitea."
+  }
+  ,{
+    id:"case_em_limb_btk_single_runoff", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA ARTI INFERIORI",
+    mapId:"urgenze_ischemia_arti_inferiori", modalityCode:"TC", region:"Cardiovascolare", topic:"Ischemia critica infrapoplitea con runoff a un vaso", emergency:true,
+    title:"Angio-TC arti inferiori — ischemia critica con runoff a un vaso", area:"Urgenze / emergenze", organ:"Arti inferiori", modality:"Angio-TC aorta addominale e arti inferiori",
+    clinical:"Lesioni trofiche del piede destro e dolore a riposo.",
+    prompt:"Referta un quadro di ischemia critica sotto il ginocchio, evidenziando il runoff distale.",
+    task:"Obiettivo: specificare quali assi tibiali raggiungono la caviglia e se il piede è vascolarizzato da un solo vaso.",
+    criticalFindings:[
+      ["Ischemia critica distale", "ischemia critica|lesioni trofiche|dolore a riposo"],
+      ["Runoff a un vaso", "runoff a un vaso|sola peroniera|un solo asse" ]
+    ],
+    findings:[
+      ["Pervietà della poplitea", "poplitea"],
+      ["Occlusione di tibiale anteriore e posteriore", "tibiale anteriore|tibiale posteriore|occlus"],
+      ["Pervietà della peroniera", "peroniera|fibulare|pervia"],
+      ["Valutazione di pedidia/plantari", "pedidia|plantari|arcata plantare"],
+      ["Runoff distale esplicitato", "runoff"],
+      ["Conclusione di arteriopatia sotto il ginocchio", "sotto il ginocchio|infrapoplitea"]
+    ],
+    sampleReport:"A destra le arterie femoro-poplitee risultano globalmente pervie, con diffuse placche ateromasiche. Sotto il ginocchio si documenta occlusione della tibiale anteriore e della tibiale posteriore, mentre la sola arteria peroniera mantiene continuità di opacizzazione fino al terzo distale della gamba, con esile contributo al piede mediante rami terminali. L'arcata plantare è scarsamente rappresentata. Quadro di arteriopatia infrapoplitea critica con runoff distale a un vaso."
+  }
+  ,{
+    id:"case_em_limb_multilevel_bilateral", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA ARTI INFERIORI",
+    mapId:"urgenze_ischemia_arti_inferiori", modalityCode:"TC", region:"Cardiovascolare", topic:"Arteriopatia multilivello bilaterale", emergency:true,
+    title:"Angio-TC arti inferiori — arteriopatia occlusiva multilivello bilaterale", area:"Urgenze / emergenze", organ:"Arti inferiori", modality:"Angio-TC aorta addominale e arti inferiori",
+    clinical:"Dolore a riposo bilaterale, prevalente a destra, con ulcere distali.",
+    prompt:"Scrivi un referto strutturato che distingua le lesioni dei due arti e il livello dominante di malattia.",
+    task:"Obiettivo: sintetizzare malattia aorto-iliaca, femoro-poplitea e infrapoplitea bilaterale, segnalando lato più compromesso e runoff.",
+    criticalFindings:[
+      ["Arteriopatia multilivello", "multilivello|aorto-iliaco|femoro-popliteo|sotto il ginocchio"],
+      ["Lato maggiormente compromesso", "destra|sinistra|prevalente" ]
+    ],
+    findings:[
+      ["Stenosi/occlusioni iliache", "iliaca"],
+      ["Lesioni femoro-poplitee", "femorale|poplitea"],
+      ["Runoff distale per lato", "runoff|vasi|caviglia"],
+      ["Circoli collaterali", "collaterali|riabitazione"],
+      ["Conclusione per lato", "a destra|a sinistra"]
+    ],
+    sampleReport:"Diffuse alterazioni ateromasiche dell'aorta addominale e degli assi iliaci. A destra, stenosi serrata dell'iliaca esterna e lunga occlusione della femorale superficiale con riabitazione della poplitea; distalmente pervietà della sola peroniera fino alla caviglia. A sinistra, multiple stenosi femoro-poplitee non critiche con pervietà della tibiale anteriore e della peroniera, occlusa la tibiale posteriore. Quadro di arteriopatia occlusiva multilivello bilaterale, più severa a destra, con runoff a un vaso a destra e a due vasi a sinistra."
+  }
+  ,{
+    id:"case_em_limb_bypass_occlusion", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA ARTI INFERIORI",
+    mapId:"urgenze_ischemia_arti_inferiori", modalityCode:"TC", region:"Cardiovascolare", topic:"Occlusione di bypass femoro-popliteo", emergency:true,
+    title:"Angio-TC arti inferiori — occlusione di bypass femoro-popliteo", area:"Urgenze / emergenze", organ:"Arti inferiori", modality:"Angio-TC aorta addominale e arti inferiori",
+    clinical:"Peggioramento acuto della claudicatio in paziente con pregresso bypass femoro-popliteo.",
+    prompt:"Referta un controllo post-rivascolarizzazione con occlusione del bypass.",
+    task:"Obiettivo: descrivere bypass, sedi delle anastomosi, pervietà/occlusione del graft e stato del circolo a valle.",
+    criticalFindings:[
+      ["Bypass occluso", "bypass|graft|occlus"],
+      ["Ridotta perfusione a valle", "distale|poplitea|runoff|riabitazione" ]
+    ],
+    findings:[
+      ["Tipo e decorso del bypass", "bypass|femoro-popliteo|graft"],
+      ["Anastomosi prossimale e distale", "anastomosi prossimale|anastomosi distale"],
+      ["Occlusione del graft", "occlus"],
+      ["Eventuale riabitazione distale", "riabitazione|collaterali"],
+      ["Runoff distale", "runoff|tibiale|peroniera"],
+      ["Conclusione orientata al reintervento", "rivascolarizzazione|vascolare"]
+    ],
+    sampleReport:"Bypass femoro-popliteo destro con anastomosi prossimale sulla femorale comune e distale sulla poplitea sottoarticolare. Il graft non si opacizza lungo l'intero decorso, reperto compatibile con occlusione completa. Distale riabitazione della poplitea tramite circoli collaterali, con pervietà della tibiale anteriore e della peroniera fino alla caviglia. Quadro di occlusione del bypass femoro-popliteo destro, da correlare con indicazione a nuova rivascolarizzazione."
+  }
+  ,{
+    id:"case_em_limb_iliac_stent_restenosis", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA ARTI INFERIORI",
+    mapId:"urgenze_ischemia_arti_inferiori", modalityCode:"TC", region:"Cardiovascolare", topic:"Restenosi / occlusione intrastent iliaco", emergency:true,
+    title:"Angio-TC arti inferiori — restenosi intrastent iliaca", area:"Urgenze / emergenze", organ:"Arti inferiori", modality:"Angio-TC aorta addominale e arti inferiori",
+    clinical:"Controllo per recidiva di claudicatio dopo stenting iliaco.",
+    prompt:"Scrivi il referto di un controllo dopo rivascolarizzazione con stenosi severa/occlusione intrastent.",
+    task:"Obiettivo: descrivere lo stent, il grado di restenosi od occlusione e le ripercussioni sul circolo a valle.",
+    criticalFindings:[
+      ["Restenosi intrastent", "stent|intrastent|restenosi|occlus"],
+      ["Emodinamica distale compromessa", "femorale|runoff|collaterali" ]
+    ],
+    findings:[
+      ["Sede dello stent", "iliaca comune|iliaca esterna|stent"],
+      ["Grado di stenosi/occlusione", "stenosi|occlus"],
+      ["Opacizzazione distale", "distale|femorale comune|riabitazione"],
+      ["Collaterali", "collaterali"],
+      ["Conclusione post-rivascolarizzazione", "post-rivascolarizzazione|intrastent"]
+    ],
+    sampleReport:"Presenza di stent a carico dell'arteria iliaca esterna sinistra, interessato nel tratto medio-distale da marcata riduzione del calibro luminale, stimabile nell'ordine del 80-90%, compatibile con severa restenosi intrastent; non si esclude focale occlusione subsegmentaria. A valle ridotta opacizzazione della femorale comune e della femorale superficiale, con parziale compenso mediante circoli collaterali. Quadro di recidiva emodinamicamente significativa post-rivascolarizzazione."
+  }
+  ,{
+    id:"case_em_limb_popliteal_aneurysm_thrombosis", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA ARTI INFERIORI",
+    mapId:"urgenze_ischemia_arti_inferiori", modalityCode:"TC", region:"Cardiovascolare", topic:"Trombosi di aneurisma popliteo", emergency:true,
+    title:"Angio-TC arti inferiori — aneurisma popliteo trombizzato", area:"Urgenze / emergenze", organ:"Arti inferiori", modality:"Angio-TC aorta addominale e arti inferiori",
+    clinical:"Paziente con massa pulsante poplitea nota e improvviso peggioramento della perfusione del piede.",
+    prompt:"Referta una trombosi di aneurisma popliteo con ischemia distale.",
+    task:"Obiettivo: descrivere la dilatazione aneurismatica poplitea, il trombo murale/l'occlusione e il runoff distale.",
+    criticalFindings:[
+      ["Aneurisma popliteo", "aneurismatica|aneurisma popliteo|poplitea"],
+      ["Trombosi/occlusione", "trombo|trombosi|occlus"],
+      ["Ischemia distale", "ischemia|runoff|distale" ]
+    ],
+    findings:[
+      ["Diametro dell'aneurisma", "diametro|mm"],
+      ["Trombo murale o lume residuo", "trombo murale|lume residuo"],
+      ["Occlusione poplitea", "occlus"],
+      ["Compromissione tibiale", "tibiale|peroniera"],
+      ["Runoff distale", "runoff"],
+      ["Conclusione di aneurisma popliteo trombizzato", "aneurisma popliteo trombizzato|trombizzato"]
+    ],
+    sampleReport:"Nel tratto sovra-retroarticolare dell'arteria poplitea destra si apprezza dilatazione aneurismatica del diametro massimo di circa 22 mm, con abbondante trombo murale e completa assenza di opacizzazione del lume nel tratto distale, compatibile con trombosi/occlusione dell'aneurisma. Distalmente tenue riabitazione della sola peroniera, con mancata opacizzazione della tibiale anteriore e posteriore. Quadro di aneurisma popliteo trombizzato con ischemia distale critica."
+  }
 ];
 
 const reportTopicCatalog = [
@@ -1950,6 +2121,16 @@ const reportTopicCatalog = [
   {sourceType:"map", mapId:"urgenze_dissezione", mapName:"DISSEZIONE AORTICA", modality:"TC", region:"Cardiovascolare", topic:"Dissezione non-A non-B", emergency:true},
   {sourceType:"map", mapId:"urgenze_dissezione", mapName:"DISSEZIONE AORTICA", modality:"TC", region:"Cardiovascolare", topic:"TBAD high-risk", emergency:true}
 
+,
+  // Urgenze / emergenze — ischemia arti inferiori
+  {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Occlusione aorto-iliaca acuta", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Occlusione cronica femorale superficiale con riabitazione poplitea", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Trombosi poplitea acuta", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Ischemia critica infrapoplitea con runoff a un vaso", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Arteriopatia multilivello bilaterale", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Occlusione di bypass femoro-popliteo", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Restenosi / occlusione intrastent iliaco", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Trombosi di aneurisma popliteo", emergency:true}
 ];
 
 const reportRegions = ["Encefalo","Testa-collo","Torace","Addome","Pelvi","Muscoloscheletrico","Cardiovascolare"];
@@ -3391,6 +3572,114 @@ function materialRecord(kind,id){
 }
 function isPdfFilename(name){return /\.pdf$/i.test(String(name||''));}
 
+
+// ---------- CORREZIONE AI ----------
+const AI_CFG_KEY='recall_ai_config_v1';
+function getAIConfig(){
+  try{return {...{endpoint:'',token:''},...JSON.parse(localStorage.getItem(AI_CFG_KEY)||'{}')};}
+  catch(_){return {endpoint:'',token:''};}
+}
+function setAIConfig(cfg){localStorage.setItem(AI_CFG_KEY,JSON.stringify({endpoint:String(cfg.endpoint||'').trim(),token:String(cfg.token||'').trim()}));}
+function updateAISettingsUI(){
+  const cfg=getAIConfig();
+  const ep=document.getElementById('aiEndpoint'); if(ep) ep.value=cfg.endpoint||'';
+  const tok=document.getElementById('aiAccessToken'); if(tok) tok.value=cfg.token||'';
+  const badge=document.getElementById('aiConnectionStatus');
+  if(badge){
+    const ok=!!(cfg.endpoint&&cfg.token);
+    badge.textContent=ok?'Configurata':'Non configurata';
+    badge.className=`badge ${ok?'good':'mid'}`;
+  }
+}
+function saveAISettings(){
+  const endpoint=String(document.getElementById('aiEndpoint')?.value||'').trim().replace(/\/$/,'');
+  const token=String(document.getElementById('aiAccessToken')?.value||'').trim();
+  if(!endpoint || !/^https?:\/\//i.test(endpoint)){toast('Inserisci un endpoint AI valido');return;}
+  if(token.length<8){toast('Inserisci il token privato Recall AI');return;}
+  setAIConfig({endpoint,token});updateAISettingsUI();toast('Configurazione AI salvata');
+}
+function forgetAISettings(){
+  if(!confirm('Rimuovere endpoint e token AI da questo dispositivo?')) return;
+  localStorage.removeItem(AI_CFG_KEY);updateAISettingsUI();toast('Configurazione AI rimossa');
+}
+async function testAISettings(){
+  const cfg=getAIConfig();
+  if(!cfg.endpoint||!cfg.token){toast('Configura prima endpoint e token AI');return;}
+  const btn=document.getElementById('testAISettingsBtn');
+  if(btn){btn.disabled=true;btn.textContent='Test in corso…';}
+  try{
+    const r=await fetch(cfg.endpoint,{method:'GET',headers:{'x-recall-token':cfg.token,'accept':'application/json'}});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error||`HTTP ${r.status}`);
+    toast(`AI collegata${data.model?` · ${data.model}`:''}`);
+    const badge=document.getElementById('aiConnectionStatus'); if(badge){badge.textContent='Collegata';badge.className='badge good';}
+  }catch(err){toast(`AI non raggiungibile: ${err.message||err}`);}
+  finally{if(btn){btn.disabled=false;btn.textContent='Testa collegamento';}}
+}
+function escapeHTMLSafe(v){return String(v??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
+function aiSeverityLabel(s){const v=String(s||'').toLowerCase();return v==='critical'?'Critico':v==='major'?'Importante':v==='minor'?'Minore':'Nota';}
+function renderAIReportFeedback(result){
+  const box=document.getElementById('aiReportFeedback'); if(!box) return;
+  if(result?.raw && !result?.score){
+    box.innerHTML=`<div class="feedback ai-feedback"><h3>✨ Correzione AI</h3><p>${escapeHTMLSafe(result.raw)}</p></div>`;return;
+  }
+  const strengths=Array.isArray(result?.strengths)?result.strengths:[];
+  const errors=Array.isArray(result?.errors)?result.errors:[];
+  const omissions=Array.isArray(result?.omissions)?result.omissions:[];
+  const terminology=Array.isArray(result?.terminology)?result.terminology:[];
+  const score=Number.isFinite(Number(result?.score))?Math.round(Number(result.score)):null;
+  box.innerHTML=`<div class="feedback ai-feedback">
+    <div class="report-top-grid"><div><h3>✨ Correzione AI</h3><div class="muted small">Valutazione ragionata del contenuto, non semplice ricerca di parole chiave.</div></div>${score!==null?`<div class="report-score">${score}%</div>`:''}</div>
+    ${result?.verdict?`<div class="ai-verdict"><strong>${escapeHTMLSafe(result.verdict)}</strong></div>`:''}
+    ${strengths.length?`<h4>Cosa hai fatto bene</h4><ul>${strengths.map(x=>`<li>${escapeHTMLSafe(x)}</li>`).join('')}</ul>`:''}
+    ${errors.length?`<h4>Errori</h4>${errors.map(e=>`<div class="ai-issue ai-${escapeHTMLSafe(e.severity||'note')}"><strong>${escapeHTMLSafe(aiSeverityLabel(e.severity))}:</strong> ${escapeHTMLSafe(e.text||e)}</div>`).join('')}`:''}
+    ${omissions.length?`<h4>Reperti / informazioni mancanti</h4><ul>${omissions.map(x=>`<li>${escapeHTMLSafe(x)}</li>`).join('')}</ul>`:''}
+    ${terminology.length?`<h4>Terminologia e stile</h4><ul>${terminology.map(x=>`<li>${escapeHTMLSafe(x)}</li>`).join('')}</ul>`:''}
+    ${result?.conclusion_feedback?`<h4>Conclusione</h4><p>${escapeHTMLSafe(result.conclusion_feedback)}</p>`:''}
+    ${result?.teaching_point?`<h4>Perla didattica</h4><p>${escapeHTMLSafe(result.teaching_point)}</p>`:''}
+    ${result?.improved_report?`<h4>Come lo riscriverei</h4><p class="ai-improved-report">${escapeHTMLSafe(result.improved_report)}</p>`:''}
+  </div>`;
+}
+async function evaluateReportCaseAI(){
+  const c=window.currentReportCase; if(!c) return;
+  const report=String(document.getElementById('reportAnswer')?.value||'').trim();
+  if(report.length<10){toast('Scrivi prima un referto');return;}
+  const cfg=getAIConfig();
+  if(!cfg.endpoint||!cfg.token){
+    toast('Correzione AI non configurata: vai in Impostazioni → Correzione AI');
+    return;
+  }
+  const btn=document.getElementById('submitAIReportBtn');
+  const box=document.getElementById('aiReportFeedback');
+  if(btn){btn.disabled=true;btn.textContent='✨ Sto correggendo…';}
+  if(box) box.innerHTML='<div class="feedback ai-feedback"><div class="muted">Analisi del referto in corso…</div></div>';
+  const images=(c.images||[]).slice(0,6).map(src=>{try{return new URL(src,window.location.href).href}catch(_){return src}});
+  const payload={
+    report,
+    case:{
+      id:c.id,title:c.title,clinical:c.clinical,prompt:c.prompt,task:c.task,
+      modality:c.modality,modalityCode:c.modalityCode,region:c.region,topic:c.topic,
+      emergency:!!c.emergency,sourceLabel:c.sourceLabel,
+      criticalFindings:(c.criticalFindings||[]).map(([label])=>label),
+      findings:(c.findings||[]).map(([label])=>label),
+      referenceReport:c.sampleReport||'',images
+    }
+  };
+  try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),90000);
+    const r=await fetch(cfg.endpoint,{method:'POST',headers:{'content-type':'application/json','x-recall-token':cfg.token},body:JSON.stringify(payload),signal:controller.signal});
+    clearTimeout(timer);
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(data.error||`HTTP ${r.status}`);
+    renderAIReportFeedback(data.feedback||data);
+  }catch(err){
+    if(box) box.innerHTML=`<div class="feedback ai-feedback"><div class="emergency-safety unsafe">AI non disponibile: ${escapeHTMLSafe(err?.name==='AbortError'?'tempo di risposta scaduto':(err?.message||String(err)))}</div></div>`;
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='✨ Correggi con AI';}
+  }
+}
+
 const ICLOUD_CFG_KEY='recall_icloud_cfg_v1';
 function getIcloudConfig(){
   try{return {...{shortcut:'Recall Apri iCloud',root:'Recall'},...JSON.parse(localStorage.getItem(ICLOUD_CFG_KEY)||'{}')};}
@@ -4022,6 +4311,7 @@ function openReportCase(id){
   document.getElementById("reportTaskText").textContent=c.task;
   document.getElementById("reportAnswer").value="";
   document.getElementById("reportFeedback").innerHTML="";
+  const aiFb=document.getElementById("aiReportFeedback"); if(aiFb) aiFb.innerHTML="";
   const imgBox=document.getElementById("reportImages");
   imgBox.innerHTML="";
   (c.images||[]).forEach(src=>{
@@ -4359,7 +4649,7 @@ document.getElementById("pdfZoomOutBtn")?.addEventListener("click",()=>changePdf
 document.getElementById("pdfZoomInBtn")?.addEventListener("click",()=>changePdfZoom(.15));
 document.getElementById("pdfOpenNativeBtn")?.addEventListener("click",openCurrentPdfNative);
 
-document.getElementById("settingsBtn").onclick=()=>{showView("settingsView");updateConnectionUI();updateInstallUI();updateCaseOfflineStatus();updateGithubSettingsUI();updateIcloudSettingsUI();};
+document.getElementById("settingsBtn").onclick=()=>{showView("settingsView");updateConnectionUI();updateInstallUI();updateCaseOfflineStatus();updateGithubSettingsUI();updateIcloudSettingsUI();updateAISettingsUI();};
 document.getElementById("settingsBackBtn").onclick=()=>showView("homeView");
 document.getElementById("copyProjectPromptBtn")?.addEventListener("click",copyProjectPrompt);
 document.getElementById("exportBtn").onclick=exportData;
@@ -4376,6 +4666,7 @@ document.getElementById("reportBrowseBackBtn").onclick=openReportHome;
 document.getElementById("reportBrowseRandomBtn").onclick=()=>randomReportCase(window.reportBrowserFilters||{});
 document.getElementById("reportCaseBackBtn").onclick=()=>{ if(window.reportBrowserFilters) openReportBrowser(window.reportBrowserFilters); else openReportHome(); };
 document.getElementById("submitReportBtn").onclick=evaluateReportCase;
+document.getElementById("submitAIReportBtn")?.addEventListener("click",evaluateReportCaseAI);
 document.getElementById("imageGeneratorBackBtn").onclick=openReportHome;
 document.getElementById("imageRandomBtn").onclick=()=>generateImageTrainingCase(true);
 document.getElementById("generateImageCaseBtn").onclick=()=>generateImageTrainingCase(false);
@@ -4393,6 +4684,9 @@ document.getElementById("syncGithubBtn")?.addEventListener("click",()=>syncGithu
 document.getElementById("forgetGithubBtn")?.addEventListener("click",forgetGithub);
 document.getElementById("createGithubTokenBtn")?.addEventListener("click",()=>window.open(githubTokenUrl(),"_blank"));
 document.getElementById("saveIcloudBtn")?.addEventListener("click",saveIcloudConfig);
+document.getElementById("saveAISettingsBtn")?.addEventListener("click",saveAISettings);
+document.getElementById("testAISettingsBtn")?.addEventListener("click",testAISettings);
+document.getElementById("forgetAISettingsBtn")?.addEventListener("click",forgetAISettings);
 document.getElementById("testIcloudBtn")?.addEventListener("click",()=>runIcloudShortcut(`${getIcloudConfig().root}/Archivio/Test/README.pdf`));
 updateGithubSettingsUI();
 if(navigator.onLine) syncGithubLibrary({silent:true}).then(()=>renderHome()).catch(()=>{});

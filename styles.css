@@ -375,3 +375,14 @@ select{width:100%;border:1px solid var(--line);border-radius:14px;padding:14px;f
 .training-choice-block{display:grid;gap:7px}
 .emergency-random-btn{white-space:nowrap}
 @media (max-width:700px){.emergency-training-head{align-items:stretch;flex-direction:column}.emergency-random-btn{width:100%}}
+
+/* v1.20 — Correzione AI */
+.ai-feedback{margin-top:12px;border:1px solid rgba(99,102,241,.18);}
+.ai-verdict{margin:10px 0;padding:10px 12px;border-radius:12px;background:rgba(99,102,241,.08);}
+.ai-issue{padding:9px 11px;margin:7px 0;border-radius:10px;border:1px solid rgba(148,163,184,.2);}
+.ai-critical{border-left:4px solid #b91c1c;background:rgba(185,28,28,.06);}
+.ai-major{border-left:4px solid #b45309;background:rgba(180,83,9,.06);}
+.ai-minor{border-left:4px solid #0369a1;background:rgba(3,105,161,.06);}
+.ai-note{border-left:4px solid #64748b;}
+.ai-improved-report{white-space:pre-wrap;line-height:1.55;}
+.ai-card input{width:100%;}

@@ -289,10 +289,13 @@
         <div class="prompt" id="reportPromptText"></div>
         <div class="muted small" id="reportTaskText"></div>
         <textarea id="reportAnswer" placeholder="Scrivi qui il tuo referto..."></textarea>
-        <div class="actions">
-          <button class="primary" id="submitReportBtn">Correggi referto</button>
+        <div class="actions wrap-actions">
+          <button class="secondary" id="submitReportBtn">Correzione rapida</button>
+          <button class="primary" id="submitAIReportBtn">✨ Correggi con AI</button>
         </div>
+        <div class="muted small">La correzione AI è pensata per casi didattici. Non inserire dati identificativi di pazienti reali.</div>
         <div id="reportFeedback"></div>
+        <div id="aiReportFeedback"></div>
       </div>
     </section>
 
@@ -345,6 +348,24 @@
         <div class="actions wrap-actions">
           <button class="primary" id="saveIcloudBtn">Salva impostazioni iCloud</button>
           <button class="secondary" id="testIcloudBtn">Testa Comando Rapido</button>
+        </div>
+      </div>
+
+      <div class="card stack ai-card">
+        <div class="settings-row">
+          <div>
+            <div class="map-title">Correzione AI dei referti</div>
+            <div class="muted small">Recall invia il caso didattico e il tuo referto a un backend privato, che usa OpenAI per una correzione ragionata. La chiave OpenAI resta solo sul server e non viene mai salvata nel browser o su GitHub.</div>
+          </div>
+          <span class="badge mid" id="aiConnectionStatus">Non configurata</span>
+        </div>
+        <label>Endpoint backend AI<input id="aiEndpoint" type="url" placeholder="https://tuo-backend.vercel.app/api/grade-report" autocomplete="off"></label>
+        <label>Token privato Recall AI<input id="aiAccessToken" type="password" placeholder="Token scelto da te per proteggere il backend" autocomplete="off"></label>
+        <div class="muted small">Qui NON va inserita la chiave API OpenAI. Endpoint e token vengono memorizzati solo su questo dispositivo.</div>
+        <div class="actions wrap-actions">
+          <button class="primary" id="saveAISettingsBtn">Salva AI</button>
+          <button class="secondary" id="testAISettingsBtn">Testa collegamento</button>
+          <button class="ghost" id="forgetAISettingsBtn">Rimuovi configurazione</button>
         </div>
       </div>
 
@@ -409,7 +430,7 @@
         <button class="danger" id="resetBtn">Ripristina demo</button>
       </div>
 
-      <div class="muted small version-label">Recall v1.18 · Urgenze: AAA + dissezione + traumi addominali · Archivio · GitHub + iCloud · PWA offline-ready</div>
+      <div class="muted small version-label">Recall v1.20 · Correzione AI · Urgenze: AAA + dissezione + traumi addominali + ischemia arti inferiori · Archivio · GitHub + iCloud · PWA offline-ready</div>
     </section>
   </main>
 

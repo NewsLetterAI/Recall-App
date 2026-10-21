@@ -242,3 +242,12 @@ Sono stati aggiunti 10 casi testuali con `mapId: urgenze_traumi_addominali`, tut
 
 La mappa compare nel selettore **Refertazione → Urgenze / emergenze → Scegli su cosa allenarti** insieme ad AAA e Dissezione. L'utente può scegliere l'intera mappa, il singolo argomento oppure fare un random limitato ai filtri scelti. Non rimuovere i casi urgenti già presenti.
 Versione di riferimento dopo questa integrazione: **Recall v1.18**.
+
+## AGGIORNAMENTO v1.20 — CORREZIONE AI REFERTI
+- Recall mantiene la correzione locale a checklist come modalità rapida/offline.
+- Nei casi di Refertazione è presente anche `✨ Correggi con AI`.
+- La correzione AI valuta semanticamente il referto: comprende negazioni e contraddizioni, distingue errori/omissioni/stile, penalizza omissioni critiche nelle urgenze, valuta conclusione e propone un referto migliorato.
+- Il ground truth del caso (clinical/task/findings/criticalFindings/sampleReport) viene inviato insieme al referto dell'utente. Nei casi con immagini possono essere inviati anche gli URL delle immagini didattiche.
+- Architettura di sicurezza: GitHub Pages NON contiene la chiave OpenAI. Recall chiama un backend privato configurabile in Impostazioni. Il backend custodisce `OPENAI_API_KEY` come variabile d'ambiente e richiede anche un `RECALL_AI_TOKEN` privato salvato localmente sul dispositivo.
+- Backend di riferimento: serverless Vercel, endpoint `/api/grade-report`, modello di default `gpt-6-sol` modificabile tramite `OPENAI_MODEL`.
+- Non inserire dati identificativi di pazienti reali nella correzione AI.
