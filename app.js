@@ -1997,6 +1997,179 @@ const reportCases = [
     ],
     sampleReport:"Nel tratto sovra-retroarticolare dell'arteria poplitea destra si apprezza dilatazione aneurismatica del diametro massimo di circa 22 mm, con abbondante trombo murale e completa assenza di opacizzazione del lume nel tratto distale, compatibile con trombosi/occlusione dell'aneurisma. Distalmente tenue riabitazione della sola peroniera, con mancata opacizzazione della tibiale anteriore e posteriore. Quadro di aneurisma popliteo trombizzato con ischemia distale critica."
   }
+  ,
+  // ---------- URGENZE / EMERGENZE: ISCHEMIA MESENTERICA ACUTA ----------
+  {
+    id:"case_em_ami_embolic_sma", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA MESENTERICA ACUTA",
+    mapId:"urgenze_ischemia_mesenterica", modalityCode:"TC", region:"Addome", topic:"IMA arteriosa embolica", emergency:true,
+    title:"Angio-TC — occlusione embolica dell'AMS", area:"Urgenze / emergenze", organ:"Mesentere", modality:"Angio-TC addome arteriosa + portale",
+    clinical:"Dolore addominale acuto sproporzionato all'esame obiettivo in paziente con fibrillazione atriale.",
+    prompt:"Scrivi un referto urgente completo, distinguendo la lesione vascolare dai segni intestinali e dai reperti di gravità.",
+    task:"Obiettivo: localizzare l'occlusione dell'AMS, descriverne estensione e circolo a valle, valutare l'enhancement intestinale e ricercare eventuali emboli sincroni.",
+    criticalFindings:[
+      ["Occlusione dell'AMS", "ams|arteria mesenterica superiore|occlusione|difetto di riempimento"],
+      ["Segni intestinali di ischemia", "ipoenhancement|ridotto enhancement|assente enhancement|ischemia"],
+      ["Valutazione urgente", "urgente|chirurg|vascolare|interventistica|rivascolarizzazione"]
+    ],
+    findings:[
+      ["Sede e distanza dall'origine dell'AMS", "cm dall'origine|origine|ams media|mesenterica superiore"],
+      ["Ostio e tratto prossimale dell'AMS", "ostio|prossimale|risparmi"],
+      ["Circolo a valle / rami distali", "rami distali|circolo a valle|opacizzato|non opacizzato|riabitato"],
+      ["Distribuzione delle anse coinvolte", "digiuno|ileo|colon|anse"],
+      ["Enhancement parietale confrontato con anse sane", "enhancement|ipoenhancement|assente enhancement|anse sane"],
+      ["Ricerca di emboli sincroni o difetti di perfusione d'organo", "infarti renali|difetti di perfusione|emboli sincroni"],
+      ["Conclusione di IMA arteriosa embolica", "ischemia mesenterica acuta|embolic|embolia"]
+    ],
+    sampleReport:"L'arteria mesenterica superiore presenta difetto di riempimento endoluminale occludente nel tratto medio, a circa 5 cm dall'origine, con ostio e tratto prossimale conservati e ridotta opacizzazione dei rami distali. Associate multiple anse digiunali e ileali con ridotto enhancement parietale rispetto ai segmenti adiacenti, senza franca pneumatosi né aria libera. Si associano piccoli difetti di perfusione renale compatibili con emboli sincroni. Quadro di ischemia mesenterica acuta arteriosa, morfologicamente suggestiva per eziologia embolica, da comunicare con urgenza per valutazione rivascolarizzante." 
+  },
+  {
+    id:"case_em_ami_thrombotic_sma", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA MESENTERICA ACUTA",
+    mapId:"urgenze_ischemia_mesenterica", modalityCode:"TC", region:"Addome", topic:"IMA arteriosa trombotica su ateromasia", emergency:true,
+    title:"Angio-TC — trombosi prossimale dell'AMS su ateromasia", area:"Urgenze / emergenze", organ:"Mesentere", modality:"Angio-TC addome arteriosa + portale",
+    clinical:"Anziano con arteriopatia nota, dolore addominale acuto su storia di dolore post-prandiale e calo ponderale.",
+    prompt:"Referta un'ischemia mesenterica arteriosa trombotica su malattia aterosclerotica.",
+    task:"Obiettivo: descrivere la lesione prossimale dell'AMS, l'ateromasia associata, il circolo a valle e l'estensione intestinale.",
+    criticalFindings:[
+      ["Occlusione/trombosi prossimale dell'AMS", "ams prossimale|mesenterica superiore|trombosi|occlusione"],
+      ["Alterazioni ischemiche intestinali", "ischemia|ipoenhancement|assente enhancement" ]
+    ],
+    findings:[
+      ["Ateromasia severa", "ateromasia|aterosclerosi|placca calcifica|placca mista"],
+      ["Coinvolgimento ostiale/prossimale", "ostio|prossimale"],
+      ["Lunghezza della lesione", "cm|estesa per"],
+      ["Circolo collaterale/riabitazione", "collaterali|riabitazione|circolo a valle"],
+      ["Sede ed estensione delle anse ischemiche", "digiuno|ileo|colon|estensione"],
+      ["Conclusione di trombosi su ateromasia", "trombosi|ateromasia|ischemia mesenterica"]
+    ],
+    sampleReport:"Marcata ateromasia calcifica e mista dell'aorta addominale e dell'origine dei principali rami viscerali. L'arteria mesenterica superiore è occlusa in sede ostiale-prossimale per circa 3 cm da materiale trombotico su placca ateromasica, con ridotta opacizzazione dei rami distali e limitata riabitazione collaterale. Multiple anse del tenue mostrano ridotto enhancement parietale e iniziale distensione fluida. Quadro di ischemia mesenterica acuta arteriosa da trombosi prossimale dell'AMS su ateromasia." 
+  },
+  {
+    id:"case_em_ami_early_no_bowel", level:1, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA MESENTERICA ACUTA",
+    mapId:"urgenze_ischemia_mesenterica", modalityCode:"TC", region:"Addome", topic:"Occlusione arteriosa precoce senza segni intestinali", emergency:true,
+    title:"Angio-TC — occlusione dell'AMS senza alterazioni intestinali evidenti", area:"Urgenze / emergenze", organ:"Mesentere", modality:"Angio-TC addome arteriosa + portale",
+    clinical:"Dolore addominale di recente insorgenza; esame eseguito molto precocemente.",
+    prompt:"Scrivi il referto senza sottostimare il quadro solo perché l'intestino appare ancora conservato.",
+    task:"Obiettivo: riconoscere una lesione vascolare urgente e specificare che l'assenza di segni parietali non esclude ischemia iniziale.",
+    criticalFindings:[
+      ["Occlusione dell'AMS", "ams|arteria mesenterica superiore|occlus"],
+      ["Assenza di segni intestinali NON rassicurante", "non esclude|ischemia iniziale|assenza di alterazioni intestinali"],
+      ["Gestione urgente", "urgente|valutazione vascolare|interventistica|chirurgica"]
+    ],
+    findings:[
+      ["Sede dell'occlusione", "origine|prossimale|medio|cm"],
+      ["Pervietà dei rami mesenterici non coinvolti", "tronco celiaco|mesenterica inferiore|pervi"],
+      ["Enhancement intestinale attualmente conservato", "enhancement conservato|assenza di alterazioni|nei limiti"],
+      ["Assenza di pneumatosi/gas portale/aria libera", "pneumatosi assente|gas portale assente|aria libera assente"],
+      ["Conclusione che non esclude ischemia precoce", "non esclude|precoce|iniziale"]
+    ],
+    sampleReport:"Occlusione completa dell'arteria mesenterica superiore nel tratto medio, con ridotta opacizzazione del circolo a valle. Non si apprezzano allo stato attuale evidenti alterazioni di calibro, spessore o enhancement delle anse intestinali; assenti pneumatosi, gas porto-mesenterico e aria libera. L'assenza di segni parietali non esclude un'ischemia mesenterica iniziale nel contesto clinico: reperto vascolare da gestire con urgenza." 
+  },
+  {
+    id:"case_em_ami_advanced_necrosis", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA MESENTERICA ACUTA",
+    mapId:"urgenze_ischemia_mesenterica", modalityCode:"TC", region:"Addome", topic:"IMA avanzata con sospetta necrosi transmurale", emergency:true,
+    title:"Angio-TC — ischemia avanzata con segni di danno transmurale", area:"Urgenze / emergenze", organ:"Mesentere", modality:"Angio-TC addome arteriosa + portale",
+    clinical:"Dolore addominale severo, lattati elevati e segni di peritonismo.",
+    prompt:"Referta l'IMA e gerarchizza i reperti che fanno sospettare danno ischemico avanzato.",
+    task:"Obiettivo: descrivere enhancement, spessore e distensione delle anse, pneumatosi, gas porto-mesenterico e segni di perforazione senza attribuire la necrosi a un singolo reperto isolato.",
+    criticalFindings:[
+      ["Segni di danno ischemico avanzato", "assente enhancement|marcato assottigliamento|pneumatosi|gas portale|necrosi"],
+      ["Eventuale perforazione", "pneumoperitoneo|aria libera|perforazione|discontinuità"],
+      ["Valutazione chirurgica immediata", "immediata|chirurgica|urgente"]
+    ],
+    findings:[
+      ["Enhancement parietale assente o marcatamente ridotto", "assente enhancement|ridotto enhancement|ipoenhancement"],
+      ["Assottigliamento e/o dilatazione delle anse", "assottigliata|dilatata|dilatazione"],
+      ["Pneumatosi", "pneumatosi"],
+      ["Gas venoso porto-mesenterico", "gas porto|porto-mesenterico|gas venoso"],
+      ["Versamento / alterazioni mesenteriche", "versamento|edema mesenterico|fat stranding"],
+      ["Conclusione prudente di possibile necrosi transmurale", "possibile necrosi|sospetta necrosi|danno ischemico avanzato"]
+    ],
+    sampleReport:"Estese alterazioni ischemiche del tenue con anse dilatate, a parete marcatamente assottigliata e con assente enhancement dopo contrasto. Si associano pneumatosi parietale a distribuzione lineare e gas venoso porto-mesenterico, con modesto versamento interansa; non evidente aria libera extraluminale. L'associazione dei reperti è fortemente sospetta per danno ischemico avanzato con possibile necrosi transmurale. Indicata immediata valutazione chirurgica." 
+  },
+  {
+    id:"case_em_ami_venous_smv", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA MESENTERICA ACUTA",
+    mapId:"urgenze_ischemia_mesenterica", modalityCode:"TC", region:"Addome", topic:"Trombosi venosa mesenterica", emergency:true,
+    title:"Angio-TC — trombosi della VMS con ischemia venosa", area:"Urgenze / emergenze", organ:"Mesentere", modality:"TC addome arteriosa + portale",
+    clinical:"Dolore addominale acuto-subacuto in paziente con fattori di ipercoagulabilità.",
+    prompt:"Referta una trombosi venosa mesenterica distinguendola dal pattern arterioso.",
+    task:"Obiettivo: descrivere estensione della trombosi, coinvolgimento portale/splenico, ispessimento stratificato delle anse, edema mesenterico e segni di gravità.",
+    criticalFindings:[
+      ["Trombosi della VMS", "vena mesenterica superiore|vms|trombosi|difetto di riempimento"],
+      ["Segni intestinali congestizi/ischemici", "ispessimento|stratificazione|edema|ischemia venosa"]
+    ],
+    findings:[
+      ["Trombosi parziale o occludente ed estensione", "parziale|occludente|estesa|vms"],
+      ["Coinvolgimento di vena porta o splenica", "vena porta|splenica|confluenza spleno-mesenterica"],
+      ["Ispessimento circonferenziale/target sign", "ispessimento circonferenziale|target|halo|stratificazione"],
+      ["Edema mesenterico e versamento", "edema mesenterico|fat stranding|versamento"],
+      ["Enhancement parietale", "enhancement|ipoenhancement|assente enhancement"],
+      ["Conclusione di ischemia venosa", "ischemia venosa|trombosi mesenterica"]
+    ],
+    sampleReport:"Difetto di riempimento trombotico occludente della vena mesenterica superiore, esteso fino alla confluenza spleno-mesenterica, con parziale interessamento del tronco portale. Multiple anse ileali presentano ispessimento circonferenziale con stratificazione parietale, edema del mesentere e versamento interansa. L'enhancement è disomogeneamente ridotto nei segmenti maggiormente alterati. Quadro di trombosi venosa mesenterica con associate alterazioni congestizie e reperti sospetti per ischemia venosa." 
+  },
+  {
+    id:"case_em_ami_nomi", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA MESENTERICA ACUTA",
+    mapId:"urgenze_ischemia_mesenterica", modalityCode:"TC", region:"Addome", topic:"NOMI", emergency:true,
+    title:"Angio-TC — ischemia mesenterica non occlusiva (NOMI)", area:"Urgenze / emergenze", organ:"Mesentere", modality:"Angio-TC addome arteriosa + portale",
+    clinical:"Paziente critico in shock, in terapia con vasopressori, con peggioramento metabolico e dolore/addome disteso.",
+    prompt:"Scrivi un referto orientato alla NOMI senza cercare per forza un'occlusione dei grossi vasi.",
+    task:"Obiettivo: documentare pervietà dei principali assi, eventuale riduzione/irregolarità dei rami dell'AMS, distribuzione discontinua dell'ischemia e coinvolgimento multisistemico.",
+    criticalFindings:[
+      ["Grossi vasi mesenterici pervi", "assi mesenterici pervi|ams pervia|vms pervia|pervi"],
+      ["Alterazioni intestinali compatibili con ischemia", "ipoenhancement|assente enhancement|ischemia"],
+      ["Contesto di shock/ipoperfusione", "shock|ipoperfusione|vasopressori|vasoattivo"]
+    ],
+    findings:[
+      ["Riduzione/irregolarità dei rami dell'AMS se presenti", "riduzione di calibro|irregolarità|restringimenti multifocali|vasocostrizione"],
+      ["Pattern diffuso/discontinuo", "discontinuo|diffuso|multiterritoriale"],
+      ["Ridotto/assente enhancement delle anse", "ridotto enhancement|assente enhancement|ipoenhancement"],
+      ["Coinvolgimento multiorgano", "infarti renali|difetti di perfusione|fegato|rene"],
+      ["Conclusione esplicita di NOMI", "nomi|ischemia mesenterica non occlusiva"]
+    ],
+    sampleReport:"I principali assi arteriosi e venosi mesenterici risultano pervi. I rami dell'arteria mesenterica superiore appaiono diffusamente ridotti di calibro e irregolari. Multiple anse del tenue e alcuni segmenti colici presentano in modo discontinuo ridotto enhancement parietale, associate a edema mesenterico e modesto versamento; coesistono piccoli difetti di perfusione renale. Nel contesto di shock con supporto vasoattivo, il quadro è suggestivo di ischemia mesenterica non occlusiva (NOMI)." 
+  },
+  {
+    id:"case_em_ami_closed_loop", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA MESENTERICA ACUTA",
+    mapId:"urgenze_ischemia_mesenterica", modalityCode:"TC", region:"Addome", topic:"Closed loop con strangolamento", emergency:true,
+    title:"TC — occlusione ad ansa chiusa con strangolamento", area:"Urgenze / emergenze", organ:"Intestino", modality:"TC addome con mdc",
+    clinical:"Dolore addominale acuto, vomito e segni di occlusione intestinale.",
+    prompt:"Referta una closed loop indicando i reperti che suggeriscono compromissione vascolare.",
+    task:"Obiettivo: descrivere ansa chiusa, due punti di transizione, configurazione C/U, whirl/convergenza vascolare, mesentere ed enhancement parietale.",
+    criticalFindings:[
+      ["Occlusione ad ansa chiusa", "closed loop|ansa chiusa|due punti di transizione|ansa sequestrata"],
+      ["Segni di strangolamento", "ridotto enhancement|assente enhancement|whirl|edema mesenterico|strangolamento"]
+    ],
+    findings:[
+      ["Configurazione a C/U", "configurazione a c|configurazione a u|ansa a c|ansa a u"],
+      ["Due punti di transizione", "due punti di transizione|transizione"],
+      ["Convergenza/torsione dei vasi mesenterici", "whirl|torsione|convergenza"],
+      ["Edema/fat stranding e versamento interansa", "edema mesenterico|fat stranding|versamento interansa|liquido mesenterico"],
+      ["Ridotto o assente enhancement parietale", "ridotto enhancement|assente enhancement|ipoenhancement"],
+      ["Conclusione di strangolamento", "strangolamento|compromissione vascolare"]
+    ],
+    sampleReport:"Nel quadrante inferiore sinistro si riconosce ansa del tenue sequestrata a configurazione a U, con due punti di transizione ravvicinati e convergenza/torsione dei vasi mesenterici. L'ansa è distesa da contenuto fluido, con ridotto enhancement parietale, edema del mesentere e versamento interansa. Quadro di occlusione ad ansa chiusa con reperti sospetti per strangolamento e ischemia, meritevole di immediata valutazione chirurgica." 
+  },
+  {
+    id:"case_em_ami_post_revasc", level:2, sourceType:"map", sourceLabel:"Da mappa Urgenze: ISCHEMIA MESENTERICA ACUTA",
+    mapId:"urgenze_ischemia_mesenterica", modalityCode:"TC", region:"Addome", topic:"Controllo post-rivascolarizzazione / riperfusione", emergency:true,
+    title:"Angio-TC — controllo dopo rivascolarizzazione mesenterica", area:"Urgenze / emergenze", organ:"Mesentere", modality:"Angio-TC addome arteriosa + portale",
+    clinical:"Controllo dopo trattamento endovascolare di occlusione dell'AMS.",
+    prompt:"Referta separando la pervietà del vaso trattato dalle modificazioni intestinali da riperfusione o ischemia persistente.",
+    task:"Obiettivo: valutare il vaso trattato e distinguere recupero dell'enhancement/edema da riperfusione rispetto a persistente ipoenhancement sospetto per ischemia residua.",
+    criticalFindings:[
+      ["Pervietà del vaso trattato", "vaso trattato|ams|pervia|pervio"],
+      ["Valutazione dell'enhancement intestinale post-trattamento", "recupero dell'enhancement|iper-enhancement|ipoenhancement|persistente ischemia"]
+    ],
+    findings:[
+      ["Stato del segmento rivascolarizzato", "pervio|stenotico|nuovamente occluso"],
+      ["Recupero o persistenza dell'enhancement", "recupero dell'enhancement|persistente ipoenhancement|assenza di enhancement"],
+      ["Ispessimento/edema sottomucoso da riperfusione", "ispessimento|edema sottomucoso|riperfusione|iperenhancement"],
+      ["Pneumatosi interpretata nel contesto", "pneumatosi|contesto|non equivale|riperfusione"],
+      ["Conclusione post-trattamento", "post-trattamento|riperfusione|persistente ischemia"]
+    ],
+    sampleReport:"L'arteria mesenterica superiore trattata risulta pervia lungo il segmento rivascolarizzato, senza nuova occlusione. Le anse precedentemente ischemiche mostrano recupero dell'enhancement, con ispessimento parietale, edema sottomucoso e iperenhancement mucoso compatibili con fenomeni di riperfusione. Non persistono segmenti con assente enhancement; non aria libera. Quadro post-trattamento con reperti prevalentemente compatibili con riperfusione, senza evidenza TC di ischemia persistente avanzata." 
+  }
+
 ];
 
 const reportTopicCatalog = [
@@ -2131,6 +2304,17 @@ const reportTopicCatalog = [
   {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Occlusione di bypass femoro-popliteo", emergency:true},
   {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Restenosi / occlusione intrastent iliaco", emergency:true},
   {sourceType:"map", mapId:"urgenze_ischemia_arti_inferiori", mapName:"ISCHEMIA ARTI INFERIORI", modality:"TC", region:"Cardiovascolare", topic:"Trombosi di aneurisma popliteo", emergency:true}
+,
+  // Urgenze / emergenze — ischemia mesenterica acuta
+  {sourceType:"map", mapId:"urgenze_ischemia_mesenterica", mapName:"ISCHEMIA MESENTERICA ACUTA", modality:"TC", region:"Addome", topic:"IMA arteriosa embolica", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_mesenterica", mapName:"ISCHEMIA MESENTERICA ACUTA", modality:"TC", region:"Addome", topic:"IMA arteriosa trombotica su ateromasia", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_mesenterica", mapName:"ISCHEMIA MESENTERICA ACUTA", modality:"TC", region:"Addome", topic:"Occlusione arteriosa precoce senza segni intestinali", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_mesenterica", mapName:"ISCHEMIA MESENTERICA ACUTA", modality:"TC", region:"Addome", topic:"IMA avanzata con sospetta necrosi transmurale", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_mesenterica", mapName:"ISCHEMIA MESENTERICA ACUTA", modality:"TC", region:"Addome", topic:"Trombosi venosa mesenterica", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_mesenterica", mapName:"ISCHEMIA MESENTERICA ACUTA", modality:"TC", region:"Addome", topic:"NOMI", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_mesenterica", mapName:"ISCHEMIA MESENTERICA ACUTA", modality:"TC", region:"Addome", topic:"Closed loop con strangolamento", emergency:true},
+  {sourceType:"map", mapId:"urgenze_ischemia_mesenterica", mapName:"ISCHEMIA MESENTERICA ACUTA", modality:"TC", region:"Addome", topic:"Controllo post-rivascolarizzazione / riperfusione", emergency:true}
+
 ];
 
 const reportRegions = ["Encefalo","Testa-collo","Torace","Addome","Pelvi","Muscoloscheletrico","Cardiovascolare"];
@@ -3572,114 +3756,6 @@ function materialRecord(kind,id){
 }
 function isPdfFilename(name){return /\.pdf$/i.test(String(name||''));}
 
-
-// ---------- CORREZIONE AI ----------
-const AI_CFG_KEY='recall_ai_config_v1';
-function getAIConfig(){
-  try{return {...{endpoint:'',token:''},...JSON.parse(localStorage.getItem(AI_CFG_KEY)||'{}')};}
-  catch(_){return {endpoint:'',token:''};}
-}
-function setAIConfig(cfg){localStorage.setItem(AI_CFG_KEY,JSON.stringify({endpoint:String(cfg.endpoint||'').trim(),token:String(cfg.token||'').trim()}));}
-function updateAISettingsUI(){
-  const cfg=getAIConfig();
-  const ep=document.getElementById('aiEndpoint'); if(ep) ep.value=cfg.endpoint||'';
-  const tok=document.getElementById('aiAccessToken'); if(tok) tok.value=cfg.token||'';
-  const badge=document.getElementById('aiConnectionStatus');
-  if(badge){
-    const ok=!!(cfg.endpoint&&cfg.token);
-    badge.textContent=ok?'Configurata':'Non configurata';
-    badge.className=`badge ${ok?'good':'mid'}`;
-  }
-}
-function saveAISettings(){
-  const endpoint=String(document.getElementById('aiEndpoint')?.value||'').trim().replace(/\/$/,'');
-  const token=String(document.getElementById('aiAccessToken')?.value||'').trim();
-  if(!endpoint || !/^https?:\/\//i.test(endpoint)){toast('Inserisci un endpoint AI valido');return;}
-  if(token.length<8){toast('Inserisci il token privato Recall AI');return;}
-  setAIConfig({endpoint,token});updateAISettingsUI();toast('Configurazione AI salvata');
-}
-function forgetAISettings(){
-  if(!confirm('Rimuovere endpoint e token AI da questo dispositivo?')) return;
-  localStorage.removeItem(AI_CFG_KEY);updateAISettingsUI();toast('Configurazione AI rimossa');
-}
-async function testAISettings(){
-  const cfg=getAIConfig();
-  if(!cfg.endpoint||!cfg.token){toast('Configura prima endpoint e token AI');return;}
-  const btn=document.getElementById('testAISettingsBtn');
-  if(btn){btn.disabled=true;btn.textContent='Test in corso…';}
-  try{
-    const r=await fetch(cfg.endpoint,{method:'GET',headers:{'x-recall-token':cfg.token,'accept':'application/json'}});
-    const data=await r.json().catch(()=>({}));
-    if(!r.ok) throw new Error(data.error||`HTTP ${r.status}`);
-    toast(`AI collegata${data.model?` · ${data.model}`:''}`);
-    const badge=document.getElementById('aiConnectionStatus'); if(badge){badge.textContent='Collegata';badge.className='badge good';}
-  }catch(err){toast(`AI non raggiungibile: ${err.message||err}`);}
-  finally{if(btn){btn.disabled=false;btn.textContent='Testa collegamento';}}
-}
-function escapeHTMLSafe(v){return String(v??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));}
-function aiSeverityLabel(s){const v=String(s||'').toLowerCase();return v==='critical'?'Critico':v==='major'?'Importante':v==='minor'?'Minore':'Nota';}
-function renderAIReportFeedback(result){
-  const box=document.getElementById('aiReportFeedback'); if(!box) return;
-  if(result?.raw && !result?.score){
-    box.innerHTML=`<div class="feedback ai-feedback"><h3>✨ Correzione AI</h3><p>${escapeHTMLSafe(result.raw)}</p></div>`;return;
-  }
-  const strengths=Array.isArray(result?.strengths)?result.strengths:[];
-  const errors=Array.isArray(result?.errors)?result.errors:[];
-  const omissions=Array.isArray(result?.omissions)?result.omissions:[];
-  const terminology=Array.isArray(result?.terminology)?result.terminology:[];
-  const score=Number.isFinite(Number(result?.score))?Math.round(Number(result.score)):null;
-  box.innerHTML=`<div class="feedback ai-feedback">
-    <div class="report-top-grid"><div><h3>✨ Correzione AI</h3><div class="muted small">Valutazione ragionata del contenuto, non semplice ricerca di parole chiave.</div></div>${score!==null?`<div class="report-score">${score}%</div>`:''}</div>
-    ${result?.verdict?`<div class="ai-verdict"><strong>${escapeHTMLSafe(result.verdict)}</strong></div>`:''}
-    ${strengths.length?`<h4>Cosa hai fatto bene</h4><ul>${strengths.map(x=>`<li>${escapeHTMLSafe(x)}</li>`).join('')}</ul>`:''}
-    ${errors.length?`<h4>Errori</h4>${errors.map(e=>`<div class="ai-issue ai-${escapeHTMLSafe(e.severity||'note')}"><strong>${escapeHTMLSafe(aiSeverityLabel(e.severity))}:</strong> ${escapeHTMLSafe(e.text||e)}</div>`).join('')}`:''}
-    ${omissions.length?`<h4>Reperti / informazioni mancanti</h4><ul>${omissions.map(x=>`<li>${escapeHTMLSafe(x)}</li>`).join('')}</ul>`:''}
-    ${terminology.length?`<h4>Terminologia e stile</h4><ul>${terminology.map(x=>`<li>${escapeHTMLSafe(x)}</li>`).join('')}</ul>`:''}
-    ${result?.conclusion_feedback?`<h4>Conclusione</h4><p>${escapeHTMLSafe(result.conclusion_feedback)}</p>`:''}
-    ${result?.teaching_point?`<h4>Perla didattica</h4><p>${escapeHTMLSafe(result.teaching_point)}</p>`:''}
-    ${result?.improved_report?`<h4>Come lo riscriverei</h4><p class="ai-improved-report">${escapeHTMLSafe(result.improved_report)}</p>`:''}
-  </div>`;
-}
-async function evaluateReportCaseAI(){
-  const c=window.currentReportCase; if(!c) return;
-  const report=String(document.getElementById('reportAnswer')?.value||'').trim();
-  if(report.length<10){toast('Scrivi prima un referto');return;}
-  const cfg=getAIConfig();
-  if(!cfg.endpoint||!cfg.token){
-    toast('Correzione AI non configurata: vai in Impostazioni → Correzione AI');
-    return;
-  }
-  const btn=document.getElementById('submitAIReportBtn');
-  const box=document.getElementById('aiReportFeedback');
-  if(btn){btn.disabled=true;btn.textContent='✨ Sto correggendo…';}
-  if(box) box.innerHTML='<div class="feedback ai-feedback"><div class="muted">Analisi del referto in corso…</div></div>';
-  const images=(c.images||[]).slice(0,6).map(src=>{try{return new URL(src,window.location.href).href}catch(_){return src}});
-  const payload={
-    report,
-    case:{
-      id:c.id,title:c.title,clinical:c.clinical,prompt:c.prompt,task:c.task,
-      modality:c.modality,modalityCode:c.modalityCode,region:c.region,topic:c.topic,
-      emergency:!!c.emergency,sourceLabel:c.sourceLabel,
-      criticalFindings:(c.criticalFindings||[]).map(([label])=>label),
-      findings:(c.findings||[]).map(([label])=>label),
-      referenceReport:c.sampleReport||'',images
-    }
-  };
-  try{
-    const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),90000);
-    const r=await fetch(cfg.endpoint,{method:'POST',headers:{'content-type':'application/json','x-recall-token':cfg.token},body:JSON.stringify(payload),signal:controller.signal});
-    clearTimeout(timer);
-    const data=await r.json().catch(()=>({}));
-    if(!r.ok) throw new Error(data.error||`HTTP ${r.status}`);
-    renderAIReportFeedback(data.feedback||data);
-  }catch(err){
-    if(box) box.innerHTML=`<div class="feedback ai-feedback"><div class="emergency-safety unsafe">AI non disponibile: ${escapeHTMLSafe(err?.name==='AbortError'?'tempo di risposta scaduto':(err?.message||String(err)))}</div></div>`;
-  }finally{
-    if(btn){btn.disabled=false;btn.textContent='✨ Correggi con AI';}
-  }
-}
-
 const ICLOUD_CFG_KEY='recall_icloud_cfg_v1';
 function getIcloudConfig(){
   try{return {...{shortcut:'Recall Apri iCloud',root:'Recall'},...JSON.parse(localStorage.getItem(ICLOUD_CFG_KEY)||'{}')};}
@@ -4311,7 +4387,6 @@ function openReportCase(id){
   document.getElementById("reportTaskText").textContent=c.task;
   document.getElementById("reportAnswer").value="";
   document.getElementById("reportFeedback").innerHTML="";
-  const aiFb=document.getElementById("aiReportFeedback"); if(aiFb) aiFb.innerHTML="";
   const imgBox=document.getElementById("reportImages");
   imgBox.innerHTML="";
   (c.images||[]).forEach(src=>{
@@ -4649,7 +4724,7 @@ document.getElementById("pdfZoomOutBtn")?.addEventListener("click",()=>changePdf
 document.getElementById("pdfZoomInBtn")?.addEventListener("click",()=>changePdfZoom(.15));
 document.getElementById("pdfOpenNativeBtn")?.addEventListener("click",openCurrentPdfNative);
 
-document.getElementById("settingsBtn").onclick=()=>{showView("settingsView");updateConnectionUI();updateInstallUI();updateCaseOfflineStatus();updateGithubSettingsUI();updateIcloudSettingsUI();updateAISettingsUI();};
+document.getElementById("settingsBtn").onclick=()=>{showView("settingsView");updateConnectionUI();updateInstallUI();updateCaseOfflineStatus();updateGithubSettingsUI();updateIcloudSettingsUI();};
 document.getElementById("settingsBackBtn").onclick=()=>showView("homeView");
 document.getElementById("copyProjectPromptBtn")?.addEventListener("click",copyProjectPrompt);
 document.getElementById("exportBtn").onclick=exportData;
@@ -4666,7 +4741,6 @@ document.getElementById("reportBrowseBackBtn").onclick=openReportHome;
 document.getElementById("reportBrowseRandomBtn").onclick=()=>randomReportCase(window.reportBrowserFilters||{});
 document.getElementById("reportCaseBackBtn").onclick=()=>{ if(window.reportBrowserFilters) openReportBrowser(window.reportBrowserFilters); else openReportHome(); };
 document.getElementById("submitReportBtn").onclick=evaluateReportCase;
-document.getElementById("submitAIReportBtn")?.addEventListener("click",evaluateReportCaseAI);
 document.getElementById("imageGeneratorBackBtn").onclick=openReportHome;
 document.getElementById("imageRandomBtn").onclick=()=>generateImageTrainingCase(true);
 document.getElementById("generateImageCaseBtn").onclick=()=>generateImageTrainingCase(false);
@@ -4684,9 +4758,6 @@ document.getElementById("syncGithubBtn")?.addEventListener("click",()=>syncGithu
 document.getElementById("forgetGithubBtn")?.addEventListener("click",forgetGithub);
 document.getElementById("createGithubTokenBtn")?.addEventListener("click",()=>window.open(githubTokenUrl(),"_blank"));
 document.getElementById("saveIcloudBtn")?.addEventListener("click",saveIcloudConfig);
-document.getElementById("saveAISettingsBtn")?.addEventListener("click",saveAISettings);
-document.getElementById("testAISettingsBtn")?.addEventListener("click",testAISettings);
-document.getElementById("forgetAISettingsBtn")?.addEventListener("click",forgetAISettings);
 document.getElementById("testIcloudBtn")?.addEventListener("click",()=>runIcloudShortcut(`${getIcloudConfig().root}/Archivio/Test/README.pdf`));
 updateGithubSettingsUI();
 if(navigator.onLine) syncGithubLibrary({silent:true}).then(()=>renderHome()).catch(()=>{});

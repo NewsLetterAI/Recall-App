@@ -1,1 +1,1 @@
-Recall v1.20 · Correzione AI dei referti · backend privato richiesto
+Recall v1.19.1 · Urgenze: aggiunta ischemia mesenterica acuta (8 casi)
